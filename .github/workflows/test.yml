@@ -31,7 +31,7 @@ jobs:
 
       - name: 🧪 Run tests with coverage and HTML report
         run: |
-          python -m pytest tests/ -v \
+          python -m pytest backend/tests/ -v
             --cov=app.services.schedule \
             --cov-report=term \
             --cov-report=xml:coverage.xml \
@@ -55,3 +55,9 @@ jobs:
             coverage.xml
             report.html
             .pytest_cache/
+            
+      - name: Upload HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: report.html
