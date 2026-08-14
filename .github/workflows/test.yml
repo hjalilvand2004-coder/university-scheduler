@@ -2,9 +2,9 @@ name: Run Tests
 
 on:
   push:
-    branches: [ master, develop ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   test:
@@ -27,30 +27,31 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest pytest-cov pytest-json-report
+          pip install pytest pytest-cov pytest-json-report pytest-html
 
-      - name: 🧪 Run tests with coverage
+      - name: 🧪 Run tests with coverage and HTML report
         run: |
-          cd backend
           python -m pytest tests/ -v \
             --cov=app.services.schedule \
             --cov-report=term \
             --cov-report=xml:coverage.xml \
-            --json-report --json-report-file=report.json
+            --json-report --json-report-file=report.json \
+            --html=report.html --self-contained-html
 
       - name: 📊 Upload coverage report to Codecov (optional)
         uses: codecov/codecov-action@v4
         with:
-          file: ./backend/coverage.xml
+          file: ./coverage.xml
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
 
-      - name: 📝 Upload test report as artifact
+      - name: 📝 Upload test reports as artifacts
         uses: actions/upload-artifact@v4
         with:
           name: pytest-reports-${{ matrix.python-version }}
           path: |
-            backend/report.json
-            backend/coverage.xml
-            backend/.pytest_cache/
+            report.json
+            coverage.xml
+            report.html
+            .pytest_cache/
