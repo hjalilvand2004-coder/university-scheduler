@@ -1,6 +1,6 @@
 # app/services/schedule/course_scorer.py
 # امتیازدهی و اولویت‌بندی دروس (مرحله ۳)
-# برای تست
+# برای تیت گیت اپ
 from collections import defaultdict
 from typing import List, Dict
 
