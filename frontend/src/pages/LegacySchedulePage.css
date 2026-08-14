@@ -1,0 +1,133 @@
+/* src/pages/LegacySchedulePage.css */
+.legacy-schedule-page .schedule-controls-modern {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 16px 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+.legacy-schedule-page .control-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #334155;
+}
+.legacy-schedule-page .control-select {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+}
+.legacy-schedule-page .controls-actions {
+  display: flex;
+  gap: 12px;
+}
+.legacy-schedule-page .btn-generate {
+  background: #6366f1;
+  color: #fff;
+  padding: 8px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.legacy-schedule-page .btn-generate:hover:not(:disabled) {
+  background: #4f46e5;
+}
+.legacy-schedule-page .btn-workflow {
+  background: #10b981;
+  color: #fff;
+  padding: 8px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.legacy-schedule-page .btn-workflow:hover:not(:disabled) {
+  background: #059669;
+}
+.legacy-schedule-page .btn-workflow.active {
+  background: #f59e0b;
+}
+.legacy-schedule-page .workflow-container {
+  margin: 20px 0;
+}
+.legacy-schedule-page .workflow-progress {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.legacy-schedule-page .step-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+}
+.legacy-schedule-page .step-indicator .step-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.legacy-schedule-page .step-indicator.active .step-number {
+  background: #4f46e5;
+  color: #fff;
+}
+.legacy-schedule-page .step-indicator.done .step-number {
+  background: #10b981;
+  color: #fff;
+}
+.legacy-schedule-page .step-indicator .step-label {
+  font-size: 12px;
+  color: #64748b;
+  text-align: center;
+}
+.legacy-schedule-page .step-indicator.active .step-label {
+  color: #1e293b;
+  font-weight: 600;
+}
+.legacy-schedule-page .step-line {
+  flex: 1;
+  height: 2px;
+  background: #e2e8f0;
+  margin: 0 4px;
+  align-self: center;
+}
+.legacy-schedule-page .step-line.done {
+  background: #10b981;
+}
+.legacy-schedule-page .step-header {
+  margin-bottom: 16px;
+}
+.legacy-schedule-page .step-header h3 {
+  margin: 0 0 4px 0;
+}
+.legacy-schedule-page .step-description {
+  color: #64748b;
+  font-size: 14px;
+}
+.legacy-schedule-page .step-data-display {
+  margin: 16px 0;
+}
+.legacy-schedule-page .workflow-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}

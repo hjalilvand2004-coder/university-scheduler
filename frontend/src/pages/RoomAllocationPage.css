@@ -1,0 +1,45 @@
+/* src/pages/RoomAllocationPage.css */
+.room-allocation-page .controls-bar {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.room-allocation-page .btn-process {
+  background: #f59e0b;
+  color: #fff;
+  padding: 10px 28px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.room-allocation-page .btn-process:hover:not(:disabled) {
+  background: #d97706;
+  box-shadow: 0 4px 12px rgba(245,158,11,0.3);
+}
+.room-allocation-page .btn-process:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.room-allocation-page .btn-clear {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.room-allocation-page .btn-clear:hover {
+  background: #e2e8f0;
+}
+.room-allocation-page .info-warning {
+  border-right-color: #f59e0b;
+  background: #fffbeb;
+}
+.room-allocation-page .result-container {
+  margin-top: 20px;
+}

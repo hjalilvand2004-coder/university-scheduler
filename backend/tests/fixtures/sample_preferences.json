@@ -1,0 +1,44 @@
+{
+  "teaching_preferences": [
+    {"unique_course_code": "1056", "instructor_code": "52", "priority": 1},
+    {"unique_course_code": "1056", "instructor_code": "179", "priority": 2},
+    {"unique_course_code": "1089", "instructor_code": "52", "priority": 2},
+    {"unique_course_code": "1089", "instructor_code": "179", "priority": 3},
+    {"unique_course_code": "1052", "instructor_code": "270", "priority": 1},
+    {"unique_course_code": "1052", "instructor_code": "52", "priority": 3},
+    {"unique_course_code": "1052", "instructor_code": "305", "priority": 4},
+    {"unique_course_code": "1046", "instructor_code": "165", "priority": 1},
+    {"unique_course_code": "1046", "instructor_code": "164", "priority": 2},
+    {"unique_course_code": "1046", "instructor_code": "256", "priority": 3}
+  ],
+  "time_preferences": [
+    {"instructor_code": "52", "day": "چهارشنبه", "start_time": "16:00", "end_time": "20:00", "priority": 1},
+    {"instructor_code": "52", "day": "سه‌شنبه", "start_time": "16:00", "end_time": "20:00", "priority": 2},
+    {"instructor_code": "52", "day": "پنجشنبه", "start_time": "08:00", "end_time": "12:00", "priority": 3},
+    {"instructor_code": "179", "day": "پنجشنبه", "start_time": "08:00", "end_time": "12:00", "priority": 1},
+    {"instructor_code": "179", "day": "چهارشنبه", "start_time": "16:00", "end_time": "20:00", "priority": 2},
+    {"instructor_code": "179", "day": "دوشنبه", "start_time": "16:00", "end_time": "20:00", "priority": 3},
+    {"instructor_code": "270", "day": "یکشنبه", "start_time": "13:00", "end_time": "17:00", "priority": 1},
+    {"instructor_code": "270", "day": "سه‌شنبه", "start_time": "13:00", "end_time": "17:00", "priority": 2},
+    {"instructor_code": "305", "day": "یکشنبه", "start_time": "08:00", "end_time": "12:00", "priority": 1},
+    {"instructor_code": "305", "day": "دوشنبه", "start_time": "08:00", "end_time": "12:00", "priority": 2},
+    {"instructor_code": "305", "day": "سه‌شنبه", "start_time": "08:00", "end_time": "12:00", "priority": 3},
+    {"instructor_code": "165", "day": "سه‌شنبه", "start_time": "08:00", "end_time": "12:00", "priority": 1},
+    {"instructor_code": "165", "day": "چهارشنبه", "start_time": "16:00", "end_time": "20:00", "priority": 2},
+    {"instructor_code": "165", "day": "پنجشنبه", "start_time": "13:00", "end_time": "17:00", "priority": 3},
+    {"instructor_code": "164", "day": "یکشنبه", "start_time": "13:00", "end_time": "17:00", "priority": 1},
+    {"instructor_code": "164", "day": "دوشنبه", "start_time": "13:00", "end_time": "17:00", "priority": 2},
+    {"instructor_code": "256", "day": "شنبه", "start_time": "13:00", "end_time": "17:00", "priority": 1},
+    {"instructor_code": "256", "day": "دوشنبه", "start_time": "16:00", "end_time": "20:00", "priority": 2},
+    {"instructor_code": "256", "day": "چهارشنبه", "start_time": "13:00", "end_time": "17:00", "priority": 3}
+  ],
+  "instructors": [
+    {"code": "52", "name": "زهرا ولدخاني", "cooperation_type": "دستیارآموزشی", "max_teaching_units": 20},
+    {"code": "179", "name": "محمد رضا مهر آزما", "cooperation_type": "هیات علمی", "max_teaching_units": 16},
+    {"code": "270", "name": "زهرا جعفري", "cooperation_type": "استاد مدعو", "max_teaching_units": 3},
+    {"code": "305", "name": "نیکزاد بدیعه", "cooperation_type": "هیات علمی", "max_teaching_units": 16},
+    {"code": "165", "name": "علي حسين گلي", "cooperation_type": "هیات علمی", "max_teaching_units": 12},
+    {"code": "164", "name": "شبنم جليلي مرندي", "cooperation_type": "هیات علمی", "max_teaching_units": 12},
+    {"code": "256", "name": "حسين خرمي", "cooperation_type": "هیات علمی", "max_teaching_units": 12}
+  ]
+}

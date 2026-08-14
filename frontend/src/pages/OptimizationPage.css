@@ -1,0 +1,56 @@
+/* src/pages/OptimizationPage.css */
+.optimization-page .controls-bar {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.optimization-page .btn-process {
+  background: #ef4444;
+  color: #fff;
+  padding: 10px 28px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.optimization-page .btn-process:hover:not(:disabled) {
+  background: #dc2626;
+  box-shadow: 0 4px 12px rgba(239,68,68,0.3);
+}
+.optimization-page .btn-process:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.optimization-page .btn-clear {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.optimization-page .btn-clear:hover {
+  background: #e2e8f0;
+}
+.optimization-page .info-warning {
+  border-right-color: #f59e0b;
+  background: #fffbeb;
+}
+.optimization-page .result-container {
+  margin-top: 20px;
+}
+.result-success {
+  margin-top: 20px;
+  background: #f0fdf4;
+  padding: 16px 24px;
+  border-radius: 12px;
+  border: 1px solid #bbf7d0;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: #16a34a;
+}

@@ -1,0 +1,56 @@
+[
+  {
+    "unique_code": "1056",
+    "course_name": "شبکه های کامپیوتری",
+    "group_number": 1,
+    "units": 3,
+    "level": "کارشناسی",
+    "term": "5",
+    "estimated_capacity": 30
+  },
+  {
+    "unique_code": "1056",
+    "course_name": "شبکه های کامپیوتری",
+    "group_number": 2,
+    "units": 3,
+    "level": "کارشناسی",
+    "term": "5",
+    "estimated_capacity": 30
+  },
+  {
+    "unique_code": "1089",
+    "course_name": "مهندسی اینترنت",
+    "group_number": 1,
+    "units": 3,
+    "level": "کارشناسی",
+    "term": "6",
+    "estimated_capacity": 25
+  },
+  {
+    "unique_code": "1052",
+    "course_name": "سیستم های عامل",
+    "group_number": 1,
+    "units": 3,
+    "level": "کارشناسی",
+    "term": "6",
+    "estimated_capacity": 25
+  },
+  {
+    "unique_code": "1052",
+    "course_name": "سیستم های عامل",
+    "group_number": 2,
+    "units": 3,
+    "level": "کارشناسی",
+    "term": "6",
+    "estimated_capacity": 25
+  },
+  {
+    "unique_code": "1046",
+    "course_name": "ریاضی گسسته",
+    "group_number": 1,
+    "units": 2,
+    "level": "کارشناسی",
+    "term": "3",
+    "estimated_capacity": 35
+  }
+]

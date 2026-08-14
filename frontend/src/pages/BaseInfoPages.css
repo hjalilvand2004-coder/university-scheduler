@@ -1,0 +1,270 @@
+/* frontend/src/pages/BaseInfoPages.css */
+
+/* ============================================================
+   کانتینر اصلی
+   ============================================================ */
+.base-page-wrapper {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 24px 28px;
+  direction: rtl;
+  transition: all 0.3s ease;
+}
+
+/* ============================================================
+   هدر صفحه
+   ============================================================ */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 8px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.page-title h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.page-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stat-badge {
+  background: #f1f5f9;
+  padding: 6px 16px;
+  border-radius: 40px;
+  font-size: 14px;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.stat-badge strong {
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.page-description {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 8px 0 16px 0;
+  padding-right: 44px;
+}
+
+/* ============================================================
+   نوار ابزار (جستجو و دکمه‌ها)
+   ============================================================ */
+.page-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 8px 0;
+}
+
+.search-box {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+  max-width: 380px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 16px 10px 42px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #1e293b;
+  background: #f8fafc;
+  transition: all 0.25s ease;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: #6366f1;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+}
+
+.search-input::placeholder {
+  color: #94a3b8;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-export {
+  background: #f1f5f9;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-export:hover {
+  background: #e2e8f0;
+  transform: translateY(-1px);
+}
+
+/* ============================================================
+   آمار اضافی
+   ============================================================ */
+.page-stats-extra {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.stat-item {
+  background: #f8fafc;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.stat-item strong {
+  color: #1e293b;
+}
+
+/* ============================================================
+   جدول (توسط CourseList استفاده می‌شود، ولی استایل‌های کمکی)
+   ============================================================ */
+.page-content {
+  margin-top: 4px;
+}
+
+/* ============================================================
+   حالت خالی و خطا
+   ============================================================ */
+.error-page {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 12px;
+  padding: 32px 24px;
+  text-align: center;
+  color: #b91c1c;
+}
+
+.error-page p {
+  margin: 0;
+  font-size: 15px;
+}
+
+/* ============================================================
+   واکنش‌گرایی
+   ============================================================ */
+@media (max-width: 768px) {
+  .base-page-wrapper {
+    padding: 16px 18px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .page-title h2 {
+    font-size: 19px;
+  }
+
+  .page-description {
+    padding-right: 0;
+    font-size: 13px;
+  }
+
+  .page-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-box {
+    max-width: none;
+  }
+
+  .toolbar-actions {
+    justify-content: flex-start;
+  }
+
+  .stat-badge {
+    font-size: 13px;
+    padding: 4px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .base-page-wrapper {
+    padding: 12px 14px;
+  }
+
+  .page-title h2 {
+    font-size: 17px;
+  }
+
+  .page-icon {
+    font-size: 22px;
+  }
+
+  .search-input {
+    font-size: 13px;
+    padding: 8px 14px 8px 36px;
+  }
+
+  .btn-export {
+    font-size: 13px;
+    padding: 7px 14px;
+  }
+
+  .stat-item {
+    font-size: 12px;
+    padding: 4px 12px;
+  }
+}
