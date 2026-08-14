@@ -30,13 +30,13 @@ jobs:
           pip install pytest pytest-cov pytest-json-report pytest-html
 
       - name: 🧪 Run tests with coverage and HTML report
-        run: |
-          python -m pytest backend/tests/ -v
-            --cov=app.services.schedule \
-            --cov-report=term \
-            --cov-report=xml:coverage.xml \
-            --json-report --json-report-file=report.json \
-            --html=report.html --self-contained-html
+          run: |
+            PYTHONPATH=backend python -m pytest backend/tests/ -v \
+              --cov=app.services.schedule \
+              --cov-report=term \
+              --cov-report=xml:coverage.xml \
+              --html=report.html \
+              --self-contained-html
 
       - name: 📊 Upload coverage report to Codecov (optional)
         uses: codecov/codecov-action@v4
