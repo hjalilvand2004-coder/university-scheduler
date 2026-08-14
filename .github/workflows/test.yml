@@ -2,9 +2,9 @@ name: Run Tests
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test:
@@ -30,13 +30,13 @@ jobs:
           pip install pytest pytest-cov pytest-json-report pytest-html
 
       - name: 🧪 Run tests with coverage and HTML report
-          run: |
-            PYTHONPATH=backend python -m pytest backend/tests/ -v \
-              --cov=app.services.schedule \
-              --cov-report=term \
-              --cov-report=xml:coverage.xml \
-              --html=report.html \
-              --self-contained-html
+        run: |
+          PYTHONPATH=backend python -m pytest backend/tests/ -v \
+            --cov=app.services.schedule \
+            --cov-report=term \
+            --cov-report=xml:coverage.xml \
+            --html=report.html \
+            --self-contained-html
 
       - name: 📊 Upload coverage report to Codecov (optional)
         uses: codecov/codecov-action@v4
@@ -55,9 +55,9 @@ jobs:
             coverage.xml
             report.html
             .pytest_cache/
-            
+
       - name: Upload HTML report
         uses: actions/upload-artifact@v4
         with:
-          name: test-report
+          name: test-report-${{ matrix.python-version }}
           path: report.html
