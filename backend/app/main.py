@@ -74,7 +74,11 @@ app.include_router(schedule_router, tags=["Schedule"])
 app.include_router(workflow_router, tags=["Workflow"])
 app.include_router(baskets_router, prefix="/api", tags=["Baskets"])  # ثبت روتر سبدها
 
+from app.api import test_report
+
+# بعد از ایجاد app
 app.include_router(test_report.router)
+
 # ===== اندپوینت ریشه =====
 @app.get("/")
 def root():

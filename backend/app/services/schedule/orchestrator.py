@@ -62,14 +62,26 @@ class ScheduleOrchestrator:
             raise
 
         # ============================================================
-        # مرحله ۲: بارگذاری اطلاعات اساتید (استفاده از متدهای جداگانه)
+        # مرحله ۲: بارگذاری اطلاعات اساتید (استفاده از متد load())
         # ============================================================
         self.logger.start_step("بارگذاری اطلاعات اساتید", "دریافت از دیتابیس")
         try:
-            # استفاده از متدهای جداگانه به جای load() برای سازگاری با تست‌ها
-            instructor_data = self.instructor_loader.load_instructors()  # این می‌تواند لیست یا دیکشنری باشد
-            teaching_prefs = self.instructor_loader.load_teaching_preferences()
-            time_prefs = self.instructor_loader.load_time_preferences()
+            # بارگذاری با متد load() که یک tuple یا dict برمی‌گرداند
+            loaded = self.instructor_loader.load()
+
+            # پردازش خروجی load()
+            if isinstance(loaded, tuple) and len(loaded) == 3:
+                instructor_data, teaching_prefs, time_prefs = loaded
+            elif isinstance(loaded, dict):
+                instructor_data = loaded.get("instructors", []) or loaded.get("instructor_data", [])
+                teaching_prefs = loaded.get("teaching_prefs", {}) or loaded.get("teaching_preferences", {})
+                time_prefs = loaded.get("time_prefs", {}) or loaded.get("time_preferences", {})
+            else:
+                # اگر هیچکدام نبود، مقادیر پیش‌فرض
+                logger.warning("⚠️ خروجی load() غیرمنتظره است. استفاده از مقادیر پیش‌فرض.")
+                instructor_data = []
+                teaching_prefs = {}
+                time_prefs = {}
 
             # ساخت دیکشنری نام اساتید برای لاگ (از هر دو فرمت پشتیبانی می‌کند)
             instructor_names = {}
@@ -79,9 +91,7 @@ class ScheduleOrchestrator:
                     if code:
                         instructor_names[code] = inst.get("name", code)
             elif isinstance(instructor_data, dict):
-                # اگر از قبل دیکشنری با کلید names باشد
                 instructor_names = instructor_data.get("names", {})
-                # اگر ساختار دیگری داشت، می‌توانیم از روی codes هم بسازیم
                 if not instructor_names and "codes" in instructor_data:
                     for code in instructor_data.get("codes", []):
                         instructor_names[code] = instructor_data.get("names", {}).get(code, code)
@@ -111,7 +121,6 @@ class ScheduleOrchestrator:
             if isinstance(time_prefs, dict):
                 for inst_code, time_list in list(time_prefs.items())[:5]:
                     prefs = []
-                    # فرض می‌کنیم time_list شامل tuple‌های (day, start, end, priority) است
                     for item in time_list[:3]:
                         if isinstance(item, tuple) and len(item) >= 3:
                             day, start, end = item[0], item[1], item[2]
@@ -131,7 +140,8 @@ class ScheduleOrchestrator:
                 for pref in time_prefs[:5]:
                     sample_time.append({
                         "instructor_code": pref.get("instructor_code", ""),
-                        "instructor_name": instructor_names.get(pref.get("instructor_code", ""), pref.get("instructor_code", "")),
+                        "instructor_name": instructor_names.get(pref.get("instructor_code", ""),
+                                                                pref.get("instructor_code", "")),
                         "preferences": [{
                             "day": pref.get("day", ""),
                             "start": pref.get("start_time", ""),
@@ -140,7 +150,8 @@ class ScheduleOrchestrator:
                         }]
                     })
 
-            instructor_count = len(instructor_data) if isinstance(instructor_data, list) else len(instructor_data.get('codes', []))
+            instructor_count = len(instructor_data) if isinstance(instructor_data, list) else len(
+                instructor_data.get('codes', []))
             teaching_prefs_count = len(teaching_prefs) if isinstance(teaching_prefs, (dict, list)) else 0
             time_prefs_count = len(time_prefs) if isinstance(time_prefs, (dict, list)) else 0
 
