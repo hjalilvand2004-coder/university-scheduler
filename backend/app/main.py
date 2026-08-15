@@ -17,6 +17,8 @@ from app.api.routes_teaching_preferences import router as teaching_preferences_r
 from app.api.routes_time_preferences import router as time_preferences_router
 from app.api.routes_workflow import router as workflow_router
 from app.api.routes_baskets import router as baskets_router  # اضافه شد
+from app.api import test_report
+
 
 # تنظیم لاگر
 logging.basicConfig(level=logging.INFO)
@@ -72,6 +74,7 @@ app.include_router(schedule_router, tags=["Schedule"])
 app.include_router(workflow_router, tags=["Workflow"])
 app.include_router(baskets_router, prefix="/api", tags=["Baskets"])  # ثبت روتر سبدها
 
+app.include_router(test_report.router)
 # ===== اندپوینت ریشه =====
 @app.get("/")
 def root():
