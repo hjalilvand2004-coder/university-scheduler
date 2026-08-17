@@ -405,3 +405,68 @@ def validate_manual_change(
             })
 
     return conflicts
+
+
+
+# -------------------------------------
+#افزودن اندپوینت اختصاصی برای تخصیص اتاق درroutes_schedule.py
+# --------------------------------------
+# در app/api/routes_workflow.py یا app/api/routes_schedule.py
+
+class RoomAssignmentRequest(BaseModel):
+    class_id: int
+    room_id: int
+    reason: Optional[str] = None
+
+@router.put("/scheduled-classes/{class_id}/room")
+def assign_room_to_class(
+    class_id: int,
+    req: RoomAssignmentRequest,
+    db: Session = Depends(get_db)
+):
+    from app.models.schedule import ScheduledClass
+    from app.models.room import Room
+
+    scheduled_class = db.query(ScheduledClass).filter(ScheduledClass.id == class_id).first()
+    if not scheduled_class:
+        raise HTTPException(404, detail="کلاس برنامه پیدا نشد")
+
+    room = db.query(Room).filter(Room.id == req.room_id).first()
+    if not room:
+        raise HTTPException(404, detail="اتاق پیدا نشد")
+
+    # اعتبارسنجی ساده (تداخل زمانی با سایر کلاس‌ها در همان اتاق)
+    conflicting = db.query(ScheduledClass).filter(
+        ScheduledClass.room_id == req.room_id,
+        ScheduledClass.day == scheduled_class.day,
+        ScheduledClass.start_time < scheduled_class.end_time,
+        ScheduledClass.end_time > scheduled_class.start_time,
+        ScheduledClass.id != class_id
+    ).first()
+    if conflicting:
+        raise HTTPException(
+            status_code=409,
+            detail=f"اتاق {room.name} در این زمان توسط کلاس '{conflicting.course_title}' اشغال است."
+        )
+
+    scheduled_class.room_id = req.room_id
+    scheduled_class.room_name = room.name
+    if req.reason:
+        scheduled_class.explanation = req.reason
+
+    db.commit()
+    db.refresh(scheduled_class)
+
+    return {
+        "status": "success",
+        "message": f"اتاق {room.name} با موفقیت به کلاس {scheduled_class.course_title} تخصیص یافت.",
+        "class": {
+            "id": scheduled_class.id,
+            "course_title": scheduled_class.course_title,
+            "group_number": scheduled_class.group_number,
+            "room_name": scheduled_class.room_name,
+            "day": scheduled_class.day,
+            "start_time": scheduled_class.start_time,
+            "end_time": scheduled_class.end_time,
+        }
+    }

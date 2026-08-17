@@ -13,6 +13,8 @@ from app.services.room_allocation_service import RoomAllocationService
 from app.services.optimization_service import OptimizationService
 from app.models.workflow import ScheduleWorkflow, WorkflowStatus
 from app.models.basket_item import BasketItem
+from app.models.schedule import ScheduledClass
+from app.models.course import UniqueCourse, OfferedCourse
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/schedule/workflow", tags=["workflow"])
@@ -78,8 +80,7 @@ class UpdateBasketItemRequest(BaseModel):
 
 # ===== Schemas برای تخصیص دستی =====
 class ManualAssignmentItem(BaseModel):
-    """آیتم تخصیص دستی استاد"""
-    id: Optional[int] = None  # شناسه کلاس در دیتابیس (اختیاری)
+    id: Optional[int] = None
     course_name: str
     group_number: int
     level: str
@@ -92,6 +93,14 @@ class ManualAssignmentItem(BaseModel):
 
 class ManualAssignRequest(BaseModel):
     assignments: List[ManualAssignmentItem]
+
+
+# ===== Schema برای ذخیره‌سازی کلاس‌های زمان‌بندی شده =====
+class SaveScheduleRequest(BaseModel):
+    classes: List[Dict[str, Any]]
+    workflow_id: int
+    semester: str
+    year: str = "1403"
 
 
 # ============================================================
@@ -338,19 +347,8 @@ def add_statistics_to_basket(req: BasketStatisticsRequest, db: Session = Depends
 # ============================================================
 # ===== APIهای ذخیره و بازیابی سبد (با ترتیب صحیح) =====
 # ============================================================
-# 🔴 مهم: مسیرهای ثابت باید قبل از مسیرهای با پارامتر تعریف شوند
-# مسیرهای ثابت:
-# - /basket/save
-# - /basket/test
-# - /basket/initial
-# - /basket/statistics
-# سپس مسیرهای با پارامتر: /basket/{workflow_id}
-
 @router.post("/basket/save", status_code=status.HTTP_201_CREATED)
 def save_basket(req: SaveBasketRequest, db: Session = Depends(get_db)):
-    """
-    ذخیره‌سازی سبد دروس (کلاس‌های تولید شده) در دیتابیس
-    """
     logger.info(f"📥 درخواست ذخیره سبد دریافت شد. تعداد آیتم‌ها: {len(req.basket)}")
     logger.debug(f"workflow_id: {req.workflow_id}, semester: {req.semester}")
 
@@ -378,9 +376,6 @@ def save_basket(req: SaveBasketRequest, db: Session = Depends(get_db)):
 
 @router.get("/basket/test")
 def test_basket_route():
-    """
-    مسیر تست برای بررسی اینکه روتر به درستی کار می‌کند
-    """
     return {"status": "ok", "message": "Basket routes are working"}
 
 
@@ -442,23 +437,11 @@ def delete_basket_by_workflow(workflow_id: int, db: Session = Depends(get_db)):
 
 @router.post("/schedule", status_code=status.HTTP_200_OK)
 def process_schedule(req: ScheduleRequest, db: Session = Depends(get_db)):
-    """
-    زمان‌بندی استاد و درس در دو مرحله:
-    1. تخصیص خودکار با اولویت‌بندی (هیات علمی، مطلوبیت‌ها)
-    2. بازگرداندن کلاس‌های بدون استاد برای تخصیص دستی
-
-    خروجی شامل:
-        - assigned: لیست کلاس‌های تخصیص‌یافته
-        - unassigned: لیست کلاس‌های بدون استاد (نیازمند مداخله دستی)
-        - all: همه کلاس‌ها با وضعیت
-    """
     if not req.basket:
         raise HTTPException(400, detail="سبد دروس خالی است")
-
     service = ScheduleService(db)
     try:
         result = service.process(req.basket)
-        # result شامل: assigned, unassigned, all
         return result
     except Exception as e:
         logger.error(f"خطا در زمان‌بندی: {e}", exc_info=True)
@@ -467,17 +450,8 @@ def process_schedule(req: ScheduleRequest, db: Session = Depends(get_db)):
 
 @router.post("/schedule/manual", status_code=status.HTTP_200_OK)
 def manual_assign_instructors(req: ManualAssignRequest, db: Session = Depends(get_db)):
-    """
-    تخصیص دستی استاد برای کلاس‌های بدون استاد (مرحله دوم)
-
-    ورودی: لیستی از آیتم‌های تخصیص دستی با فیلدهای:
-        - course_name, group_number, level, term: شناسه کلاس
-        - instructor_code: کد استاد جدید
-        - day, start, end: زمان جدید
-    """
     if not req.assignments:
         raise HTTPException(400, detail="لیست تخصیص دستی خالی است")
-
     service = ScheduleService(db)
     try:
         assignments_data = [item.dict() for item in req.assignments]
@@ -510,3 +484,151 @@ def process_optimize(req: OptimizationRequest, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(400, detail=f"خطا در بهینه‌سازی برنامه: {str(e)}")
     return {"optimized": optimized}
+
+
+# ============================================================
+# ===== اندپوینت‌های جدید برای ذخیره و بازیابی کلاس‌های زمان‌بندی شده =====
+# ============================================================
+
+@router.post("/save-schedule", status_code=status.HTTP_201_CREATED)
+def save_schedule(req: SaveScheduleRequest, db: Session = Depends(get_db)):
+    """
+    ذخیره‌سازی کلاس‌های زمان‌بندی‌شده در جدول scheduled_classes
+    با تطبیق با ساختار واقعی جدول offered_courses
+    """
+    if not req.classes:
+        raise HTTPException(400, detail="لیست کلاس‌ها خالی است")
+
+    workflow = db.query(ScheduleWorkflow).filter(ScheduleWorkflow.id == req.workflow_id).first()
+    if not workflow:
+        raise HTTPException(404, detail="Workflow یافت نشد")
+
+    # ---- تابع کمکی اصلاح‌شده بر اساس ساختار واقعی ----
+    def get_or_create_offered_course(unique_course, year, db):
+        """
+        جستجو یا ایجاد رکورد در offered_courses بر اساس unique_code و year
+        (چون ستون semester در این جدول وجود ندارد، آن را نادیده می‌گیریم)
+        """
+        # 1. جستجوی رکورد موجود
+        offered = db.query(OfferedCourse).filter(
+            OfferedCourse.unique_code == unique_course.code,
+            OfferedCourse.year == year
+        ).first()
+
+        if offered:
+            logger.debug(f"✅ OfferedCourse موجود با id={offered.id} برای کد {unique_course.code}")
+            return offered
+
+        # 2. ایجاد رکورد جدید در offered_courses
+        new_offered = OfferedCourse(
+            unique_code=unique_course.code,
+            offered_title=unique_course.title,  # ✅ صحیح
+            unique_title=unique_course.title,  # ✅ صحیح
+            year=year,
+        )
+        db.add(new_offered)
+        db.flush()  # برای گرفتن id جدید
+        logger.info(f"✅ رکورد جدید در offered_courses با id={new_offered.id} ساخته شد")
+        return new_offered
+
+    saved_count = 0
+    for idx, cls_data in enumerate(req.classes):
+        course_code = cls_data.get("course_code") or cls_data.get("unique_code")
+        if not course_code:
+            logger.warning(f"⚠️ کلاس #{idx} فاقد course_code، رد شد")
+            continue
+
+        # پیدا کردن UniqueCourse (جدول دروس اصلی)
+        unique_course = db.query(UniqueCourse).filter(UniqueCourse.code == course_code).first()
+        if not unique_course:
+            logger.error(f"❌ UniqueCourse با کد {course_code} یافت نشد")
+            continue
+
+        # ساخت/یافتن OfferedCourse (با ارسال year به جای semester)
+        try:
+            offered_course = get_or_create_offered_course(unique_course, req.year, db)
+        except Exception as e:
+            logger.error(f"❌ خطا در ساخت OfferedCourse برای {course_code}: {e}")
+            continue
+
+        course_id = offered_course.id  # این id در جدول scheduled_classes به عنوان کلید خارجی ذخیره می‌شود
+
+        # بررسی تکراری نبودن در scheduled_classes
+        existing = db.query(ScheduledClass).filter(
+            ScheduledClass.course_code == course_code,
+            ScheduledClass.group_number == cls_data.get("group_number", 1),
+            ScheduledClass.scenario_id == req.workflow_id
+        ).first()
+
+        if existing:
+            # به‌روزرسانی رکورد موجود
+            existing.instructor_name = cls_data.get("instructor_name")
+            existing.day = cls_data.get("day")
+            existing.start_time = cls_data.get("start")
+            existing.end_time = cls_data.get("end")
+            existing.predicted_students = cls_data.get("predicted_students", 0)
+            saved_count += 1
+            logger.debug(f"🔄 کلاس موجود به‌روز شد: {course_code}")
+            continue
+
+        # ایجاد رکورد جدید در scheduled_classes
+        new_class = ScheduledClass(
+            course_id=course_id,
+            course_code=course_code,
+            course_title=cls_data.get("course_name"),
+            group_number=cls_data.get("group_number", 1),
+            instructor_name=cls_data.get("instructor_name"),
+            room_name=cls_data.get("room_name"),
+            day=cls_data.get("day"),
+            start_time=cls_data.get("start"),
+            end_time=cls_data.get("end"),
+            predicted_students=cls_data.get("predicted_students", 0),
+            semester=req.semester,  # اینجا semester ذخیره می‌شود (چون در scheduled_classes وجود دارد)
+            year=req.year,
+            scenario_id=req.workflow_id,
+        )
+        db.add(new_class)
+        saved_count += 1
+        logger.debug(f"➕ کلاس جدید اضافه شد: {course_code}")
+
+    db.commit()
+    logger.info(f"✅ تعداد {saved_count} کلاس با موفقیت در scheduled_classes ذخیره شد.")
+    return {
+        "status": "success",
+        "message": f"{saved_count} کلاس با موفقیت ذخیره شد.",
+        "saved_count": saved_count
+    }
+
+
+@router.get("/{workflow_id}/scheduled-classes")
+def get_scheduled_classes(workflow_id: int, db: Session = Depends(get_db)):
+    workflow = db.query(ScheduleWorkflow).filter(ScheduleWorkflow.id == workflow_id).first()
+    if not workflow:
+        raise HTTPException(404, detail="Workflow یافت نشد")
+
+    classes = db.query(ScheduledClass).filter(
+        ScheduledClass.scenario_id == workflow_id
+    ).all()
+
+    result = []
+    for cls in classes:
+        result.append({
+            "id": cls.id,
+            "course_code": cls.course_code,
+            "course_title": cls.course_title,
+            "group_number": cls.group_number,
+            "instructor_name": cls.instructor_name,
+            "room_name": cls.room_name,
+            "room_id": cls.room_id,
+            "capacity": cls.room_capacity,
+            "day": cls.day,
+            "start_time": cls.start_time,
+            "end_time": cls.end_time,
+            "predicted_students": cls.predicted_students,
+        })
+
+    return {
+        "workflow_id": workflow_id,
+        "total": len(result),
+        "classes": result
+    }

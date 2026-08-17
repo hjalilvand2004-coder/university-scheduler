@@ -828,3 +828,119 @@ class WorkflowService:
 
         logger.info("بهینه‌سازی اکتشافی اعمال شد (فقط کپی داده).")
         return optimized
+
+        # app/services/workflow_service.py (افزودن متدهای جدید)
+
+        # ... کدهای موجود ...
+
+        # ============================================================
+        # متدهای جدید برای مدیریت کلاس‌های زمان‌بندی‌شده
+        # ============================================================
+
+        def save_scheduled_classes(
+                self,
+                classes: List[Dict],
+                workflow_id: int,
+                semester: str,
+                year: str = "1403"
+        ) -> List[Dict]:
+            """
+            ذخیره‌سازی کلاس‌های زمان‌بندی‌شده (بدون اتاق) در دیتابیس
+            """
+            from app.models.schedule import ScheduledClass
+
+            if not classes:
+                logger.warning("لیست کلاس‌ها خالی است")
+                return []
+
+            saved_classes = []
+            for cls_data in classes:
+                # بررسی وجود کلاس تکراری
+                existing = self.db.query(ScheduledClass).filter(
+                    ScheduledClass.scenario_id == workflow_id,
+                    ScheduledClass.course_code == cls_data.get("course_code"),
+                    ScheduledClass.group_number == cls_data.get("group_number")
+                ).first()
+
+                if existing:
+                    # به‌روزرسانی اطلاعات
+                    existing.course_title = cls_data.get("course_name")
+                    existing.instructor_name = cls_data.get("instructor_name")
+                    existing.day = cls_data.get("day")
+                    existing.start_time = cls_data.get("start")
+                    existing.end_time = cls_data.get("end")
+                    existing.predicted_students = cls_data.get("estimated_capacity", 0)
+                    existing.semester = semester
+                    existing.year = year
+                    saved_classes.append(existing.to_dict() if hasattr(existing, 'to_dict') else existing)
+                else:
+                    new_class = ScheduledClass(
+                        course_code=cls_data.get("course_code"),
+                        course_title=cls_data.get("course_name"),
+                        group_number=cls_data.get("group_number"),
+                        instructor_name=cls_data.get("instructor_name"),
+                        day=cls_data.get("day"),
+                        start_time=cls_data.get("start"),
+                        end_time=cls_data.get("end"),
+                        predicted_students=cls_data.get("estimated_capacity", 0),
+                        semester=semester,
+                        year=year,
+                        scenario_id=workflow_id,
+                    )
+                    self.db.add(new_class)
+                    saved_classes.append(new_class)
+
+            self.db.commit()
+            logger.info(f"✅ {len(saved_classes)} کلاس زمان‌بندی‌شده ذخیره شد.")
+            return [cls.to_dict() if hasattr(cls, 'to_dict') else cls for cls in saved_classes]
+
+        def get_scheduled_classes(self, workflow_id: int) -> List[Dict]:
+            """
+            دریافت کلاس‌های زمان‌بندی‌شده برای یک workflow
+            """
+            from app.models.schedule import ScheduledClass
+
+            classes = self.db.query(ScheduledClass).filter(
+                ScheduledClass.scenario_id == workflow_id
+            ).all()
+
+            result = []
+            for cls in classes:
+                result.append({
+                    "id": cls.id,
+                    "course_code": cls.course_code,
+                    "course_name": cls.course_title,
+                    "group_number": cls.group_number,
+                    "instructor_name": cls.instructor_name,
+                    "room_name": cls.room_name,
+                    "room_id": cls.room_id,
+                    "capacity": cls.room_capacity,
+                    "day": cls.day,
+                    "start": cls.start_time,
+                    "end": cls.end_time,
+                    "predicted_students": cls.predicted_students,
+                    "scenario_id": cls.scenario_id,
+                    "semester": cls.semester,
+                    "year": cls.year,
+                })
+            return result
+
+        def update_workflow_status(self, workflow_id: int, status: str) -> bool:
+            """
+            به‌روزرسانی وضعیت workflow
+            """
+            from app.models.workflow import ScheduleWorkflow, WorkflowStatus
+
+            workflow = self.db.query(ScheduleWorkflow).filter(
+                ScheduleWorkflow.id == workflow_id
+            ).first()
+            if not workflow:
+                return False
+
+            try:
+                workflow.status = WorkflowStatus(status)
+                self.db.commit()
+                return True
+            except ValueError:
+                logger.error(f"وضعیت '{status}' نامعتبر است")
+                return False
