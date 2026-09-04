@@ -7,8 +7,12 @@ from collections import defaultdict
 from app.models.term_course import TermCourse
 from app.models.schedule_history import ScheduleHistory
 from app.models.course import UniqueCourse
-from app.models.basket_item import BasketItem  # اضافه شد
-from app.utils.term_normalizer import normalize_term
+from app.models.basket_item import BasketItem
+
+# ===== استفاده از normalize_term و get_term_search_patterns از فایل مرجع اسلات‌ها =====
+from app.services.schedule.slot_times import normalize_term, get_term_search_patterns
+
+# ===== توابع کمکی از workflow_helpers (بدون تغییر) =====
 from app.services.workflow_helpers import (
     parse_row_codes, calculate_final_score, is_bottleneck
 )
@@ -209,7 +213,7 @@ class BasketService:
                 course["avg_capacity_in_mehr"] = 0
                 course["avg_capacity_in_bahman"] = 0
                 course["required_classes"] = 1
-                if "estimated_capacity" not in course:
+                if "estimated_capacity" not in c:
                     course["estimated_capacity"] = 0
                 result.append(course)
                 continue
@@ -330,35 +334,44 @@ class BasketService:
         return deleted
 
     # ============================================================
-    # متدهای کمکی (مرحله اول)
+    # متدهای کمکی (مرحله اول) - اصلاح شده با استفاده از get_term_search_patterns
     # ============================================================
 
     def _step1_integrate(self, semester: str, levels: List[str], year: str) -> List[Dict]:
-        """یکپارچه‌سازی دروس ترمیک بر اساس ترم فرد/زوج"""
-        target_terms = [1, 3, 5, 7] if semester == "mehr" else [2, 4, 6, 8]
+        """
+        یکپارچه‌سازی دروس ترمیک بر اساس ترم فرد/زوج با استفاده از الگوهای جستجو
+        """
+        # نرمال‌سازی ترم ورودی به کلید استاندارد
+        canonical_semester = normalize_term(semester)
+        # دریافت لیست عبارات جستجو برای این ترم
+        term_patterns = get_term_search_patterns(canonical_semester)
+        logger.info(f"الگوهای جستجوی ترم {canonical_semester}: {term_patterns}")
+
+        # دریافت تمام دروس ترمیک برای مقاطع مورد نظر
         term_courses = self.db.query(TermCourse).filter(TermCourse.level.in_(levels)).all()
+
         integrated = []
         for tc in term_courses:
-            tn = normalize_term(tc.term)
-            if tn not in target_terms:
-                continue
-            integrated.append({
-                "id": tc.id,
-                "level": tc.level,
-                "term": tc.term,
-                "term_number": tn,
-                "course_name": tc.course_name,
-                "unique_code": tc.unique_course_code,
-                "unique_name": tc.unique_course_name,
-                "units": tc.units,
-                "course_type": tc.course_type,
-                "prerequisite_codes": tc.prerequisite_row_codes,
-                "corequisite_codes": tc.corequisite_row_codes,
-            })
+            # اگر term درس در لیست الگوهای جستجو باشد، شاملش می‌کنیم
+            if tc.term in term_patterns:
+                integrated.append({
+                    "id": tc.id,
+                    "level": tc.level,
+                    "term": tc.term,
+                    "course_name": tc.course_name,
+                    "unique_code": tc.unique_course_code,
+                    "unique_name": tc.unique_course_name,
+                    "units": tc.units,
+                    "course_type": tc.course_type,
+                    "prerequisite_codes": tc.prerequisite_row_codes,
+                    "corequisite_codes": tc.corequisite_row_codes,
+                })
         return integrated
 
     def _step2_add_bottleneck(self, integrated: List[Dict]) -> List[Dict]:
-        """افزودن دروس گلوگاهی و پیش‌نیازهای缺失 با ستون‌های تیک"""
+        """
+        افزودن دروس گلوگاهی و پیش‌نیازهای缺失 با ستون‌های تیک
+        """
         if not integrated:
             return []
 
@@ -394,7 +407,6 @@ class BasketService:
                     "id": tc.id,
                     "level": tc.level,
                     "term": tc.term,
-                    "term_number": normalize_term(tc.term),
                     "course_name": tc.course_name,
                     "unique_code": tc.unique_course_code,
                     "unique_name": tc.unique_course_name,

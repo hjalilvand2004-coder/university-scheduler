@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 from pydantic import BaseModel, Field
 from typing import List, Optional, Any, Dict, Union
 
@@ -8,10 +7,11 @@ from app.core.database import get_db
 from app.services.scheduler_service import generate_schedule_from_db
 from app.optimization.cp_sat_solver import solve_schedule
 from app.data.sample_data import sample_courses, sample_instructors, sample_rooms, sample_slots
-from app.schemas.course import Course, Instructor, Room, TimeSlot, CourseType, Semester
+from app.schemas.course import Course, Instructor, Room, TimeSlot, CourseType
 from app.models.instructor import Instructor as InstructorModel
+from app.models.schedule import ScheduledClass
+from app.models.room import Room as RoomModel
 
-# ===== تعریف router =====
 router = APIRouter(prefix="/api/schedules", tags=["Schedules"])
 
 
@@ -60,10 +60,10 @@ class ScheduleResponse(BaseModel):
     explanations: List[str]
     rejected_courses: List[Any]
     selected_courses: List[Any]
-    ranked_courses: List[RankedCourseResponse]  # اضافه شد
+    ranked_courses: List[RankedCourseResponse]
     alternative_scenarios: List[Any]
     quality_metrics: Dict[str, Any]
-    unschedulable_courses: List[Any]  # اضافه شد
+    unschedulable_courses: List[Any]
 
 
 class SavedScheduleResponse(BaseModel):
@@ -85,6 +85,12 @@ class ManualChangeResponse(BaseModel):
     message: str
     conflicts: Optional[List[Dict[str, str]]] = None
     class_data: Optional[Dict[str, Any]] = None
+
+
+class RoomAssignmentRequest(BaseModel):
+    class_id: int
+    room_id: int
+    reason: Optional[str] = None
 
 
 # ============================================================
@@ -186,7 +192,7 @@ def generate_schedule(
             max_groups_per_course=request.max_groups_per_course,
             demand_threshold=request.demand_threshold,
             number_of_scenarios=request.number_of_scenarios,
-            max_courses=request.max_courses  # اضافه شد
+            max_courses=request.max_courses
         )
         return result
     except Exception as e:
@@ -234,7 +240,7 @@ def generate_sample_schedule(
             "total_classes": len(solution["classes"]),
             "total_groups": len(solution["classes"]),
         },
-        "ranked_courses": [],  # نمونه رتبه‌بندی ندارد
+        "ranked_courses": [],
         "unschedulable_courses": solution.get("unschedulable_courses", [])
     }
 
@@ -245,7 +251,6 @@ def get_saved_schedules(
     year: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
-    from app.models.schedule import ScheduledClass
     query = db.query(ScheduledClass)
     if semester:
         query = query.filter(ScheduledClass.semester == semester)
@@ -262,7 +267,6 @@ def get_saved_schedules(
 
 @router.get("/{schedule_id}", response_model=ScheduledClassResponse)
 def get_schedule(schedule_id: int, db: Session = Depends(get_db)):
-    from app.models.schedule import ScheduledClass
     schedule = db.query(ScheduledClass).filter(ScheduledClass.id == schedule_id).first()
     if not schedule:
         raise HTTPException(status_code=404, detail="برنامه پیدا نشد")
@@ -295,8 +299,6 @@ def manual_change(
     request: ManualChangeRequest,
     db: Session = Depends(get_db)
 ):
-    from app.models.schedule import ScheduledClass
-
     # 1. پیدا کردن کلاس مورد نظر
     scheduled_class = db.query(ScheduledClass).filter(
         ScheduledClass.id == request.scheduled_class_id
@@ -372,8 +374,6 @@ def validate_manual_change(
     new_slot_id: Optional[int],
     db: Session
 ) -> List[Dict[str, str]]:
-    from app.models.schedule import ScheduledClass
-
     conflicts = []
 
     final_slot_id = new_slot_id if new_slot_id is not None else scheduled_class.slot_id
@@ -407,16 +407,9 @@ def validate_manual_change(
     return conflicts
 
 
-
-# -------------------------------------
-#افزودن اندپوینت اختصاصی برای تخصیص اتاق درroutes_schedule.py
-# --------------------------------------
-# در app/api/routes_workflow.py یا app/api/routes_schedule.py
-
-class RoomAssignmentRequest(BaseModel):
-    class_id: int
-    room_id: int
-    reason: Optional[str] = None
+# ============================================================
+# API تخصیص اتاق به کلاس
+# ============================================================
 
 @router.put("/scheduled-classes/{class_id}/room")
 def assign_room_to_class(
@@ -424,14 +417,11 @@ def assign_room_to_class(
     req: RoomAssignmentRequest,
     db: Session = Depends(get_db)
 ):
-    from app.models.schedule import ScheduledClass
-    from app.models.room import Room
-
     scheduled_class = db.query(ScheduledClass).filter(ScheduledClass.id == class_id).first()
     if not scheduled_class:
         raise HTTPException(404, detail="کلاس برنامه پیدا نشد")
 
-    room = db.query(Room).filter(Room.id == req.room_id).first()
+    room = db.query(RoomModel).filter(RoomModel.id == req.room_id).first()
     if not room:
         raise HTTPException(404, detail="اتاق پیدا نشد")
 

@@ -8,8 +8,17 @@ import logging
 from app.core.database import get_db
 from app.models.schedule_history import ScheduleHistory
 
+# ===== یکجا وارد کردن همه توابع مورد نیاز از slot_times =====
+from app.services.schedule.slot_times import (
+    normalize_term,
+    time_to_minutes,
+    normalize_day,
+    DAY_MAP,
+)
+
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/schedule-history", tags=["Schedule History"])
+
 
 # ===== توابع کمکی =====
 def normalize_column_name(col: str) -> str:
@@ -18,6 +27,7 @@ def normalize_column_name(col: str) -> str:
     col = col.strip()
     col = re.sub(r'\s+', ' ', col)
     return col
+
 
 def clean_record(record: dict) -> dict:
     cleaned = {}
@@ -32,6 +42,41 @@ def clean_record(record: dict) -> dict:
             cleaned[key] = value
     return cleaned
 
+
+def normalize_term_field(term_value) -> str:
+    """نرمال‌سازی ترم با استفاده از normalize_term از slot_times"""
+    if not term_value:
+        return term_value
+    try:
+        return normalize_term(str(term_value))
+    except ValueError as e:
+        logger.warning(f"ترم '{term_value}' نامعتبر است: {e}")
+        return term_value
+
+
+def validate_time_slot(start: str, end: str) -> bool:
+    """
+    بررسی اعتبار زمان‌های شروع و پایان
+    - پایان باید بعد از شروع باشد
+    - حداقل مدت زمان ۳۰ دقیقه
+    """
+    if not start or not end:
+        return True
+    try:
+        start_min = time_to_minutes(start)
+        end_min = time_to_minutes(end)
+        if end_min <= start_min:
+            logger.warning(f"زمان پایان ({end}) باید بعد از شروع ({start}) باشد")
+            return False
+        if end_min - start_min < 30:
+            logger.warning(f"مدت زمان کلاس ({end_min - start_min} دقیقه) کمتر از 30 دقیقه است")
+            return False
+        return True
+    except Exception as e:
+        logger.warning(f"خطا در اعتبارسنجی زمان {start}-{end}: {e}")
+        return True
+
+
 # ============================================
 # CRUD
 # ============================================
@@ -40,24 +85,51 @@ def clean_record(record: dict) -> dict:
 async def get_all(db: Session = Depends(get_db)):
     return db.query(ScheduleHistory).all()
 
+
 @router.post("/")
 async def create(data: dict, db: Session = Depends(get_db)):
+    # نرمال‌سازی semester
+    if "semester" in data and data["semester"]:
+        data["semester"] = normalize_term_field(data["semester"])
+    # نرمال‌سازی day
+    if "day" in data and data["day"]:
+        day_norm = normalize_day(str(data["day"]))
+        if day_norm in DAY_MAP:
+            data["day"] = DAY_MAP[day_norm]
+    # اعتبارسنجی زمان
+    if "start_time" in data and "end_time" in data:
+        if not validate_time_slot(data["start_time"], data["end_time"]):
+            raise HTTPException(status_code=400, detail="زمان شروع و پایان نامعتبر است")
     new = ScheduleHistory(**data)
     db.add(new)
     db.commit()
     db.refresh(new)
     return new
 
+
 @router.put("/{id}")
 async def update(id: int, data: dict, db: Session = Depends(get_db)):
     item = db.query(ScheduleHistory).filter(ScheduleHistory.id == id).first()
     if not item:
         raise HTTPException(status_code=404, detail="رکورد پیدا نشد")
+    # نرمال‌سازی semester
+    if "semester" in data and data["semester"]:
+        data["semester"] = normalize_term_field(data["semester"])
+    # نرمال‌سازی day
+    if "day" in data and data["day"]:
+        day_norm = normalize_day(str(data["day"]))
+        if day_norm in DAY_MAP:
+            data["day"] = DAY_MAP[day_norm]
+    # اعتبارسنجی زمان
+    if "start_time" in data and "end_time" in data:
+        if not validate_time_slot(data["start_time"], data["end_time"]):
+            raise HTTPException(status_code=400, detail="زمان شروع و پایان نامعتبر است")
     for key, value in data.items():
         setattr(item, key, value)
     db.commit()
     db.refresh(item)
     return item
+
 
 @router.delete("/{id}")
 async def delete(id: int, db: Session = Depends(get_db)):
@@ -67,6 +139,7 @@ async def delete(id: int, db: Session = Depends(get_db)):
     db.delete(item)
     db.commit()
     return {"message": "رکورد با موفقیت حذف شد"}
+
 
 # ============================================
 # بارگذاری اکسل
@@ -82,7 +155,6 @@ async def upload_excel(file: UploadFile = File(...), db: Session = Depends(get_d
         df = df.where(pd.notnull(df), None)
         records = df.to_dict(orient="records")
 
-        # نگاشت ستون‌های فایل به فیلدهای مدل
         column_map = {
             "نیمسال ارائه": "semester",
             "نام درس": "course_name",
@@ -108,7 +180,7 @@ async def upload_excel(file: UploadFile = File(...), db: Session = Depends(get_d
             "نام کلاس": "class_name"
         }
 
-        required_cols = ["نیمسال ارائه", "نام درس"]  # حداقل ستون‌های ضروری
+        required_cols = ["نیمسال ارائه", "نام درس"]
         missing_cols = [col for col in required_cols if col not in df.columns]
         if missing_cols:
             raise HTTPException(
@@ -129,6 +201,25 @@ async def upload_excel(file: UploadFile = File(...), db: Session = Depends(get_d
                 if not data.get("semester") or not data.get("course_name"):
                     errors.append(f"ردیف {idx}: نیمسال یا نام درس خالی است")
                     continue
+
+                # نرمال‌سازی semester
+                if data.get("semester"):
+                    data["semester"] = normalize_term_field(data["semester"])
+
+                # نرمال‌سازی day
+                if data.get("day"):
+                    day_norm = normalize_day(str(data["day"]))
+                    if day_norm in DAY_MAP:
+                        data["day"] = DAY_MAP[day_norm]
+                    else:
+                        errors.append(f"ردیف {idx}: روز '{data['day']}' معتبر نیست")
+                        continue
+
+                # اعتبارسنجی زمان
+                if data.get("start_time") and data.get("end_time"):
+                    if not validate_time_slot(data["start_time"], data["end_time"]):
+                        errors.append(f"ردیف {idx}: زمان {data['start_time']}-{data['end_time']} نامعتبر است")
+                        continue
 
                 # تبدیل ظرفیت به عدد صحیح
                 if data.get("max_capacity") is not None:

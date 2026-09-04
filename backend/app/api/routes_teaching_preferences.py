@@ -8,6 +8,10 @@ import logging
 from app.core.database import get_db
 from app.models.teaching_preference import TeachingPreference
 
+# ===== وارد کردن توابع کمکی برای نرمال‌سازی =====
+from app.utils.helpers import normalize_code, normalize_instructor_code
+from app.services.schedule.slot_times import normalize_term  # برای نرمال‌سازی ترم (اختیاری)
+
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/teaching-preferences", tags=["Teaching Preferences"])
 
@@ -42,6 +46,11 @@ async def get_all(db: Session = Depends(get_db)):
 
 @router.post("/")
 async def create(data: dict, db: Session = Depends(get_db)):
+    # نرمال‌سازی کدها قبل از ذخیره
+    if "unique_course_code" in data and data["unique_course_code"]:
+        data["unique_course_code"] = normalize_code(data["unique_course_code"])
+    if "instructor_code" in data and data["instructor_code"]:
+        data["instructor_code"] = normalize_instructor_code(data["instructor_code"])
     new = TeachingPreference(**data)
     db.add(new)
     db.commit()
@@ -53,6 +62,11 @@ async def update(id: int, data: dict, db: Session = Depends(get_db)):
     item = db.query(TeachingPreference).filter(TeachingPreference.id == id).first()
     if not item:
         raise HTTPException(status_code=404, detail="رکورد پیدا نشد")
+    # نرمال‌سازی کدها در صورت وجود
+    if "unique_course_code" in data and data["unique_course_code"]:
+        data["unique_course_code"] = normalize_code(data["unique_course_code"])
+    if "instructor_code" in data and data["instructor_code"]:
+        data["instructor_code"] = normalize_instructor_code(data["instructor_code"])
     for key, value in data.items():
         setattr(item, key, value)
     db.commit()
@@ -116,6 +130,19 @@ async def upload_excel(file: UploadFile = File(...), db: Session = Depends(get_d
                 if not data.get("course_name") or not data.get("instructor_name"):
                     errors.append(f"ردیف {idx}: نام درس یا نام استاد خالی است")
                     continue
+
+                # نرمال‌سازی کدها
+                if data.get("unique_course_code"):
+                    data["unique_course_code"] = normalize_code(data["unique_course_code"])
+                if data.get("instructor_code"):
+                    data["instructor_code"] = normalize_instructor_code(data["instructor_code"])
+                # نرمال‌سازی ترم (اختیاری)
+                if data.get("term_code"):
+                    try:
+                        data["term_code"] = normalize_term(data["term_code"])
+                    except ValueError:
+                        # اگر ترم نامعتبر باشد، همان مقدار قبلی نگه‌داری می‌شود
+                        pass
 
                 db.add(TeachingPreference(**data))
                 added += 1

@@ -10,44 +10,40 @@ from app.models.schedule_history import ScheduleHistory
 from app.models.teaching_preference import TeachingPreference
 from app.models.time_preference import TimePreference
 from app.services.scoring_service import calculate_course_score, Semester
-from app.utils.term_normalizer import normalize_term, get_target_terms
+
+# ===== استفاده از normalize_term از فایل مرجع اسلات‌ها =====
+from app.services.schedule.slot_times import normalize_term
+# ===== get_target_terms فعلاً از ماژول قدیمی وارد می‌شود (در آینده به slot_times منتقل شود) =====
+from app.utils.term_normalizer import get_target_terms
+
+# ===== (اختیاری) برای حذف تکرار، می‌توان BOTTLENECK_COURSES را از workflow_helpers وارد کرد =====
+# from app.services.workflow_helpers import BOTTLENECK_COURSES
 
 logger = logging.getLogger(__name__)
 
-# لیست دروس گلوگاهی (بر اساس نیازمندی)
+# لیست دروس گلوگاهی (بر اساس نیازمندی) - در صورت استفاده از workflow_helpers این بخش حذف شود
 BOTTLENECK_COURSES = {
     "ساختمان داده", "معماری کامپیوتر", "ریاضی عمومی ۱", "ریاضی عمومی ۲",
     "معادلات دیفرانسیل", "مدارهای منطقی", "برنامه‌سازی پیشرفته", "ریاضی گسسته",
     "سیستم‌عامل", "هوش مصنوعی", "مهندسی نرم‌افزار", "طراحی سیستم‌های دیجیتال"
 }
 
-# تمام مقاطع موجود
 ALL_LEVELS = ["پیوسته 1394", "پیوسته 1403", "ناپیوسته"]
-
-# آستانه امتیاز برای انتخاب (افزایش یافته)
-SCORE_THRESHOLD = 10  # ← قبلاً ۱ بود
+SCORE_THRESHOLD = 10
 
 
 class CourseSelector:
     def __init__(self, db: Session):
         self.db = db
-        # کش برای تطبیق فازی نام دروس (بهبود عملکرد)
         self._unique_course_cache = None
         self._offered_title_cache = None
 
     def _find_unique_code_by_name(self, course_name: str) -> Optional[str]:
-        """
-        پیدا کردن کد یکتا بر اساس نام درس با استفاده از تطبیق فازی
-        """
         if not course_name:
             return None
-
-        # کش کردن لیست عناوین برای بهبود عملکرد
         if self._offered_title_cache is None:
             offered_titles = self.db.query(OfferedCourse.unique_title).distinct().all()
             self._offered_title_cache = [t[0] for t in offered_titles if t[0]]
-
-        # ابتدا روی OfferedCourse.unique_title جستجو می‌کنیم
         matches = get_close_matches(course_name, self._offered_title_cache, n=1, cutoff=0.6)
         if matches:
             offered = self.db.query(OfferedCourse).filter(
@@ -57,11 +53,9 @@ class CourseSelector:
                 logger.debug(f"✅ تطبیق نام '{course_name}' → '{matches[0]}' با کد {offered.unique_code}")
                 return offered.unique_code
 
-        # اگر پیدا نشد، روی UniqueCourse.title جستجو می‌کنیم
         if self._unique_course_cache is None:
             unique_titles = self.db.query(UniqueCourse.title).distinct().all()
             self._unique_course_cache = [t[0] for t in unique_titles if t[0]]
-
         matches = get_close_matches(course_name, self._unique_course_cache, n=1, cutoff=0.6)
         if matches:
             unique_course = self.db.query(UniqueCourse).filter(
@@ -75,7 +69,7 @@ class CourseSelector:
         return None
 
     def _get_term_number(self, term_str: str) -> int:
-        """نرمالیزه کردن ترم و برگرداندن عدد"""
+        """نرمالیزه کردن ترم و برگرداندن عدد (استفاده از normalize_term از slot_times)"""
         return normalize_term(term_str)
 
     def select_courses(
@@ -83,30 +77,17 @@ class CourseSelector:
             semester: Semester,
             levels: Optional[List[str]] = None,
             demand_threshold: int = 10,
-            max_courses: int = 60,  # ← کاهش به ۶۰
+            max_courses: int = 60,
             include_prerequisites: bool = True
     ) -> Tuple[List[Dict], List[Dict]]:
-        """
-        انتخاب هوشمندانه دروس مناسب برای ترم جاری بر اساس:
-        - سیاست نیمسال (مهر: ترم‌های فرد، بهمن: ترم‌های زوج)
-        - همه مقاطع مشخص‌شده
-        - دروس پیش‌نیاز (حتی اگر در ترم‌های دیگر باشند)
-        - امتیازدهی و داده‌های تاریخی
-        - مطلوبیت اساتید
-        - گلوگاهی بودن
-        """
-        # تعیین ترم‌های هدف بر اساس نیمسال (به صورت اعداد)
         target_term_numbers = get_target_terms(semester)
         term_type = "فرد" if semester == Semester.MEHR else "زوج"
-
-        # تعیین مقاطع هدف
         target_levels = levels if levels else ALL_LEVELS
 
         logger.info("=" * 60)
         logger.info(f"📊 شروع انتخاب دروس - نیمسال: {semester.value}, ترم‌های هدف: {target_term_numbers}, مقاطع: {target_levels}")
         logger.info("=" * 60)
 
-        # 1. دریافت همه دروس ترمیک برای مقاطع هدف (بدون فیلتر ترم)
         all_term_courses = self.db.query(TermCourse).filter(
             TermCourse.level.in_(target_levels)
         ).all()
@@ -115,12 +96,10 @@ class CourseSelector:
             logger.warning(f"هیچ درسی برای مقاطع {target_levels} یافت نشد")
             return [], []
 
-        # فیلتر کردن بر اساس ترم نرمالیزه‌شده
         term_courses = []
         for tc in all_term_courses:
             term_number = self._get_term_number(tc.term)
             if term_number in target_term_numbers:
-                # ذخیره term_number در شیء برای استفاده بعدی
                 tc._term_number = term_number
                 term_courses.append(tc)
 
@@ -130,13 +109,11 @@ class CourseSelector:
 
         logger.info(f"📚 تعداد دروس ترمیک پس از فیلتر ترم: {len(term_courses)}")
 
-        # 2. دریافت دروس ارائه
         offered_courses = {
             oc.unique_code: oc for oc in self.db.query(OfferedCourse).all()
         }
         logger.info(f"📖 تعداد دروس ارائه: {len(offered_courses)}")
 
-        # 3. دریافت داده‌های تاریخی
         historical_demand = {}
         history_records = self.db.query(
             ScheduleHistory.ref_unique_course_code,
@@ -152,7 +129,6 @@ class CourseSelector:
                 }
         logger.info(f"📊 تعداد دروس با سابقه تاریخی: {len(historical_demand)}")
 
-        # 4. دریافت مطلوبیت‌های تدریس
         teaching_prefs = self.db.query(TeachingPreference).all()
         course_instructors = {}
         for tp in teaching_prefs:
@@ -166,7 +142,6 @@ class CourseSelector:
                 })
         logger.info(f"👨‍🏫 تعداد دروس با استاد واجد شرایط: {len(course_instructors)}")
 
-        # 5. پردازش هر درس
         selected = []
         rejected = []
         selected_codes = set()
@@ -176,10 +151,8 @@ class CourseSelector:
         for idx, tc in enumerate(term_courses, 1):
             term_number = getattr(tc, '_term_number', self._get_term_number(tc.term))
 
-            # پیدا کردن کد یکتا (با تطبیق فازی در صورت نیاز)
             unique_code = tc.unique_course_code
             if not unique_code or unique_code == "یافت نشد":
-                # تلاش برای پیدا کردن کد یکتا از طریق نام
                 found_code = self._find_unique_code_by_name(tc.course_name)
                 if found_code:
                     unique_code = found_code
@@ -187,10 +160,8 @@ class CourseSelector:
                 else:
                     logger.warning(f"⚠️ برای درس '{tc.course_name}' کد یکتا پیدا نشد")
 
-            # پیدا کردن درس ارائه مربوطه
             offered = offered_courses.get(unique_code)
 
-            # استخراج پیش‌نیازها
             prerequisites = []
             prerequisite_codes = []
             if tc.prerequisite_row_codes:
@@ -214,7 +185,6 @@ class CourseSelector:
             if offered and offered.prerequisite and offered.prerequisite != '-':
                 prerequisites.append(offered.prerequisite)
 
-            # استخراج هم‌نیازها
             corequisites = []
             if tc.corequisite_row_codes:
                 try:
@@ -231,23 +201,19 @@ class CourseSelector:
             if offered and offered.corequisite and offered.corequisite != '-':
                 corequisites.append(offered.corequisite)
 
-            # داده‌های تاریخی
             hist_data = historical_demand.get(unique_code, {'count': 0, 'avg_capacity': 0})
             historical_count = hist_data['count']
             avg_capacity = hist_data['avg_capacity']
 
-            # بررسی وجود استاد
             instructors = course_instructors.get(unique_code, [])
             has_instructor = len(instructors) > 0
 
-            # گلوگاهی بودن
             is_bottleneck = (
                 tc.course_name in BOTTLENECK_COURSES or
                 (unique_code and unique_code in BOTTLENECK_COURSES) or
                 len(prerequisites) > 2
             )
 
-            # محاسبه امتیاز پایه
             course_data = {
                 "id": tc.id,
                 "title": tc.course_name,
@@ -263,7 +229,6 @@ class CourseSelector:
 
             score, reasons = calculate_course_score(course_data, semester)
 
-            # ===== افزایش امتیاز بر اساس داده‌های تاریخی =====
             if historical_count > 0:
                 bonus = min(historical_count * 5, 30)
                 score += bonus
@@ -273,20 +238,13 @@ class CourseSelector:
                 score += 10
                 reasons.append(f"📊 میانگین ظرفیت {avg_capacity:.0f} نفر در ترم‌های گذشته")
 
-            # ===== تعیین اولویت‌ها =====
-            # 1. دروس با سابقه بالا (≥ ۳ بار) حتماً انتخاب شوند
             must_select = historical_count >= 3
-
-            # 2. دروس گلوگاهی
             is_critical_bottleneck = (
                 is_bottleneck and
                 (historical_count >= 2 or unique_code in BOTTLENECK_COURSES)
             )
-
-            # 3. دروس با استاد واجد شرایط
             has_qualified_instructor = has_instructor and len(instructors) > 0
 
-            # ===== سایر امتیازات =====
             if is_bottleneck:
                 score += 15
                 reasons.append("🎯 درس گلوگاهی - ارائه آن ضروری است")
@@ -300,12 +258,10 @@ class CourseSelector:
                 score += 3
                 reasons.append(f"🔗 دارای {len(prerequisites)} پیش‌نیاز")
 
-            # ===== افزایش امتیاز برای دروس با تقاضای بالا =====
             if avg_capacity > 25:
                 score += 5
                 reasons.append(f"📈 تقاضای بالا (میانگین ظرفیت {avg_capacity:.0f})")
 
-            # ===== کاهش امتیاز دروس عمومی و اختیاری =====
             if tc.course_type in ["عمومی", "اختیاری", "تمرکز تخصصی اختیاری", "درس های اختیاری همه گرایش ها"]:
                 score -= 20
                 reasons.append("⚠️ درس عمومی/اختیاری - اولویت کمتر")
@@ -315,7 +271,7 @@ class CourseSelector:
                 "course_name": tc.course_name,
                 "unique_course_code": unique_code,
                 "unique_course_name": tc.unique_course_name,
-                "units": tc.units,  # ← واحد درس
+                "units": tc.units,
                 "course_type": tc.course_type,
                 "approximate_term": tc.approximate_term or term_number,
                 "term_number": term_number,
@@ -342,10 +298,6 @@ class CourseSelector:
                 "priority_score": score,
             }
 
-            # ===== تصمیم‌گیری با آستانه بالاتر =====
-            # - دروس با سابقه ≥ ۳ بار: حتماً انتخاب
-            # - دروس گلوگاهی بحرانی: حتماً انتخاب
-            # - دروس با امتیاز ≥ SCORE_THRESHOLD: انتخاب
             if must_select or is_critical_bottleneck or score >= SCORE_THRESHOLD:
                 selected.append(course_info)
                 if unique_code:
@@ -356,12 +308,10 @@ class CourseSelector:
 
         logger.info(f"📊 تعداد دروس انتخاب‌شده اولیه: {len(selected)}")
 
-        # 7. اضافه کردن دروس پیش‌نیاز
         if include_prerequisites:
             prereq_codes_to_add = set()
             for course in selected:
                 prereq_codes_to_add.update(course.get("prerequisite_codes", []))
-
             prereq_codes_to_add = {c for c in prereq_codes_to_add if c and c != "یافت نشد"}
 
             if prereq_codes_to_add:
@@ -373,7 +323,6 @@ class CourseSelector:
                 for pc in prereq_courses:
                     if pc.unique_course_code not in selected_codes:
                         offered = offered_courses.get(pc.unique_course_code)
-                        # محاسبه امتیاز برای پیش‌نیاز
                         course_data = {
                             "id": pc.id,
                             "title": pc.course_name,
@@ -387,7 +336,7 @@ class CourseSelector:
                             "direct_requests": 0,
                         }
                         score, reasons = calculate_course_score(course_data, semester)
-                        score += 20  # امتیاز ویژه برای پیش‌نیازها
+                        score += 20
                         reasons.append("🔗 این درس به عنوان پیش‌نیاز دروس انتخابی اضافه شده است")
 
                         prereq_info = {
@@ -425,13 +374,10 @@ class CourseSelector:
                             selected_codes.add(pc.unique_course_code)
                         logger.info(f"➕ پیش‌نیاز اضافه شد: {pc.course_name} (از ترم {pc.term})")
 
-        # 8. مرتب‌سازی بر اساس امتیاز (نزولی)
         selected.sort(key=lambda x: x["score"], reverse=True)
 
-        # 9. محدودیت نهایی: فقط در صورت نیاز برش بزنیم
         if len(selected) > max_courses:
             logger.info(f"⚠️ تعداد دروس انتخابی ({len(selected)}) بیشتر از حد مجاز ({max_courses}) است")
-            # اولویت با دروس با must_select=True
             must_select_courses = [c for c in selected if c.get("must_select", False)]
             other_courses = [c for c in selected if not c.get("must_select", False)]
             other_courses.sort(key=lambda x: x["score"], reverse=True)
@@ -439,12 +385,10 @@ class CourseSelector:
             if len(selected) > max_courses:
                 selected = selected[:max_courses]
 
-        # 10. گزارش نهایی
         logger.info("=" * 60)
         logger.info(f"✅ تعداد دروس انتخاب‌شده نهایی: {len(selected)}")
         logger.info(f"❌ تعداد دروس ردشده: {len(rejected)}")
 
-        # نمایش ۱۵ درس اول برای بررسی
         logger.info("📋 ۱۵ درس برتر انتخاب‌شده:")
         logger.info("-" * 60)
         for i, course in enumerate(selected[:15], 1):
@@ -457,7 +401,6 @@ class CourseSelector:
         if len(selected) > 15:
             logger.info(f"  ... و {len(selected) - 15} درس دیگر")
 
-        # نمایش ۵ درس اول ردشده
         if rejected:
             logger.info("📋 ۵ درس برتر ردشده:")
             rejected_sorted = sorted(rejected, key=lambda x: x["score"], reverse=True)

@@ -5,6 +5,7 @@ from collections import defaultdict, Counter
 from typing import List, Dict, Optional, Tuple, Union
 
 from app.utils.helpers import get_day_name, slot_overlap, calculate_time_match_score
+from app.services.schedule.slot_times import DAY_MAP, normalize_term, time_to_minutes
 
 logger = logging.getLogger(__name__)
 
@@ -97,13 +98,8 @@ class ReportGenerator:
                 return dict(result)
             elif prefs and "instructor_code" in prefs[0]:
                 # time_prefs
-                from app.utils.helpers import get_day_name
-                day_map = {
-                    "شنبه": 0, "یکشنبه": 1, "دوشنبه": 2,
-                    "سه‌شنبه": 3, "سهشنبه": 3,
-                    "چهارشنبه": 4, "پنجشنبه": 5,
-                }
                 result = defaultdict(list)
+                # استفاده از DAY_MAP از slot_times
                 for pref in prefs:
                     if not isinstance(pref, dict):
                         continue
@@ -111,7 +107,7 @@ class ReportGenerator:
                     if not instructor:
                         continue
                     day_name = pref.get("day", "").strip().replace("\u200c", "").replace(" ", "")
-                    day_num = day_map.get(day_name)
+                    day_num = DAY_MAP.get(day_name)  # استفاده از DAY_MAP
                     if day_num is None:
                         continue
                     start = pref.get("start_time") or pref.get("start")
@@ -209,7 +205,7 @@ class ReportGenerator:
             # ---- بررسی strict (همانند time_scheduler) ----
             # در time_scheduler، strict = start_inside
             def start_inside(slot_start, pref_start, pref_end):
-                slot_s = time_to_minutes(slot_start)
+                slot_s = time_to_minutes(slot_start)  # استفاده از time_to_minutes از slot_times
                 pref_s = time_to_minutes(pref_start)
                 pref_e = time_to_minutes(pref_end)
                 return pref_s <= slot_s < pref_e
@@ -346,15 +342,8 @@ class ReportGenerator:
         # نرمال‌سازی instructor_data به فرمت استاندارد
         normalized_instructor = ReportGenerator._normalize_instructor_data(instructor_data)
 
-        DAY_LABELS = {
-            1: "شنبه",
-            2: "یکشنبه",
-            3: "دوشنبه",
-            4: "سه‌شنبه",
-            5: "چهارشنبه",
-            6: "پنجشنبه",
-            7: "جمعه",
-        }
+        # DAY_LABELS با استفاده از DAY_MAP (معکوس)
+        DAY_LABELS = {v: k for k, v in DAY_MAP.items()}  # معکوس کردن نگاشت
 
         def safe_text(value, default="نامشخص") -> str:
             if value is None:
@@ -411,36 +400,29 @@ class ReportGenerator:
             return ""
 
         def get_display_day(value) -> str:
-            zero_based_days = {
-                0: "شنبه",
-                1: "یکشنبه",
-                2: "دوشنبه",
-                3: "سه‌شنبه",
-                4: "چهارشنبه",
-                5: "پنجشنبه",
-                6: "جمعه",
-            }
-            one_based_days = {
-                1: "شنبه",
-                2: "یکشنبه",
-                3: "دوشنبه",
-                4: "سه‌شنبه",
-                5: "چهارشنبه",
-                6: "پنجشنبه",
-                7: "جمعه",
-            }
+            # استفاده از DAY_MAP برای نمایش نام روز
             if value is None:
                 return "نامشخص"
             if isinstance(value, bool):
                 return "نامشخص"
             if isinstance(value, int):
-                return zero_based_days.get(value, str(value))
+                # پیدا کردن نام روز از DAY_MAP با جستجوی معکوس
+                for day_name, day_num in DAY_MAP.items():
+                    if day_num == value:
+                        return day_name
+                return str(value)
             value_text = str(value).strip()
             if not value_text:
                 return "نامشخص"
             if value_text.isdigit():
                 numeric_day = int(value_text)
-                return zero_based_days.get(numeric_day, one_based_days.get(numeric_day, value_text))
+                for day_name, day_num in DAY_MAP.items():
+                    if day_num == numeric_day:
+                        return day_name
+                return value_text
+            # اگر خودش نام روز است، آن را برگردان
+            if value_text in DAY_MAP:
+                return value_text
             return value_text
 
         def get_instructor_name(instructor_code, item: Optional[Dict] = None) -> str:
@@ -621,14 +603,3 @@ class ReportGenerator:
                 logger.info(f"   ... و {len(assigned) - 20} تخصیص دیگر")
 
         logger.info("=" * 100)
-
-
-# ============================================================
-# تابع کمکی time_to_minutes (برای استفاده در این ماژول)
-# ============================================================
-def time_to_minutes(t: str) -> int:
-    try:
-        h, m = map(int, t.split(':'))
-        return h * 60 + m
-    except:
-        return 0

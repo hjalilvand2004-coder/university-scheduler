@@ -1,12 +1,16 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File, Depends
+from fastapi import APIRouter, HTTPException, UploadFile, File, Depends, Query
 from sqlalchemy.orm import Session
 import pandas as pd
 from io import BytesIO
 import re
 import logging
+from typing import Optional
 
 from app.core.database import get_db
 from app.models.time_preference import TimePreference
+
+# ===== وارد کردن توابع از فایل مرجع اسلات‌ها =====
+from app.services.schedule.slot_times import get_slots, normalize_term
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/time-preferences", tags=["Time Preferences"])
@@ -31,6 +35,18 @@ def clean_record(record: dict) -> dict:
         else:
             cleaned[key] = value
     return cleaned
+
+def validate_time_slot(start: str, end: str, term: str, units: int = 2) -> bool:
+    """
+    بررسی اینکه زمان شروع و پایان با یکی از اسلات‌های استاندارد برای ترم و واحد داده شده مطابقت دارد.
+    """
+    try:
+        slots_data = get_slots(term=term, units=units)
+        valid_slots = [(item['start'], item['end']) for item in slots_data.get('slots', [])]
+        return (start, end) in valid_slots
+    except Exception:
+        # اگر ترم نامعتبر باشد یا خطایی رخ دهد، اعتبارسنجی را انجام نمی‌دهیم (اجازه داده شود)
+        return True
 
 # ============================================
 # CRUD
@@ -69,12 +85,26 @@ async def delete(id: int, db: Session = Depends(get_db)):
     return {"message": "رکورد با موفقیت حذف شد"}
 
 # ============================================
-# بارگذاری اکسل
+# بارگذاری اکسل (با اعتبارسنجی اسلات)
 # ============================================
 
 @router.post("/upload")
-async def upload_excel(file: UploadFile = File(...), db: Session = Depends(get_db)):
+async def upload_excel(
+    file: UploadFile = File(...),
+    term: str = Query("mehr", description="ترم جاری: mehr, bahman, summer"),
+    db: Session = Depends(get_db)
+):
+    """
+    بارگذاری فایل اکسل حاوی ترجیحات زمانی اساتید.
+    زمان‌های شروع و پایان با اسلات‌های استاندارد ترم جاری اعتبارسنجی می‌شوند.
+    """
     try:
+        # نرمال‌سازی ترم
+        try:
+            canonical_term = normalize_term(term)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=f"ترم نامعتبر: {str(e)}")
+
         contents = await file.read()
         df = pd.read_excel(BytesIO(contents))
         df.columns = [normalize_column_name(col) for col in df.columns]
@@ -94,7 +124,7 @@ async def upload_excel(file: UploadFile = File(...), db: Session = Depends(get_d
             "یوزرنیم استاد": "instructor_username",
             "زمان شروع": "start_time",
             "گروه زمانی": "time_group",
-            "اولویت": "priority"  # ← اضافه شود
+            "اولویت": "priority"  # اضافه شده
         }
 
         required_cols = ["روز", "استاد", "زمان شروع", "زمان پایان"]
@@ -128,6 +158,21 @@ async def upload_excel(file: UploadFile = File(...), db: Session = Depends(get_d
                     errors.append(f"ردیف {idx}: روز یا نام استاد خالی است")
                     continue
 
+                # ===== اعتبارسنجی زمان با اسلات‌های استاندارد =====
+                start_time = data.get("start_time")
+                end_time = data.get("end_time")
+                if start_time and end_time:
+                    # برای اعتبارسنجی، فرض می‌کنیم واحد درس ۲ است (می‌توان از فیلد دیگر استفاده کرد)
+                    # اما برای دقت بیشتر، اگر فیلد "واحد" در اکسل وجود داشت، می‌توان از آن استفاده کرد.
+                    units = 2  # پیش‌فرض
+                    if not validate_time_slot(start_time, end_time, canonical_term, units):
+                        errors.append(
+                            f"ردیف {idx}: زمان {start_time}-{end_time} با اسلات‌های استاندارد ترم {term} "
+                            f"برای {units} واحد مطابقت ندارد"
+                        )
+                        continue
+
+                # افزودن رکورد
                 db.add(TimePreference(**data))
                 added += 1
             except Exception as e:

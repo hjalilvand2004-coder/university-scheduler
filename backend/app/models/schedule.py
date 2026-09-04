@@ -17,6 +17,7 @@ class ScheduledClass(Base):
     # اطلاعات استاد
     instructor_id = Column(Integer, ForeignKey("instructors.id"))
     instructor_name = Column(String(100))
+    instructor_code = Column(String(50))  # <-- جدید: کد استاد برای تطابق
 
     # اطلاعات کلاس
     room_id = Column(Integer, ForeignKey("rooms.id"))
@@ -50,3 +51,6 @@ class ScheduledClass(Base):
 
     # شناسه سناریو (برای تشخیص سناریوهای مختلف)
     scenario_id = Column(Integer, default=1)
+
+    # ===== اضافه شده: شناسه سبد دروس =====
+    basket_id = Column(Integer, nullable=True)  # یا ForeignKey("baskets.id") در صورت وجود جدول baskets

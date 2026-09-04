@@ -1,5 +1,5 @@
 // frontend/src/pages/Dashboard.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Sidebar from "../components/Sidebar";
 import BaseInfoPages from "./BaseInfoPages";
 import SchedulePages from "./SchedulePages";
@@ -60,7 +60,7 @@ const DEFAULT_LEVELS = ["پیوسته 1394", "پیوسته 1403", "ناپیوس�
 
 export default function Dashboard() {
   // ===== وضعیت‌های عمومی =====
-  const [activePage, setActivePage] = useState("basket-list"); // صفحه پیش‌فرض: لیست سبدها
+  const [activePage, setActivePage] = useState("basket-list");
   const [semester, setSemester] = useState("mehr");
   const [loading, setLoading] = useState(false);
   const [schedule, setSchedule] = useState(null);
@@ -595,7 +595,6 @@ export default function Dashboard() {
 
   const handleBasketCreated = (basketId) => {
     if (basketId === null) {
-      // کاربر از دکمه "بازگشت به لیست سبدها" استفاده کرده است
       setActivePage("basket-list");
       setCurrentBasketId(null);
     } else {
@@ -603,11 +602,12 @@ export default function Dashboard() {
     }
   };
 
-  const handleProcessSchedule = async () => {
+  const handleProcessSchedule = useCallback(async () => {
     if (!basketData) return alert("ابتدا سبد دروس را شناسایی کنید.");
     setProcessLoading(true);
     try {
       const result = await processSchedule({ basket: basketData });
+      console.log("📋 نتیجه زمان‌بندی:", result);
       setInstructorTimeData(result);
       alert(`زمان‌بندی انجام شد. ${result.assigned?.length || 0} کلاس تخصیص یافت، ${result.unassigned?.length || 0} کلاس بدون استاد باقی ماند.`);
     } catch (e) {
@@ -616,16 +616,22 @@ export default function Dashboard() {
     } finally {
       setProcessLoading(false);
     }
-  };
+  }, [basketData]);
 
-  const handleManualAssignComplete = (updatedData) => {
+  const handleManualAssignComplete = useCallback((updatedData) => {
     console.log("📋 تخصیص دستی تکمیل شد:", updatedData);
     if (updatedData && typeof updatedData === "object") {
       setInstructorTimeData(updatedData);
+    } else {
+      console.warn("داده‌های تخصیص دستی نامعتبر:", updatedData);
     }
-  };
+  }, []);
 
-  const handleNextToRooms = () => {
+  const handleNextToRooms = useCallback(() => {
+    if (!instructorTimeData) {
+      alert("لطفاً ابتدا زمان‌بندی را انجام دهید.");
+      return;
+    }
     const unassignedCount = instructorTimeData?.unassigned?.length || 0;
     if (unassignedCount > 0) {
       const confirmMsg = `${unassignedCount} کلاس بدون استاد باقی مانده است. آیا مطمئن هستید که می‌خواهید به مرحله بعد بروید؟`;
@@ -634,15 +640,30 @@ export default function Dashboard() {
       }
     }
     setActivePage("room-allocation");
-  };
+  }, [instructorTimeData]);
 
-  const handleProcessRooms = async () => {
-    if (!instructorTimeData) return alert("ابتدا زمان‌بندی را انجام دهید.");
+  // === اصلاح شده: تابع handleProcessRooms با دریافت پارامترهای کامل ===
+  const handleProcessRooms = useCallback(async (params) => {
+    const { schedule, workflowId: wfId, semester: sem, year } = params || {};
+
+    if (!schedule || schedule.length === 0) {
+      alert("برنامه زمان‌بندی خالی است.");
+      return;
+    }
+    if (!wfId) {
+      alert("شناسه workflow موجود نیست. لطفاً ابتدا زمان‌بندی را انجام دهید.");
+      return;
+    }
     setProcessLoading(true);
     try {
-      const allClasses = instructorTimeData.all || instructorTimeData.assigned || [];
-      const result = await processRooms({ schedule: allClasses });
-      setRoomAllocationData(result.allocated || result);
+      const result = await processRooms({
+        schedule: schedule,
+        workflowId: wfId,
+        semester: sem || "mehr",
+        year: year || "1403"
+      });
+      console.log("🏢 نتیجه تخصیص اتاق:", result);
+      setRoomAllocationData(result.allocated || result.data || result);
       alert("تخصیص اتاق انجام شد.");
     } catch (e) {
       console.error("خطا در تخصیص اتاق:", e);
@@ -650,9 +671,9 @@ export default function Dashboard() {
     } finally {
       setProcessLoading(false);
     }
-  };
+  }, []);
 
-  const handleProcessOptimize = async () => {
+  const handleProcessOptimize = useCallback(async () => {
     if (!roomAllocationData) return alert("ابتدا تخصیص اتاق را انجام دهید.");
     setProcessLoading(true);
     try {
@@ -665,24 +686,41 @@ export default function Dashboard() {
     } finally {
       setProcessLoading(false);
     }
-  };
+  }, [roomAllocationData]);
 
-  const handleClearSchedule = () => setInstructorTimeData(null);
-  const handleClearRooms = () => setRoomAllocationData(null);
-  const handleClearOptimize = () => setOptimizedData(null);
+  const handleClearSchedule = useCallback(() => {
+    setInstructorTimeData(null);
+  }, []);
+
+  const handleClearRooms = useCallback(() => {
+    setRoomAllocationData(null);
+  }, []);
+
+  const handleClearOptimize = useCallback(() => {
+    setOptimizedData(null);
+  }, []);
+
+  // ============================================================
+  // تابع جدید: دریافت داده‌های زمان‌بندی از RoomAllocationPage (برای همگام‌سازی)
+  // ============================================================
+  const handleInstructorDataLoaded = useCallback((data) => {
+    console.log("📥 داده‌های زمان‌بندی از RoomAllocationPage دریافت شد:", data);
+    if (data && typeof data === "object") {
+      setInstructorTimeData(data);
+    }
+  }, []);
 
   // ============================================================
   // تابع هدایت به لیست سبدها (برای استفاده در SchedulePages و InstructorTimePage)
   // ============================================================
-  const handleNavigateToBasketList = () => {
+  const handleNavigateToBasketList = useCallback(() => {
     setActivePage("basket-list");
-  };
+  }, []);
 
   // ============================================================
   // رندر محتوای اصلی
   // ============================================================
   const renderContent = () => {
-    // ===== صفحه‌ی جدید: لیست سبدها =====
     if (activePage === "basket-list") {
       return (
         <BasketListPage
@@ -698,7 +736,6 @@ export default function Dashboard() {
       );
     }
 
-    // صفحات اطلاعات پایه
     const basePages = [
       "unique-courses",
       "offered-courses",
@@ -759,7 +796,6 @@ export default function Dashboard() {
       );
     }
 
-    // صفحات تولید برنامه
     const schedulePages = ["basket", "instructor-time", "room-allocation", "optimization", "schedule"];
     if (schedulePages.includes(activePage)) {
       return (
@@ -802,12 +838,12 @@ export default function Dashboard() {
           timePreferences={timePreferences}
           onNextToRooms={handleNextToRooms}
           onManualAssignComplete={handleManualAssignComplete}
-          onNavigateToBasketList={handleNavigateToBasketList} // <-- اضافه شد
+          onNavigateToBasketList={handleNavigateToBasketList}
+          onInstructorDataLoaded={handleInstructorDataLoaded}
         />
       );
     }
 
-    // صفحه اصلی داشبورد
     return (
       <DashboardHome
         uniqueCourses={uniqueCourses}
@@ -834,7 +870,6 @@ export default function Dashboard() {
           <h1>سامانه هوشمند برنامه‌ریزی درسی</h1>
           <div className="header-info">
             <span>ترم: {semester === "mehr" ? "مهر" : "بهمن"}</span>
-            {/* دکمه‌ی موقت برای رفتن به لیست سبدها */}
             <button
               onClick={() => setActivePage("basket-list")}
               style={{

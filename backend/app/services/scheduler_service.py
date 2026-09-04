@@ -1,3 +1,5 @@
+# app/services/schedule_generation.py (یا هر نام دیگر)
+
 from sqlalchemy.orm import Session
 from typing import List, Dict, Any, Optional
 import json
@@ -22,10 +24,14 @@ from app.services.explanation_service import explain_scheduled_class
 from app.services.scoring_service import Semester
 from app.schemas.course import Course, Instructor, Room, TimeSlot, CourseType
 
+# === واردات از فایل مرجع اسلات‌های زمانی ===
+from app.services.schedule.slot_times import SCHEDULES, get_slots, normalize_term, time_to_minutes
+
 logger = logging.getLogger(__name__)
 
 
 def _serialize_course_info(course_info: Dict[str, Any], keep_score: bool = True) -> Dict[str, Any]:
+    # ... (همان کد قبلی)
     result = {}
     for key, value in course_info.items():
         if key == "offered_course":
@@ -52,16 +58,23 @@ def generate_schedule_from_db(
         semester: str,
         levels: Optional[List[str]] = None,
         year: str = "1403",
-        max_groups_per_course: int = 1,  # ← کاهش به ۱ (قبلاً ۲ بود)
-        demand_threshold: int = 15,  # ← افزایش آستانه
+        max_groups_per_course: int = 1,
+        demand_threshold: int = 15,
         number_of_scenarios: int = 3,
-        max_courses: int = 60  # ← کاهش به ۶۰ (قبلاً ۱۲۰ بود)
+        max_courses: int = 60
 ) -> Dict[str, Any]:
     try:
         logger.info(f"شروع تولید برنامه - نیمسال: {semester}, مقاطع: {levels}, max_courses: {max_courses}")
 
-        semester_enum = Semester.MEHR if semester == "mehr" else Semester.BAHMAN
+        # ---- تعیین ترم استاندارد برای استفاده در slot_times ----
+        try:
+            term_key = normalize_term(semester)  # "semester_1" یا "semester_2" یا "summer"
+        except ValueError:
+            logger.warning(f"ترم '{semester}' نامعتبر است، از پیش‌فرض 'mehr' استفاده می‌شود.")
+            term_key = "semester_1"
 
+        # انتخاب دروس
+        semester_enum = Semester.MEHR if semester == "mehr" else Semester.BAHMAN
         selector = CourseSelector(db)
         selected_courses, rejected_courses = selector.select_courses(
             semester=semester_enum,
@@ -128,9 +141,7 @@ def generate_schedule_from_db(
 
                 course_id = sc["term_course_id"] if not offered else offered.id
                 unique_code = offered.unique_code if offered else sc.get("unique_course_code", "")
-
-                # استخراج تعداد واحد از dictionary (اگر موجود باشد)
-                units = sc.get("units", 2)  # پیش‌فرض ۲ واحد
+                units = sc.get("units", 2)
 
                 course_obj = Course(
                     id=course_id,
@@ -149,7 +160,7 @@ def generate_schedule_from_db(
                     chart_required=True,
                     preferred_days=[],
                     preferred_slots=[],
-                    units=units,  # ← اضافه کردن units به مدل Course
+                    units=units,
                 )
                 courses.append(course_obj)
                 if unique_code:
@@ -228,7 +239,7 @@ def generate_schedule_from_db(
             )
             instructors.append(instructor_obj)
 
-        # ===== 2.4 استاد مجازی برای دروس بدون استاد =====
+        # ===== 2.4 استاد مجازی =====
         courses_without_instructor = set(all_course_ids)
         for instructor in instructors:
             for cid in instructor.qualified_course_ids:
@@ -277,60 +288,38 @@ def generate_schedule_from_db(
 
         logger.info(f"تعداد اتاق‌ها: {len(rooms)}")
 
-        # ===== 2.6 زمان‌ها (بر اساس فرمول جدید) =====
-        logger.info("ایجاد زمان‌ها بر اساس واحد درس...")
+        # ================================================================
+        # 2.6 تولید اسلات‌های زمانی بر اساس فایل مرجع slot_times
+        # ================================================================
+        logger.info("ایجاد زمان‌ها بر اساس فایل مرجع slot_times...")
+
+        # دریافت برنامه کامل ترم
+        schedule_dict = SCHEDULES.get(term_key)
+        if not schedule_dict:
+            logger.warning(f"ترم {term_key} در SCHEDULES یافت نشد، استفاده از semester_1")
+            schedule_dict = SCHEDULES["semester_1"]
+
+        days = [0, 1, 2, 3, 4, 5]  # شنبه تا پنجشنبه
         slots = []
         slot_id = 1
-        days = [0, 1, 2, 3, 4, 5]  # شنبه تا پنجشنبه
 
-        # شیفت‌های استاندارد برای دروس ۲ واحدی
-        two_unit_slots = [
-            ("07:30", "09:15"),
-            ("09:16", "11:00"),
-            ("11:01", "12:45"),
-            ("13:00", "14:45"),
-            ("14:46", "16:30"),
-            ("16:31", "18:15"),
-            ("18:16", "20:00"),
-        ]
+        # برای هر تعداد واحد (2، 3، 4) اسلات‌ها را تولید می‌کنیم
+        for units, slot_list in schedule_dict.items():
+            slot_type = f"{units}_unit"
+            for slot_str in slot_list:
+                start, end = slot_str.split("-")
+                for day in days:
+                    slot_obj = TimeSlot(
+                        id=slot_id,
+                        day=day,
+                        start=start,
+                        end=end,
+                        slot_type=slot_type  # optional
+                    )
+                    slots.append(slot_obj)
+                    slot_id += 1
 
-        # شیفت‌های استاندارد برای دروس ۳ واحدی
-        three_unit_slots = [
-            ("07:30", "10:10"),
-            ("10:11", "12:50"),
-            ("13:00", "15:30"),
-            ("15:31", "18:00"),
-            ("18:01", "20:30"),
-        ]
-
-        # برای هر روز، تمام شیفت‌ها را اضافه می‌کنیم
-        for day in days:
-            # ابتدا شیفت‌های ۲ واحدی
-            for start, end in two_unit_slots:
-                slot_obj = TimeSlot(
-                    id=slot_id,
-                    day=day,
-                    start=start,
-                    end=end,
-                    slot_type="2_unit"  # اضافه کردن نوع شیفت
-                )
-                slots.append(slot_obj)
-                slot_id += 1
-
-            # سپس شیفت‌های ۳ واحدی
-            for start, end in three_unit_slots:
-                slot_obj = TimeSlot(
-                    id=slot_id,
-                    day=day,
-                    start=start,
-                    end=end,
-                    slot_type="3_unit"  # اضافه کردن نوع شیفت
-                )
-                slots.append(slot_obj)
-                slot_id += 1
-
-        logger.info(
-            f"تعداد زمان‌ها: {len(slots)} (شامل {len(two_unit_slots) * len(days)} شیفت ۲ واحدی و {len(three_unit_slots) * len(days)} شیفت ۳ واحدی)")
+        logger.info(f"تعداد زمان‌ها: {len(slots)} (بر اساس ترم {term_key})")
 
         # ===== 3. اجرای حل‌کننده =====
         logger.info("اجرای حل‌کننده OR-Tools...")
@@ -341,6 +330,7 @@ def generate_schedule_from_db(
                 rooms=rooms,
                 slots=slots,
                 max_groups_per_course=max_groups_per_course,
+                term=term_key  # ارسال ترم به حل‌کننده (در صورت پشتیبانی)
             )
             logger.info(f"وضعیت حل: {solution.get('status')}")
             logger.info(f"تعداد کلاس‌های تولیدشده: {len(solution.get('classes', []))}")
@@ -397,9 +387,7 @@ def generate_schedule_from_db(
                                 break
                         cohort_list = [f"{level}-{term}"] if level and term else []
 
-                    # ===== محاسبه زمان پایان بر اساس واحد درس =====
-                    units = 2  # پیش‌فرض
-                    # پیدا کردن واحد درس از selected_courses
+                    units = 2
                     for sc in selected_courses:
                         if sc["term_course_id"] == item.get("course_id") or (
                                 sc.get("offered_course") and sc["offered_course"].id == item.get("course_id")
@@ -410,21 +398,36 @@ def generate_schedule_from_db(
                     start_time = item.get("start", "")
                     end_time = item.get("end", "")
 
-                    # اگر زمان پایان موجود نباشد، بر اساس واحد محاسبه می‌کنیم
+                    # اگر زمان پایان موجود نباشد، از اسلات‌های مرجع محاسبه می‌کنیم
                     if not end_time and start_time:
-                        from datetime import datetime, timedelta
+                        # سعی می‌کنیم از slot_times زمان پایان را پیدا کنیم
                         try:
-                            start_dt = datetime.strptime(start_time, "%H:%M")
-                            if units == 2:
-                                duration = timedelta(minutes=105)  # 1:45
-                            else:
-                                # برای ۳ واحدی: اگر قبل از ۱۳ باشد ۱۶۰ دقیقه، وگرنه ۱۵۰ دقیقه
-                                if start_dt < datetime.strptime("13:00", "%H:%M"):
-                                    duration = timedelta(minutes=160)  # 2:40
-                                else:
-                                    duration = timedelta(minutes=150)  # 2:30
-                            end_dt = start_dt + duration
-                            end_time = end_dt.strftime("%H:%M")
+                            # برای هر اسلات در SCHEDULES جستجو می‌کنیم
+                            found = False
+                            for unit_slots in schedule_dict.values():
+                                for slot_str in unit_slots:
+                                    s, e = slot_str.split("-")
+                                    if s == start_time:
+                                        end_time = e
+                                        found = True
+                                        break
+                                if found:
+                                    break
+                            if not found:
+                                # محاسبه تقریبی
+                                from datetime import datetime, timedelta
+                                start_dt = datetime.strptime(start_time, "%H:%M")
+                                if units == 2:
+                                    duration = timedelta(minutes=105)
+                                elif units == 3:
+                                    if start_dt < datetime.strptime("13:00", "%H:%M"):
+                                        duration = timedelta(minutes=160)
+                                    else:
+                                        duration = timedelta(minutes=150)
+                                else:  # 4 واحد
+                                    duration = timedelta(minutes=200)  # تقریبی
+                                end_dt = start_dt + duration
+                                end_time = end_dt.strftime("%H:%M")
                         except:
                             end_time = item.get("end", "")
 
@@ -492,7 +495,8 @@ def generate_schedule_from_db(
                     selected_courses=selected_courses,
                     semester=semester,
                     year=year,
-                    max_groups_per_course=max_groups_per_course
+                    max_groups_per_course=max_groups_per_course,
+                    term_key=term_key
                 )
             else:
                 logger.info("به دلیل infeasible بودن برنامه اصلی، سناریوهای جایگزین تولید نشدند.")
@@ -585,7 +589,8 @@ def generate_alternative_scenarios(
         selected_courses: List[Dict],
         semester: str,
         year: str,
-        max_groups_per_course: int = 1
+        max_groups_per_course: int = 1,
+        term_key: str = "semester_1"
 ) -> List[Dict]:
     scenarios = []
     modes = [
@@ -606,7 +611,8 @@ def generate_alternative_scenarios(
                 rooms=rooms,
                 slots=slots,
                 max_groups_per_course=max_groups_per_course,
-                objective_mode=mode["objective_mode"]
+                objective_mode=mode["objective_mode"],
+                term=term_key
             )
             scenarios.append({
                 "name": mode["name"],

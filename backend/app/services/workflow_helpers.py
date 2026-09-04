@@ -1,3 +1,5 @@
+# app/services/workflow_helpers.py
+
 import re
 from typing import List, Dict, Any
 
@@ -12,6 +14,12 @@ BOTTLENECK_COURSES = {
 def parse_row_codes(row_codes_str: str) -> List[int]:
     """
     تبدیل رشته‌ی کدهای ردیف (مثل '1,2' یا '21، 24') به لیست اعداد
+
+    Args:
+        row_codes_str: رشته شامل کدهای ردیف
+
+    Returns:
+        لیست اعداد صحیح
     """
     if not row_codes_str:
         return []
@@ -28,6 +36,12 @@ def calculate_final_score(course: Dict[str, Any]) -> int:
     - میانگین مهر: به اندازه خود عدد صحیح
     - میانگین بهمن: نصف عدد صحیح (تقسیم صحیح بر ۲)
     - انتخاب مدیر: ۱۰ امتیاز
+
+    Args:
+        course: دیکشنری اطلاعات درس
+
+    Returns:
+        امتیاز نهایی (عدد صحیح)
     """
     score = 0
     if course.get("from_termic"):
@@ -44,7 +58,15 @@ def calculate_final_score(course: Dict[str, Any]) -> int:
 
 
 def is_bottleneck(course: Dict[str, Any]) -> bool:
-    """بررسی گلوگاهی بودن درس"""
+    """
+    بررسی گلوگاهی بودن درس بر اساس نام یا کد یکتا.
+
+    Args:
+        course: دیکشنری اطلاعات درس
+
+    Returns:
+        True اگر درس گلوگاهی باشد، در غیر این صورت False
+    """
     name = course.get("course_name", "")
     code = course.get("unique_code", "")
     return name in BOTTLENECK_COURSES or code in BOTTLENECK_COURSES

@@ -24,8 +24,8 @@ export default function SchedulePages({
   optimizedData,
   processLoading,
   onBasketComplete,
-  onBasketCreated,        // جدید: برای دریافت شناسه سبد از BasketPage
-  basketId,              // جدید: شناسه سبد فعلی برای ارسال به BasketPage و سایر صفحات
+  onBasketCreated,
+  basketId,
   onProcessSchedule,
   onProcessRooms,
   onProcessOptimize,
@@ -45,15 +45,14 @@ export default function SchedulePages({
   onPrevStep,
   onFinalize,
   onUpdateStepData,
-  // ===== Props مورد نیاز برای InstructorTimePage =====
   teachingPreferences = [],
   timePreferences = [],
-  // ===== Prop جدید برای رفتن به صفحه تخصیص اتاق =====
   onNextToRooms = null,
-  // ===== Props اضافی برای تخصیص اتاق و بهینه‌سازی (در صورت نیاز) =====
+  onNextToOptimization = null,
   onManualAssignComplete = null,
-  // ===== Prop جدید برای هدایت به لیست سبدها (از InstructorTimePage) =====
   onNavigateToBasketList = null,
+  // ===== Prop جدید برای همگام‌سازی داده‌های زمان‌بندی =====
+  onInstructorDataLoaded = null,
 }) {
   switch (activePage) {
     case "basket":
@@ -86,7 +85,7 @@ export default function SchedulePages({
           timePreferences={timePreferences}
           basketId={basketId}
           onManualAssignComplete={onManualAssignComplete}
-          onNavigateToBasketList={onNavigateToBasketList} // <-- اضافه شد
+          onNavigateToBasketList={onNavigateToBasketList}
         />
       );
 
@@ -98,8 +97,11 @@ export default function SchedulePages({
           onProcess={onProcessRooms}
           onClear={onClearRooms}
           loading={processLoading}
-          onNext={() => {}}
+          onNext={onNextToOptimization || (() => {})}
           basketId={basketId}
+          workflowId={workflowId}
+          // ===== ارسال prop جدید به RoomAllocationPage =====
+          onInstructorDataLoaded={onInstructorDataLoaded}
         />
       );
 

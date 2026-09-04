@@ -16,9 +16,14 @@ from app.api.routes_term_courses import router as term_courses_router
 from app.api.routes_teaching_preferences import router as teaching_preferences_router
 from app.api.routes_time_preferences import router as time_preferences_router
 from app.api.routes_workflow import router as workflow_router
-from app.api.routes_baskets import router as baskets_router  # اضافه شد
-from app.api import test_report
+from app.api.routes_baskets import router as baskets_router
+from app.api.routes_room_allocation import router as room_allocation_router
+from app.api.routes_optimization import router as optimization_router
 
+# ===== اضافه کردن روتر اسلات‌های زمانی =====
+from app.services.schedule.slot_times import router as slot_times_router
+
+from app.api import test_report
 
 # تنظیم لاگر
 logging.basicConfig(level=logging.INFO)
@@ -72,12 +77,13 @@ app.include_router(teaching_preferences_router, tags=["Teaching Preferences"])
 app.include_router(time_preferences_router, tags=["Time Preferences"])
 app.include_router(schedule_router, tags=["Schedule"])
 app.include_router(workflow_router, tags=["Workflow"])
-app.include_router(baskets_router, prefix="/api", tags=["Baskets"])  # ثبت روتر سبدها
-
-from app.api import test_report
-
-# بعد از ایجاد app
+app.include_router(baskets_router, prefix="/api", tags=["Baskets"])
+app.include_router(optimization_router, prefix="/api")
+app.include_router(room_allocation_router)
 app.include_router(test_report.router)
+
+# ===== اضافه کردن روتر اسلات‌های زمانی =====
+app.include_router(slot_times_router)
 
 # ===== اندپوینت ریشه =====
 @app.get("/")

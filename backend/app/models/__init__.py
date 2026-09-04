@@ -10,3 +10,4 @@ from app.models.teaching_preference import TeachingPreference
 from app.models.time_preference import TimePreference
 from app.models.workflow import ScheduleWorkflow
 from app.models.basket_item import BasketItem
+from .unassigned_class import UnassignedClass

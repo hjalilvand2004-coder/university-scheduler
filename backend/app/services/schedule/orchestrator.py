@@ -1,9 +1,10 @@
 # app/services/schedule/orchestrator.py
 # هماهنگ‌کننده اصلی مراحل (ارکستراسیون) با لاگ‌های مقایسه‌ای و کنترل نهایی
+# نسخه‌ی به‌روز شده برای پشتیبانی از ترم (term) و استفاده از slot_times
 
 import logging
 from collections import defaultdict
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session
 
 from app.services.schedule.step_logger import StepLogger
@@ -31,7 +32,17 @@ class ScheduleOrchestrator:
         self.internship_assigner = InternshipAssigner()
         self.report_generator = ReportGenerator()
 
-    def process(self, basket: List[Dict]) -> Dict[str, Any]:
+    def process(self, basket: List[Dict], term: Optional[str] = None) -> Dict[str, Any]:
+        """
+        اجرای فرایند کامل زمان‌بندی.
+
+        Args:
+            basket: لیست دروس (سبد)
+            term: شناسه ترم (مثلاً 'mehr', 'bahman', 'summer'). اگر داده نشود، از term_key اولین درس استخراج می‌شود.
+
+        Returns:
+            دیکشنری شامل نتایج تخصیص و مراحل
+        """
         if not basket:
             logger.warning("سبد دروس خالی است")
             return {"assigned": [], "unassigned": [], "all": [], "steps": self.logger.get_result()}
@@ -60,6 +71,35 @@ class ScheduleOrchestrator:
         except Exception as e:
             self.logger.fail_step(str(e))
             raise
+
+        # ============================================================
+        # تعیین ترم (اگر داده نشده باشد)
+        # ============================================================
+        if term is None:
+            # استخراج از اولین درس با term_key معتبر
+            for course in prepared_courses:
+                term_key = course.get("term_key")
+                if term_key:
+                    term = term_key
+                    logger.info(f"📌 ترم از داده‌ها استخراج شد: {term}")
+                    break
+            if term is None:
+                # اگر هیچ term_key نبود، پیش‌فرض semester_1 (مهر)
+                term = "semester_1"
+                logger.warning(f"⚠️ ترم مشخص نشد، پیش‌فرض: {term}")
+        else:
+            # اگر term داده شده، آن را به کلید استاندارد تبدیل می‌کنیم (اختیاری)
+            from app.services.schedule.slot_times import normalize_term
+            try:
+                term = normalize_term(term)
+                logger.info(f"📌 ترم ورودی پس از نرمال‌سازی: {term}")
+            except ValueError as e:
+                logger.error(f"❌ ترم نامعتبر: {term}. خطا: {e}")
+                # می‌توانیم از پیش‌فرض استفاده کنیم
+                term = "semester_1"
+                logger.warning(f"⚠️ استفاده از پیش‌فرض: {term}")
+
+        logger.info(f"🕒 ترم انتخاب‌شده برای زمان‌بندی: {term}")
 
         # ============================================================
         # مرحله ۲: بارگذاری اطلاعات اساتید (استفاده از متد load())
@@ -236,16 +276,17 @@ class ScheduleOrchestrator:
             raise
 
         # ============================================================
-        # مرحله ۵: زمان‌بندی کامل هر استاد (با امضای جدید)
+        # مرحله ۵: زمان‌بندی کامل هر استاد (با امضای جدید و ارسال term)
         # ============================================================
         self.logger.start_step("زمان‌بندی کامل به ازای هر استاد",
                                "برای هر استاد، با افزایش تدریجی تساهل، دروس را به طور متوازن در روزهای ترجیحی تخصیص می‌دهد")
         try:
-            # فراخوانی با پارامترهای نام‌دار و دریافت دیکشنری
+            # فراخوانی با پارامترهای نام‌دار و ارسال term
             schedule_result = self.time_scheduler.assign_full_schedule(
                 courses=assigned_regular_with_instructor,
                 instructor_data=instructor_data,
-                time_prefs=time_prefs
+                time_prefs=time_prefs,
+                term=term  # <-- اضافه شد
             )
             assigned_regular_complete = schedule_result.get("scheduled", [])
             unassigned_regular_no_time = schedule_result.get("unscheduled", [])

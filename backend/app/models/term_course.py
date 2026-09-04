@@ -5,16 +5,18 @@ class TermCourse(Base):
     __tablename__ = "term_courses"
 
     id = Column(Integer, primary_key=True, index=True)
-    level = Column(String(100))               # مقطع ارائه (مثلاً "پیوسته 1394")
-    term = Column(String(50))                 # ترم (مثلاً "ترم یک")
-    row_number = Column(Integer)              # ردیف
-    course_name = Column(String(200))         # نام درس
-    units = Column(Integer)                   # واحد
-    course_type = Column(String(50))          # نوع درس (اصلی، پایه، عمومی)
-    approximate_term = Column(Integer)        # ترم تقریبی (عدد)
-    description = Column(Text)                # توضیح (پیش‌نیازها و ...)
-    prerequisite_row_codes = Column(String(200))  # کد ردیف پیش‌نیازها (مثل "1,2")
-    corequisite_row_codes = Column(String(200))   # کد ردیف هم‌نیازها
-    unique_course_code = Column(String(50))   # کد درس یکتا
-    unique_course_name = Column(String(200))  # نام درس یکتا
-    year_identified = Column(String(20))      # سال شناسایی
+    level = Column(String(100))
+    term = Column(String(50))
+    row_number = Column(Integer)
+    course_name = Column(String(200))
+    units = Column(Integer)
+    course_type = Column(String(50))
+    approximate_term = Column(Integer)
+    description = Column(Text)
+    prerequisite_row_codes = Column(String(200))
+    corequisite_row_codes = Column(String(200))
+    unique_course_code = Column(String(50))
+    unique_course_name = Column(String(200))
+    year_identified = Column(String(20))
+    # ===== فیلد جدید =====
+    capacity = Column(Integer, default=0)  # ظرفیت درس

@@ -19,7 +19,7 @@
 #
 # نکته:
 # - بازه دقیق 12:00 تا 16:00 به 13:00 تا 17:00 تبدیل می‌شود.
-# - فقط از اسلات‌های ثابت TWO_UNIT_SLOTS و THREE_UNIT_SLOTS استفاده می‌شود.
+# - فقط از اسلات‌های تعریف‌شده در slot_times استفاده می‌شود (وابسته به ترم).
 # - سقف واحد استاد رعایت می‌شود.
 # - اولویت با دروس با واحد بیشتر است.
 
@@ -27,7 +27,7 @@ import logging
 from collections import defaultdict
 from typing import List, Dict, Tuple, Optional, Any, Union
 
-from app.utils.constants import TWO_UNIT_SLOTS, THREE_UNIT_SLOTS
+from app.services.schedule.slot_times import get_slots
 from app.utils.helpers import time_to_minutes, slot_overlap, get_day_name
 
 logger = logging.getLogger(__name__)
@@ -162,6 +162,7 @@ class TimeScheduler:
         courses: Optional[List[Dict]] = None,
         instructor_data: Optional[Union[List[Dict], Dict]] = None,
         time_prefs: Optional[Union[List[Dict], Dict]] = None,
+        term: str = "mehr",  # <-- پارامتر جدید: ترم مورد نظر
     ) -> Dict[str, List[Dict]]:
         """
         زمان‌بندی دروس دارای استاد.
@@ -170,6 +171,7 @@ class TimeScheduler:
             courses: فهرست درس‌ها که instructor_code دارند.
             instructor_data: اطلاعات استاد (لیست یا دیکشنری).
             time_prefs: مطلوبیت زمان استاد (لیست یا دیکشنری).
+            term: شناسه ترم (مثلاً 'mehr', 'bahman', 'summer').
 
         Returns:
             دیکشنری با کلیدهای 'scheduled' و 'unscheduled'
@@ -186,6 +188,7 @@ class TimeScheduler:
             courses_with_instructor=courses,
             time_prefs=normalized_time_prefs,
             instructor_data=normalized_instructor_data,
+            term=term,  # <-- ارسال ترم به تابع داخلی
         )
 
         return {"scheduled": assigned, "unscheduled": unassigned}
@@ -194,7 +197,8 @@ class TimeScheduler:
     def _assign_full_schedule_internal(
         courses_with_instructor: List[Dict],
         time_prefs: Dict,
-        instructor_data: Dict
+        instructor_data: Dict,
+        term: str,  # <-- پارامتر جدید
     ) -> Tuple[List[Dict], List[Dict]]:
         """
         زمان‌بندی دروس دارای استاد.
@@ -222,6 +226,9 @@ class TimeScheduler:
                     ...
                 }
 
+            term:
+                شناسه ترم (مثلاً 'mehr', 'bahman', 'summer')
+
         Returns:
             Tuple[List[Dict], List[Dict]]:
                 assigned, unassigned
@@ -234,8 +241,8 @@ class TimeScheduler:
         total_input = len(courses_with_instructor)
 
         logger.info(
-            "⏳ شروع زمان‌بندی برای %s درس با استاد مشخص",
-            total_input
+            "⏳ شروع زمان‌بندی برای %s درس با استاد مشخص (ترم: %s)",
+            total_input, term
         )
 
         assigned: List[Dict] = []
@@ -285,20 +292,32 @@ class TimeScheduler:
                 for occupied_start, occupied_end in occupied_slots
             )
 
+        # ============================================================
+        # تابع دریافت اسلات‌ها بر اساس ترم و تعداد واحد
+        # ============================================================
         def get_course_slots(course: Dict) -> List[Tuple[str, str]]:
             """
-            دریافت اسلات‌های ثابت مجاز برای درس.
+            دریافت اسلات‌های مجاز برای درس با توجه به ترم و تعداد واحد.
 
-            نکته مهم:
-            این تابع هیچ ساعت جدیدی، نظیر 15:31، تولید نمی‌کند.
-            اگر اسلات 15:31 لازم است، باید صراحتاً در constants تعریف شود.
+            این تابع از منبع واحد slot_times استفاده می‌کند.
             """
             units = get_course_units(course)
-
-            if units == 3:
-                return sort_slots(THREE_UNIT_SLOTS)
-
-            return sort_slots(TWO_UNIT_SLOTS)
+            try:
+                # دریافت لیست اسلات‌ها از slot_times
+                result = get_slots(term=term, units=units)
+                slots = [(item['start'], item['end']) for item in result['slots']]
+                return sort_slots(slots)
+            except ValueError as e:
+                logger.error(
+                    "خطا در دریافت اسلات برای ترم %s و واحد %s: %s",
+                    term, units, e
+                )
+                # Fallback: استفاده از اسلات‌های پیش‌فرض (نیمسال اول) برای جلوگیری از کرش
+                # (اگرچه بهتر است این حالت رخ ندهد)
+                logger.warning("استفاده از اسلات‌های پیش‌فرض (نیمسال اول) به عنوان جایگزین")
+                fallback_result = get_slots(term="mehr", units=units)
+                slots = [(item['start'], item['end']) for item in fallback_result['slots']]
+                return sort_slots(slots)
 
         def normalize_preference_window(
                 start: str,

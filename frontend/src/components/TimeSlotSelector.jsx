@@ -1,30 +1,74 @@
-// components/TimeSlotSelector.jsx
+// frontend/src/components/TimeSlotSelector.jsx
 import React, { useState, useEffect } from "react";
+import { scheduleApi } from "../api/scheduleApi";
 import "./TimeSlotSelector.css";
 
 const DAYS = ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه"];
-const TIME_GROUPS = [
-  { id: "morning", label: "صبح", start: "08:00", end: "12:00" },
-  { id: "afternoon", label: "ظهر", start: "12:00", end: "16:00" },
-  { id: "evening", label: "عصر", start: "16:00", end: "20:00" },
+const PERIOD_OPTIONS = [
+  { value: "", label: "همه بازه‌ها" },
+  { value: "morning", label: "صبح" },
+  { value: "afternoon", label: "بعدازظهر" },
+  { value: "evening", label: "عصر" },
 ];
 
-function TimeSlotSelector({ instructors, onChange, initialSelections = [] }) {
+function TimeSlotSelector({
+  instructors = [],
+  onChange,
+  initialSelections = [],
+  term = "mehr",           // ترم پیش‌فرض (می‌تواند از والد دریافت شود)
+  units = 2,               // تعداد واحد پیش‌فرض
+  period = "",             // فیلتر بازه (اختیاری)
+}) {
   const [selectedInstructor, setSelectedInstructor] = useState("");
   const [selections, setSelections] = useState([]);
   const [selectedDay, setSelectedDay] = useState(null);
 
+  // وضعیت مربوط به اسلات‌های دریافت‌شده از بک‌اند
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // هم‌گام‌سازی انتخاب‌های اولیه
   useEffect(() => {
     if (initialSelections.length > 0) {
       setSelections(initialSelections);
     }
   }, [initialSelections]);
 
+  // هرگاه انتخاب‌ها تغییر کنند، والد را مطلع می‌کنیم
   useEffect(() => {
     if (onChange) {
       onChange(selections);
     }
   }, [selections, onChange]);
+
+  // دریافت اسلات‌های معتبر از بک‌اند با تغییر ترم، واحد یا فیلتر بازه
+  useEffect(() => {
+    const fetchSlots = async () => {
+      if (!term || !units) return;
+      setLoading(true);
+      setError("");
+      try {
+        const response = await scheduleApi.searchSlots({
+          term,
+          units,
+          period: period || undefined, // اگر خالی باشد، undefined ارسال می‌شود
+        });
+        setAvailableSlots(response.data.slots || []);
+      } catch (err) {
+        console.error("خطا در دریافت اسلات‌ها:", err);
+        setError(err.response?.data?.detail || "خطا در دریافت زمان‌بندی");
+        setAvailableSlots([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSlots();
+  }, [term, units, period]);
+
+  // ----------------------------------------------
+  // توابع مدیریت انتخاب‌ها
+  // ----------------------------------------------
 
   const handleInstructorChange = (e) => {
     setSelectedInstructor(e.target.value);
@@ -34,13 +78,12 @@ function TimeSlotSelector({ instructors, onChange, initialSelections = [] }) {
     setSelectedDay(selectedDay === day ? null : day);
   };
 
-  const handleTimeGroupClick = (day, timeGroup) => {
+  const handleSlotClick = (day, slotObj) => {
     if (!selectedInstructor) {
       alert("لطفاً ابتدا استاد را انتخاب کنید.");
       return;
     }
 
-    // پیدا کردن استاد انتخاب‌شده
     const instructor = instructors.find(
       (inst) => (inst.code || inst.id) === selectedInstructor
     );
@@ -49,33 +92,34 @@ function TimeSlotSelector({ instructors, onChange, initialSelections = [] }) {
       return;
     }
 
-    // بررسی تکراری نبودن
+    // بررسی تکراری نبودن برای همان روز و همان اسلات
     const exists = selections.some(
-      (sel) => sel.day === day && sel.timeGroup === timeGroup.id
+      (sel) => sel.day === day && sel.slot === slotObj.slot
     );
     if (exists) {
-      alert("این بازه زمانی قبلاً انتخاب شده است.");
+      alert("این بازه زمانی برای این روز قبلاً انتخاب شده است.");
       return;
     }
 
-    // ساخت آبجکت با تمام فیلدهای مورد نیاز بک‌اند
+    // ساخت آبجکت انتخاب با استفاده از اطلاعات اسلات
     const newSelection = {
       day: day,
-      timeGroup: timeGroup.id,
-      start_time: timeGroup.start,
-      end_time: timeGroup.end,
-      time_group: timeGroup.label,
-      instructor_code: instructor.code,    // ← استفاده از code
+      slot: slotObj.slot,               // رشته مثل "07:30-09:15"
+      start_time: slotObj.start,
+      end_time: slotObj.end,
+      period: slotObj.period,           // "morning"/"afternoon"/"evening"
+      period_title: slotObj.period_title,
+      instructor_code: instructor.code || instructor.id,
       instructor_name: instructor.name,
       instructor_username: instructor.username || "",
       cooperation_type: instructor.cooperation_type || "",
       expert_group: instructor.group || "",
       priority: selections.length + 1,
-      status: true, // فعال
+      status: true,
     };
 
     setSelections([...selections, newSelection]);
-    setSelectedDay(null);
+    setSelectedDay(null); // پس از انتخاب، روز را ریست می‌کنیم
   };
 
   const removeSelection = (index) => {
@@ -87,13 +131,19 @@ function TimeSlotSelector({ instructors, onChange, initialSelections = [] }) {
     setSelections(reordered);
   };
 
+  // گروه‌بندی انتخاب‌ها بر اساس روز برای نمایش
   const groupedSelections = DAYS.reduce((acc, day) => {
     acc[day] = selections.filter((sel) => sel.day === day);
     return acc;
   }, {});
 
+  // ----------------------------------------------
+  // رندر
+  // ----------------------------------------------
+
   return (
     <div className="time-slot-selector">
+      {/* انتخاب استاد */}
       <div className="instructor-selector">
         <label>استاد:</label>
         <select
@@ -110,8 +160,13 @@ function TimeSlotSelector({ instructors, onChange, initialSelections = [] }) {
         </select>
       </div>
 
+      {/* نمایش وضعیت بارگذاری/خطا */}
+      {loading && <div className="loading-message">در حال بارگذاری اسلات‌ها...</div>}
+      {error && <div className="error-message">{error}</div>}
+
+      {/* تقویم هفتگی */}
       <div className="weekly-calendar">
-        <h4>روز مورد نظر را انتخاب کنید و سپس روی بازه زمانی کلیک کنید</h4>
+        <h4>روز مورد نظر را انتخاب کنید و سپس روی یک بازه زمانی کلیک کنید</h4>
         <div className="days-row">
           {DAYS.map((day) => (
             <button
@@ -125,32 +180,35 @@ function TimeSlotSelector({ instructors, onChange, initialSelections = [] }) {
         </div>
 
         {selectedDay && (
-          <div className="time-groups">
-            <p className="hint-text">روز {selectedDay} - روی یکی از بازه‌های زیر کلیک کنید:</p>
-            <div className="groups-row">
-              {TIME_GROUPS.map((group) => {
-                const alreadySelected = selections.some(
-                  (sel) => sel.day === selectedDay && sel.timeGroup === group.id
-                );
-                return (
-                  <button
-                    key={group.id}
-                    className={`time-group-btn ${alreadySelected ? "selected" : ""}`}
-                    onClick={() => handleTimeGroupClick(selectedDay, group)}
-                    disabled={alreadySelected}
-                  >
-                    <span className="group-label">{group.label}</span>
-                    <span className="group-time">
-                      {group.start} - {group.end}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+          <div className="time-slots">
+            <p className="hint-text">روز {selectedDay} – بازه‌های معتبر برای ترم و واحد انتخاب‌شده:</p>
+            {availableSlots.length === 0 ? (
+              <p className="empty-slots">هیچ اسلاتی برای این ترم و تعداد واحد وجود ندارد.</p>
+            ) : (
+              <div className="slots-grid">
+                {availableSlots.map((slotObj) => {
+                  const alreadySelected = selections.some(
+                    (sel) => sel.day === selectedDay && sel.slot === slotObj.slot
+                  );
+                  return (
+                    <button
+                      key={slotObj.slot}
+                      className={`slot-btn ${alreadySelected ? "selected" : ""}`}
+                      onClick={() => handleSlotClick(selectedDay, slotObj)}
+                      disabled={alreadySelected || !selectedInstructor}
+                    >
+                      <span className="slot-time">{slotObj.slot}</span>
+                      <span className="slot-period">{slotObj.period_title}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </div>
 
+      {/* لیست انتخاب‌های فعلی */}
       <div className="selections-list">
         <h4>انتخاب‌های فعلی</h4>
         {selections.length === 0 ? (
@@ -169,7 +227,7 @@ function TimeSlotSelector({ instructors, onChange, initialSelections = [] }) {
                       <div key={idx} className="selection-item">
                         <span className="priority-badge">{sel.priority}</span>
                         <span className="time-label">
-                          {sel.time_group} ({sel.start_time} - {sel.end_time})
+                          {sel.slot} ({sel.period_title})
                         </span>
                         <button
                           className="remove-btn"

@@ -1,5 +1,5 @@
 /* ============================================================
-   InstructorTimePage.css - نسخه کامل با رنگ‌بندی اصلاح‌شده
+   InstructorTimePage.css - نسخه بهینه‌شده با طراحی ظریف‌تر
    ============================================================ */
 
 /* ----- متغیرهای رنگ و تم ----- */
@@ -32,14 +32,16 @@
   --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
   --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
   --shadow-2xl: 0 25px 50px -12px rgba(0,0,0,0.25);
-  --radius: 12px;
-  --radius-sm: 8px;
+  --radius: 10px;
+  --radius-sm: 6px;
   --radius-full: 9999px;
-  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --font: 'Inter', 'Vazirmatn', system-ui, -apple-system, sans-serif;
-  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-bg: rgba(255, 255, 255, 0.8);
   --glass-border: rgba(255, 255, 255, 0.3);
+  --table-font-size: 0.78rem;
+  --table-padding: 6px 10px;
 }
 
 /* ============================================================
@@ -49,7 +51,7 @@
   font-family: var(--font);
   background: linear-gradient(145deg, #f0f4ff 0%, #f8fafc 50%, #f1f5f9 100%);
   min-height: 100vh;
-  padding: 24px;
+  padding: 18px 20px;
   direction: rtl;
   position: relative;
 }
@@ -63,8 +65,8 @@
   width: 200%;
   height: 200%;
   background:
-    radial-gradient(ellipse at 20% 50%, rgba(124, 58, 237, 0.05) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 50%, rgba(99, 102, 241, 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse at 20% 50%, rgba(124, 58, 237, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 50%, rgba(99, 102, 241, 0.04) 0%, transparent 60%),
     radial-gradient(ellipse at 50% 20%, rgba(14, 165, 233, 0.03) 0%, transparent 50%);
   z-index: 0;
   pointer-events: none;
@@ -83,11 +85,11 @@
 /* ----- هدر صفحه با افکت شیشه‌ای ----- */
 .instructor-time-page .process-header {
   background: var(--glass-bg);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
   border-radius: var(--radius);
-  padding: 28px 36px;
-  margin-bottom: 24px;
+  padding: 18px 28px;
+  margin-bottom: 18px;
   box-shadow: var(--shadow-md);
   border: 1px solid var(--glass-border);
   transition: var(--transition-slow);
@@ -106,51 +108,50 @@
 }
 .instructor-time-page .process-header:hover {
   box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 
 .instructor-time-page .process-title {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 .instructor-time-page .process-icon {
-  font-size: 2.4rem;
+  font-size: 2rem;
   animation: icon-float 3s ease-in-out infinite;
-  filter: drop-shadow(0 4px 8px rgba(124, 58, 237, 0.2));
+  filter: drop-shadow(0 4px 8px rgba(124, 58, 237, 0.15));
 }
 @keyframes icon-float {
   0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-6px) scale(1.05); }
+  50% { transform: translateY(-4px) scale(1.04); }
 }
 .instructor-time-page .process-title h2 {
   margin: 0;
-  font-size: 1.8rem;
-  font-weight: 800;
+  font-size: 1.5rem;
+  font-weight: 700;
   background: var(--primary-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  letter-spacing: -0.5px;
-  text-shadow: 0 2px 4px rgba(124, 58, 237, 0.1);
+  letter-spacing: -0.3px;
 }
 
 .instructor-time-page .process-description {
-  margin: 10px 0 0 0;
-  color: var(--gray-600);
-  font-size: 0.95rem;
-  line-height: 1.8;
-  padding-right: 8px;
+  margin: 6px 0 0 0;
+  color: var(--gray-500);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  padding-right: 6px;
 }
 
 .instructor-time-page .basket-badge {
   background: var(--gray-100);
-  padding: 6px 22px;
+  padding: 4px 18px;
   border-radius: var(--radius-full);
-  font-size: 0.85rem;
-  color: var(--gray-700);
+  font-size: 0.78rem;
+  color: var(--gray-600);
   display: inline-block;
-  margin-top: 12px;
+  margin-top: 8px;
   border: 1px solid var(--gray-200);
   box-shadow: var(--shadow-sm);
   transition: var(--transition);
@@ -158,17 +159,17 @@
 }
 .instructor-time-page .basket-badge:hover {
   background: var(--gray-200);
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
 
 /* ----- بدنه اصلی با افکت شیشه‌ای ----- */
 .instructor-time-page .process-body {
   background: var(--glass-bg);
-  backdrop-filter: blur(12px) saturate(160%);
-  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  backdrop-filter: blur(10px) saturate(160%);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
   border-radius: var(--radius);
-  padding: 32px 36px;
+  padding: 22px 28px;
   box-shadow: var(--shadow-md);
   border: 1px solid var(--glass-border);
   transition: var(--transition-slow);
@@ -178,56 +179,55 @@
 }
 
 /* ============================================================
-   نوار ابزار (کنترل‌ها)
+   نوار ابزار (کنترل‌ها) - دکمه‌های جمع‌وجور
    ============================================================ */
 .instructor-time-page .controls-bar {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
-  margin-bottom: 28px;
-  padding: 6px 0;
+  margin-bottom: 20px;
+  padding: 4px 0;
 }
 
+/* استایل پایه تمام دکمه‌های نوار ابزار */
 .instructor-time-page .controls-bar .btn {
-  padding: 10px 26px;
+  padding: 8px 22px;
   border: none;
   border-radius: var(--radius-full);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   cursor: pointer;
   transition: var(--transition);
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 6px;
   box-shadow: var(--shadow-sm);
   position: relative;
   overflow: hidden;
-  letter-spacing: 0.3px;
-}
-.instructor-time-page .controls-bar .btn::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(255,255,255,0.15);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-.instructor-time-page .controls-bar .btn:hover::after {
-  opacity: 1;
-}
-.instructor-time-page .controls-bar .btn:active {
-  transform: scale(0.96);
+  letter-spacing: 0.2px;
+  line-height: 1.4;
+  min-height: 38px;
+  min-width: 80px;
+  text-decoration: none;
+  background: white;
+  color: var(--gray-700);
 }
 
+/* دکمه اصلی - اجرای زمان‌بندی */
 .instructor-time-page .btn-process {
   background: var(--primary-gradient);
   color: #fff;
   box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
+  border: 1px solid rgba(255,255,255,0.12);
 }
 .instructor-time-page .btn-process:hover:not(:disabled) {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 8px 28px rgba(99, 102, 241, 0.45);
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 6px 28px rgba(99, 102, 241, 0.45);
+}
+.instructor-time-page .btn-process:active:not(:disabled) {
+  transform: translateY(-1px) scale(0.98);
 }
 .instructor-time-page .btn-process:disabled {
   opacity: 0.5;
@@ -235,46 +235,57 @@
   transform: none;
 }
 
+/* دکمه پاک کردن نتایج */
 .instructor-time-page .btn-clear {
   background: var(--gray-100);
   color: var(--gray-600);
+  border: 1px solid var(--gray-300);
 }
 .instructor-time-page .btn-clear:hover {
   background: var(--gray-200);
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
+.instructor-time-page .btn-clear:active {
+  transform: translateY(0);
+}
 
+/* دکمه تخصیص دستی */
 .instructor-time-page .btn-manual {
   background: var(--warning-gradient);
   color: #fff;
   box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35);
+  border: 1px solid rgba(255,255,255,0.12);
 }
 .instructor-time-page .btn-manual:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 28px rgba(245, 158, 11, 0.45);
+  box-shadow: 0 6px 28px rgba(245, 158, 11, 0.45);
 }
 
+/* دکمه ویرایش جدول */
 .instructor-time-page .btn-edit-table {
   background: var(--secondary-gradient);
   color: #fff;
   box-shadow: 0 4px 16px rgba(14, 165, 233, 0.35);
+  border: 1px solid rgba(255,255,255,0.12);
 }
 .instructor-time-page .btn-edit-table:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 28px rgba(14, 165, 233, 0.45);
+  box-shadow: 0 6px 28px rgba(14, 165, 233, 0.45);
 }
 
+/* دکمه‌های ذخیره */
 .instructor-time-page .btn-save-manual,
 .instructor-time-page .btn-save-edits {
   background: var(--success-gradient);
   color: #fff;
   box-shadow: 0 4px 16px rgba(34, 197, 94, 0.35);
+  border: 1px solid rgba(255,255,255,0.12);
 }
 .instructor-time-page .btn-save-manual:hover:not(:disabled),
 .instructor-time-page .btn-save-edits:hover:not(:disabled) {
   transform: translateY(-3px);
-  box-shadow: 0 8px 28px rgba(34, 197, 94, 0.45);
+  box-shadow: 0 6px 28px rgba(34, 197, 94, 0.45);
 }
 .instructor-time-page .btn-save-manual:disabled,
 .instructor-time-page .btn-save-edits:disabled {
@@ -282,25 +293,49 @@
   cursor: not-allowed;
 }
 
+/* دکمه انصراف */
 .instructor-time-page .btn-cancel {
   background: var(--danger-gradient);
   color: #fff;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+  border: 1px solid rgba(255,255,255,0.12);
 }
 .instructor-time-page .btn-cancel:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 28px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 6px 28px rgba(239, 68, 68, 0.4);
 }
 
+/* دکمه گزارش تست‌ها */
+.instructor-time-page .btn-test-report {
+  background: var(--gray-700);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+.instructor-time-page .btn-test-report:hover {
+  background: var(--gray-800);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.2);
+}
+
+/* نشان workflow */
 .instructor-time-page .workflow-badge {
   background: var(--gray-200);
-  color: var(--gray-700);
-  padding: 6px 20px;
+  color: var(--gray-600);
+  padding: 4px 18px;
   border-radius: var(--radius-full);
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   font-weight: 500;
   margin-right: auto;
   border: 1px solid var(--gray-300);
   box-shadow: var(--shadow-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.instructor-time-page .workflow-badge::before {
+  content: '🔗';
+  font-size: 0.8rem;
 }
 
 /* ============================================================
@@ -309,18 +344,18 @@
 .instructor-time-page .day-filters {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin: 18px 0 24px 0;
-  padding: 4px 0;
+  gap: 6px;
+  margin: 12px 0 18px 0;
+  padding: 2px 0;
 }
 
 .instructor-time-page .day-filter-btn {
-  padding: 8px 24px;
+  padding: 6px 18px;
   border-radius: var(--radius-full);
   border: 1.5px solid var(--gray-300);
   background: #fff;
   color: var(--gray-700);
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   font-weight: 500;
   cursor: pointer;
   transition: var(--transition);
@@ -330,13 +365,12 @@
   background: var(--gray-100);
   border-color: var(--gray-400);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
 }
 .instructor-time-page .day-filter-btn.active {
   background: var(--primary-gradient);
   border-color: var(--primary);
   color: #fff;
-  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
   transform: translateY(-2px);
 }
 
@@ -346,18 +380,18 @@
 .instructor-time-page .view-tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin: 14px 0 24px 0;
-  padding-bottom: 14px;
+  gap: 4px;
+  margin: 10px 0 18px 0;
+  padding-bottom: 10px;
   border-bottom: 2px solid var(--gray-200);
 }
 
 .instructor-time-page .view-tab {
   background: transparent;
   border: none;
-  padding: 8px 22px;
+  padding: 6px 16px;
   border-radius: var(--radius-full);
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   font-weight: 500;
   color: var(--gray-500);
   cursor: pointer;
@@ -370,7 +404,7 @@
   bottom: -2px;
   left: 50%;
   width: 0;
-  height: 3px;
+  height: 2px;
   background: var(--primary-gradient);
   transition: var(--transition);
   transform: translateX(-50%);
@@ -385,7 +419,7 @@
   font-weight: 600;
 }
 .instructor-time-page .view-tab.active::after {
-  width: 60%;
+  width: 50%;
 }
 
 /* ============================================================
@@ -394,44 +428,44 @@
 .instructor-time-page .table-search {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 20px;
+  gap: 8px;
+  padding: 10px 16px;
   background: var(--gray-50);
   border-radius: var(--radius) var(--radius) 0 0;
   border-bottom: 1px solid var(--gray-200);
 }
 .instructor-time-page .search-input {
   flex: 1;
-  padding: 10px 20px;
+  padding: 6px 16px;
   border: 1.5px solid var(--gray-300);
   border-radius: var(--radius-full);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   background: white;
   outline: none;
   transition: var(--transition);
 }
 .instructor-time-page .search-input:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.12);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
 }
 .instructor-time-page .search-clear {
   background: none;
   border: none;
-  font-size: 1.2rem;
+  font-size: 1rem;
   color: var(--gray-400);
   cursor: pointer;
-  padding: 4px 12px;
+  padding: 2px 10px;
   transition: var(--transition);
   border-radius: 50%;
 }
 .instructor-time-page .search-clear:hover {
   color: var(--gray-600);
   background: var(--gray-100);
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 /* ============================================================
-   جدول سفارشی
+   جدول سفارشی - نسخه بهینه‌شده با فونت ریزتر و بدون اسکرول اضافی
    ============================================================ */
 .instructor-time-page .custom-table-wrapper {
   overflow-x: auto;
@@ -440,6 +474,7 @@
   border: 1px solid var(--gray-200);
   box-shadow: var(--shadow-sm);
   transition: var(--transition);
+  -webkit-overflow-scrolling: touch;
 }
 .instructor-time-page .custom-table-wrapper:hover {
   box-shadow: var(--shadow-lg);
@@ -448,30 +483,77 @@
 .instructor-time-page .custom-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: var(--table-font-size);
+  table-layout: auto;
+  min-width: 600px; /* حداقل عرض برای نمایش مناسب */
 }
 .instructor-time-page .custom-table th {
   background: var(--gray-50);
-  color: var(--gray-800);
+  color: var(--gray-700);
   font-weight: 600;
-  padding: 14px 18px;
+  padding: var(--table-padding);
   text-align: right;
   border-bottom: 2px solid var(--gray-200);
   white-space: nowrap;
   position: sticky;
   top: 0;
   z-index: 2;
-  font-size: 0.85rem;
-  letter-spacing: 0.3px;
+  font-size: 0.72rem;
+  letter-spacing: 0.2px;
 }
 .instructor-time-page .custom-table td {
-  padding: 12px 18px;
+  padding: var(--table-padding);
   border-bottom: 1px solid var(--gray-100);
   color: var(--gray-700);
   vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
 }
+/* اجازه بده برخی ستون‌ها بیشتر فضا بگیرند */
+.instructor-time-page .custom-table td:first-child {
+  max-width: 150px;
+  white-space: normal;
+  word-break: break-word;
+}
+.instructor-time-page .custom-table td:nth-child(2) {
+  max-width: 60px;
+  text-align: center;
+}
+.instructor-time-page .custom-table td:nth-child(3) {
+  max-width: 100px;
+}
+.instructor-time-page .custom-table td:nth-child(4) {
+  max-width: 80px;
+}
+.instructor-time-page .custom-table td:nth-child(5) {
+  max-width: 60px;
+  text-align: center;
+}
+.instructor-time-page .custom-table td:nth-child(6) {
+  max-width: 70px;
+  text-align: center;
+}
+.instructor-time-page .custom-table td:nth-child(7) {
+  max-width: 70px;
+  text-align: center;
+}
+.instructor-time-page .custom-table td:nth-child(8) {
+  max-width: 60px;
+  text-align: center;
+}
+.instructor-time-page .custom-table td:nth-child(9) {
+  max-width: 80px;
+}
+.instructor-time-page .custom-table td:last-child {
+  max-width: 100px;
+  white-space: normal;
+  word-break: break-word;
+}
+
 .instructor-time-page .custom-table tbody tr {
-  transition: background-color 0.15s;
+  transition: background-color 0.12s;
 }
 .instructor-time-page .custom-table tbody tr:hover {
   background-color: var(--gray-50);
@@ -481,38 +563,38 @@
 }
 
 /* ============================================================
-   رنگ‌بندی سلول‌ها بر اساس وضعیت تطابق (نسخه جدید)
+   رنگ‌بندی سلول‌ها بر اساس وضعیت تطابق (بهینه‌شده)
    ============================================================ */
 
 /* --- ستون درس (course_name) --- */
 .cell-course_name-teach_mismatch {
-  background-color: #fca5a5 !important; /* قرمز پررنگ */
+  background-color: #fca5a5 !important;
 }
 .cell-course_name-full {
-  background-color: #dbeafe !important; /* آبی */
+  background-color: #dbeafe !important;
 }
 .cell-course_name-partial {
-  background-color: #bbf7d0 !important; /* سبز */
+  background-color: #dcfce7 !important;
 }
 .cell-course_name-none {
-  background-color: #fed7aa !important; /* نارنجی */
+  background-color: #fee2e2 !important;
 }
 .cell-course_name-no_preference {
-  background-color: #f3f4f6 !important; /* خاکستری */
+  background-color: #f3f4f6 !important;
 }
 
 /* --- ستون روز (day) --- */
 .cell-day-day_mismatch {
-  background-color: #fecaca !important; /* قرمز کم‌رنگ / گوجه‌ای */
+  background-color: #fecaca !important;
 }
 .cell-day-full {
   background-color: #dbeafe !important;
 }
 .cell-day-partial {
-  background-color: #bbf7d0 !important;
+  background-color: #dcfce7 !important;
 }
 .cell-day-none {
-  background-color: #fed7aa !important;
+  background-color: #fee2e2 !important;
 }
 .cell-day-no_preference {
   background-color: #f3f4f6 !important;
@@ -520,32 +602,32 @@
 
 /* --- ستون زمان (start / end) --- */
 .cell-time-time_full {
-  background-color: #dbeafe !important; /* آبی کمرنگ - تطابق کامل */
+  background-color: #dbeafe !important;
 }
 .cell-time-time_partial {
-  background-color: #bbf7d0 !important; /* سبز کمرنگ - یکی از زمان‌ها در بازه */
+  background-color: #dcfce7 !important;
 }
 .cell-time-time_mismatch {
-  background-color: #fed7aa !important; /* نارنجی کمرنگ - هیچکدام در بازه */
+  background-color: #fed7aa !important;
 }
 .cell-time-day_mismatch {
-  background-color: #fecaca !important; /* قرمز کم‌رنگ - روز نامطابق */
+  background-color: #fecaca !important;
 }
 .cell-time-full {
   background-color: #dbeafe !important;
 }
 .cell-time-partial {
-  background-color: #bbf7d0 !important;
+  background-color: #dcfce7 !important;
 }
 .cell-time-none {
-  background-color: #fed7aa !important;
+  background-color: #fee2e2 !important;
 }
 .cell-time-no_preference {
   background-color: #f3f4f6 !important;
 }
 
 /* ============================================================
-   رنگ‌بندی سطرها بر اساس وضعیت کلی (برای پس‌زمینه)
+   رنگ‌بندی سطرها بر اساس وضعیت کلی
    ============================================================ */
 .instructor-time-page .row-status-full {
   background-color: #eff6ff !important;
@@ -557,7 +639,7 @@
   background-color: #f0fdf4 !important;
 }
 .instructor-time-page .row-status-partial:hover {
-  background-color: #bbf7d0 !important;
+  background-color: #dcfce7 !important;
 }
 .instructor-time-page .row-status-none {
   background-color: #fff7ed !important;
@@ -575,9 +657,9 @@
 /* وضعیت بج (badge) */
 .instructor-time-page .status-badge {
   display: inline-block;
-  padding: 4px 16px;
+  padding: 2px 12px;
   border-radius: var(--radius-full);
-  font-size: 0.75rem;
+  font-size: 0.68rem;
   font-weight: 600;
   white-space: nowrap;
   box-shadow: var(--shadow-sm);
@@ -606,9 +688,9 @@
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
-  padding: 14px 20px;
-  font-size: 0.9rem;
+  gap: 8px;
+  padding: 10px 16px;
+  font-size: 0.78rem;
   color: var(--gray-500);
   border-top: 1px solid var(--gray-200);
   background: var(--gray-50);
@@ -616,7 +698,7 @@
 }
 .instructor-time-page .edit-actions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
 }
 
@@ -625,30 +707,30 @@
    ============================================================ */
 .instructor-time-page .edit-input,
 .instructor-time-page .edit-select {
-  padding: 6px 12px;
+  padding: 4px 10px;
   border: 1.5px solid var(--gray-300);
   border-radius: var(--radius-sm);
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   background: white;
   width: 100%;
-  min-width: 80px;
+  min-width: 60px;
   transition: var(--transition);
 }
 .instructor-time-page .edit-input:focus,
 .instructor-time-page .edit-select:focus {
   border-color: var(--primary);
   outline: none;
-  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.12);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
 }
 
 /* ============================================================
-   نمایش مراحل (Steps)
+   نمایش مراحل (Steps) - جمع‌وجورتر
    ============================================================ */
 .instructor-time-page .steps-container {
-  margin: 24px 0;
+  margin: 18px 0;
   background: white;
   border-radius: var(--radius);
-  padding: 24px 28px;
+  padding: 18px 22px;
   border: 1px solid var(--gray-200);
   box-shadow: var(--shadow-sm);
   transition: var(--transition);
@@ -662,59 +744,42 @@
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 12px;
+  margin-bottom: 14px;
 }
 .instructor-time-page .steps-header h4 {
   margin: 0;
   color: var(--gray-800);
-  font-size: 1.15rem;
+  font-size: 1rem;
   font-weight: 700;
 }
 
 .instructor-time-page .steps-progress {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 .instructor-time-page .steps-progress span {
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   color: var(--gray-600);
   font-weight: 500;
 }
 .instructor-time-page .progress-bar {
-  width: 180px;
-  height: 8px;
+  width: 150px;
+  height: 6px;
   background: var(--gray-200);
   border-radius: var(--radius-full);
   overflow: hidden;
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
 }
 .instructor-time-page .progress-fill {
   height: 100%;
   background: var(--primary-gradient);
   border-radius: var(--radius-full);
-  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.instructor-time-page .progress-fill::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-  animation: shimmer 2s infinite;
-}
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
 .instructor-time-page .steps-stats {
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   color: var(--gray-500);
   font-weight: 500;
 }
@@ -722,26 +787,26 @@
 .instructor-time-page .steps-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 .instructor-time-page .step-item {
   display: flex;
-  gap: 16px;
-  padding: 16px 22px;
+  gap: 12px;
+  padding: 12px 18px;
   background: var(--gray-50);
   border-radius: var(--radius-sm);
-  border-right: 4px solid var(--gray-300);
+  border-right: 3px solid var(--gray-300);
   transition: var(--transition);
 }
 .instructor-time-page .step-item:hover {
   background: var(--gray-100);
-  transform: translateX(-4px);
+  transform: translateX(-3px);
 }
 .instructor-time-page .step-item .step-number {
   font-weight: 700;
   color: var(--gray-400);
-  font-size: 1.2rem;
-  min-width: 32px;
+  font-size: 1rem;
+  min-width: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -752,34 +817,34 @@
 .instructor-time-page .step-item .step-title {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 .instructor-time-page .step-item .step-icon {
-  font-size: 1.2rem;
+  font-size: 1rem;
 }
 .instructor-time-page .step-item .step-name {
   font-weight: 600;
   color: var(--gray-800);
-  font-size: 0.95rem;
+  font-size: 0.85rem;
 }
 .instructor-time-page .step-item .step-status-label {
-  font-size: 0.7rem;
-  padding: 2px 12px;
+  font-size: 0.62rem;
+  padding: 1px 10px;
   border-radius: var(--radius-full);
   background: var(--gray-200);
   color: var(--gray-600);
   font-weight: 500;
 }
 .instructor-time-page .step-item .step-description {
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   color: var(--gray-500);
-  margin: 4px 0 8px 0;
+  margin: 2px 0 6px 0;
 }
 .instructor-time-page .step-item .step-timestamp {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   color: var(--gray-400);
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 /* وضعیت‌های مراحل */
@@ -809,14 +874,14 @@
 
 /* جزئیات مرحله */
 .instructor-time-page .step-details {
-  margin: 8px 0 4px 0;
+  margin: 6px 0 2px 0;
 }
 .instructor-time-page .step-details .details-table {
-  margin-top: 12px;
+  margin-top: 8px;
 }
 .instructor-time-page .step-details .details-table h5 {
-  margin: 0 0 8px 0;
-  font-size: 0.9rem;
+  margin: 0 0 6px 0;
+  font-size: 0.82rem;
   color: var(--gray-700);
   font-weight: 600;
 }
@@ -828,7 +893,7 @@
 .course-info-container {
   background: white;
   border-radius: var(--radius);
-  padding: 24px 28px;
+  padding: 18px 22px;
   border: 1px solid var(--gray-200);
   box-shadow: var(--shadow-sm);
   transition: var(--transition);
@@ -843,9 +908,9 @@
 .course-selector {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
   border-bottom: 1px solid var(--gray-200);
   flex-wrap: wrap;
 }
@@ -853,30 +918,30 @@
 .course-selector label {
   font-weight: 600;
   color: var(--gray-800);
-  font-size: 0.95rem;
+  font-size: 0.85rem;
 }
 .instructor-select,
 .course-select {
-  padding: 8px 18px;
+  padding: 6px 14px;
   border: 1.5px solid var(--gray-300);
   border-radius: var(--radius-sm);
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   background: white;
-  min-width: 220px;
+  min-width: 180px;
   outline: none;
   transition: var(--transition);
 }
 .instructor-select:focus,
 .course-select:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.12);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
 }
 
 .instructor-details,
 .course-details {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 14px;
 }
 
 /* کارت‌های اطلاعات */
@@ -886,8 +951,8 @@
   background: var(--primary-gradient);
   color: white;
   border-radius: var(--radius);
-  padding: 22px 30px;
-  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+  padding: 18px 24px;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
   position: relative;
   overflow: hidden;
 }
@@ -905,8 +970,8 @@
 }
 .instructor-info-card h4,
 .course-info-card h4 {
-  margin: 0 0 14px 0;
-  font-size: 1.15rem;
+  margin: 0 0 10px 0;
+  font-size: 1rem;
   font-weight: 700;
   position: relative;
 }
@@ -914,7 +979,7 @@
 .course-info-card .info-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 32px;
+  gap: 24px;
   position: relative;
 }
 .instructor-info-card .info-item,
@@ -924,22 +989,22 @@
 }
 .instructor-info-card .info-label,
 .course-info-card .info-label {
-  font-size: 0.75rem;
+  font-size: 0.68rem;
   opacity: 0.8;
   font-weight: 500;
 }
 .instructor-info-card .info-value,
 .course-info-card .info-value {
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   font-weight: 600;
   margin-top: 2px;
 }
 .instructor-info-card .info-warning {
-  margin-top: 12px;
-  padding: 8px 16px;
+  margin-top: 10px;
+  padding: 6px 14px;
   background: rgba(255,255,255,0.15);
   border-radius: var(--radius-sm);
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   position: relative;
 }
 
@@ -947,7 +1012,7 @@
 .preferences-section {
   background: var(--gray-50);
   border-radius: var(--radius-sm);
-  padding: 16px 20px;
+  padding: 12px 16px;
   border: 1px solid var(--gray-200);
   transition: var(--transition);
 }
@@ -955,9 +1020,9 @@
   border-color: var(--gray-300);
 }
 .preferences-section h4 {
-  margin: 0 0 12px 0;
+  margin: 0 0 8px 0;
   color: var(--gray-800);
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
 }
 .pref-list {
@@ -966,8 +1031,8 @@
   margin: 0;
 }
 .pref-list li {
-  padding: 6px 0;
-  font-size: 0.9rem;
+  padding: 4px 0;
+  font-size: 0.8rem;
   color: var(--gray-700);
   border-bottom: 1px dashed var(--gray-200);
 }
@@ -976,7 +1041,7 @@
 }
 .empty-message {
   color: var(--gray-400);
-  font-size: 0.9rem;
+  font-size: 0.82rem;
 }
 
 /* جمع‌بندی وضعیت */
@@ -984,29 +1049,29 @@
   grid-column: span 2;
   background: var(--gray-50);
   border-radius: var(--radius-sm);
-  padding: 16px 20px;
+  padding: 12px 16px;
   border: 1px solid var(--gray-200);
 }
 .summary-section h4 {
-  margin: 0 0 12px 0;
+  margin: 0 0 10px 0;
   color: var(--gray-800);
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
 }
 .summary-stats {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
 }
 .summary-stats .stat-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 8px 18px;
+  padding: 6px 14px;
   background: white;
   border-radius: var(--radius-sm);
   border: 1px solid var(--gray-200);
-  min-width: 70px;
+  min-width: 60px;
   transition: var(--transition);
 }
 .summary-stats .stat-item:hover {
@@ -1014,11 +1079,11 @@
   box-shadow: var(--shadow-sm);
 }
 .summary-stats .stat-label {
-  font-size: 0.7rem;
+  font-size: 0.62rem;
   color: var(--gray-400);
 }
 .summary-stats .stat-value {
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--gray-800);
 }
@@ -1031,37 +1096,43 @@
 }
 .classes-section h4,
 .groups-section h4 {
-  margin: 0 0 12px 0;
+  margin: 0 0 10px 0;
   color: var(--gray-800);
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
 }
 .classes-table,
 .groups-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   background: white;
   border-radius: var(--radius-sm);
   overflow: hidden;
   border: 1px solid var(--gray-200);
+  min-width: 600px;
 }
 .classes-table th,
 .groups-table th {
   background: var(--gray-50);
-  padding: 10px 14px;
+  padding: 6px 10px;
   text-align: right;
   font-weight: 600;
   color: var(--gray-600);
   border-bottom: 2px solid var(--gray-200);
-  font-size: 0.8rem;
-  letter-spacing: 0.3px;
+  font-size: 0.7rem;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
 }
 .classes-table td,
 .groups-table td {
-  padding: 8px 14px;
+  padding: 5px 10px;
   border-bottom: 1px solid var(--gray-100);
   color: var(--gray-700);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
 }
 .classes-table tbody tr:hover,
 .groups-table tbody tr:hover {
@@ -1074,40 +1145,43 @@
 .instructor-time-page .matrix-view,
 .instructor-time-page .calendar-view {
   overflow-x: auto;
-  margin: 12px 0;
+  margin: 10px 0;
 }
 
 .instructor-time-page .matrix-table,
 .instructor-time-page .calendar-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   background: white;
   border-radius: var(--radius);
   overflow: hidden;
   border: 1px solid var(--gray-200);
   box-shadow: var(--shadow-sm);
+  min-width: 500px;
 }
 .instructor-time-page .matrix-table th,
 .instructor-time-page .matrix-table td,
 .instructor-time-page .calendar-table th,
 .instructor-time-page .calendar-table td {
-  padding: 8px 12px;
+  padding: 5px 8px;
   border: 1px solid var(--gray-200);
   text-align: center;
-  min-width: 70px;
+  min-width: 55px;
+  white-space: nowrap;
 }
 .instructor-time-page .matrix-table th,
 .instructor-time-page .calendar-table th {
   background: var(--gray-50);
   font-weight: 600;
   color: var(--gray-800);
+  font-size: 0.7rem;
 }
 .instructor-time-page .matrix-table .course-name {
   font-weight: 500;
   text-align: right;
   background: var(--gray-50);
-  min-width: 150px;
+  min-width: 120px;
 }
 .instructor-time-page .matrix-table td.filled {
   background: #dbeafe;
@@ -1126,23 +1200,23 @@
   font-weight: 500;
   background: var(--gray-50);
   text-align: right;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 .instructor-time-page .calendar-table td.filled {
   background: #f0fdf4;
 }
 .instructor-time-page .calendar-table .cell-item {
-  font-size: 0.7rem;
-  padding: 2px 8px;
-  border-radius: 4px;
-  margin: 2px 0;
+  font-size: 0.65rem;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin: 1px 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   transition: var(--transition);
 }
 .instructor-time-page .calendar-table .cell-item:hover {
-  transform: scale(1.05);
+  transform: scale(1.04);
 }
 .instructor-time-page .calendar-table .cell-item.match-full {
   background: #93c5fd;
@@ -1167,17 +1241,17 @@
 .instructor-time-page .chart-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 18px;
-  margin-top: 14px;
-  font-size: 0.85rem;
+  gap: 14px;
+  margin-top: 10px;
+  font-size: 0.75rem;
   color: var(--gray-600);
 }
 .instructor-time-page .legend-box {
   display: inline-block;
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
-  margin-left: 6px;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  margin-left: 4px;
   vertical-align: middle;
   border: 1px solid var(--gray-300);
   transition: var(--transition);
@@ -1197,57 +1271,57 @@
 .instructor-time-page .chart-view {
   background: white;
   border-radius: var(--radius);
-  padding: 24px;
+  padding: 18px;
   border: 1px solid var(--gray-200);
   box-shadow: var(--shadow-sm);
 }
 .instructor-time-page .chart-view h4 {
-  margin: 0 0 18px 0;
+  margin: 0 0 14px 0;
   color: var(--gray-800);
+  font-size: 0.95rem;
 }
 .instructor-time-page .bar-chart {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 .instructor-time-page .bar-item {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
 }
 .instructor-time-page .bar-label {
-  min-width: 100px;
-  font-size: 0.8rem;
+  min-width: 80px;
+  font-size: 0.72rem;
   color: var(--gray-600);
   text-align: left;
 }
 .instructor-time-page .bar-track.stacked {
   flex: 1;
-  height: 30px;
+  height: 22px;
   background: var(--gray-100);
   border-radius: var(--radius-full);
   overflow: hidden;
   display: flex;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
 }
 .instructor-time-page .bar-segment {
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  font-size: 0.7rem;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 0.6rem;
   font-weight: 600;
   color: white;
-  min-width: 28px;
+  min-width: 20px;
 }
 .instructor-time-page .bar-segment.match-full { background: #93c5fd; }
 .instructor-time-page .bar-segment.match-partial { background: #86efac; color: #14532d; }
 .instructor-time-page .bar-segment.match-none { background: #fdba74; color: #7c2d12; }
 .instructor-time-page .bar-segment.match-no-preference { background: #e5e7eb; color: #374151; }
 .instructor-time-page .bar-total {
-  min-width: 34px;
-  font-size: 0.8rem;
+  min-width: 28px;
+  font-size: 0.72rem;
   font-weight: 600;
   color: var(--gray-800);
   text-align: left;
@@ -1260,7 +1334,7 @@
 .reasons-view {
   background: white;
   border-radius: var(--radius);
-  padding: 20px 24px;
+  padding: 16px 20px;
   border: 1px solid var(--gray-200);
   box-shadow: var(--shadow-sm);
   transition: var(--transition);
@@ -1271,39 +1345,45 @@
 }
 .conflicts-view h4,
 .reasons-view h4 {
-  margin: 0 0 8px 0;
+  margin: 0 0 6px 0;
   color: var(--gray-800);
   font-weight: 700;
+  font-size: 0.95rem;
 }
 .conflicts-view p,
 .reasons-view p {
-  margin: 0 0 16px 0;
+  margin: 0 0 12px 0;
   color: var(--gray-500);
-  font-size: 0.9rem;
+  font-size: 0.82rem;
 }
 
 .conflicts-table,
 .reasons-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
+  min-width: 600px;
 }
 .conflicts-table th,
 .reasons-table th {
   background: var(--gray-50);
-  padding: 10px 14px;
+  padding: 6px 10px;
   text-align: right;
   font-weight: 600;
   color: var(--gray-600);
   border-bottom: 2px solid var(--gray-200);
   white-space: nowrap;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
 }
 .conflicts-table td,
 .reasons-table td {
-  padding: 8px 14px;
+  padding: 5px 10px;
   border-bottom: 1px solid var(--gray-100);
   color: var(--gray-700);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
 }
 .conflicts-table .conflict-row,
 .reasons-table .mismatch-row {
@@ -1342,8 +1422,8 @@
    آمار فراوانی
    ============================================================ */
 .instructor-time-page .frequency-section {
-  margin-top: 32px;
-  padding: 24px;
+  margin-top: 24px;
+  padding: 18px;
   background: white;
   border-radius: var(--radius);
   border: 1px solid var(--gray-200);
@@ -1355,58 +1435,58 @@
 }
 .instructor-time-page .frequency-section h4 {
   margin-top: 0;
-  margin-bottom: 18px;
-  font-size: 1.1rem;
+  margin-bottom: 14px;
+  font-size: 0.95rem;
   color: var(--gray-800);
   font-weight: 700;
 }
 .instructor-time-page .frequency-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
 }
 .instructor-time-page .freq-card {
   background: var(--gray-50);
   border-radius: var(--radius-sm);
-  padding: 14px 18px;
+  padding: 10px 14px;
   border: 1px solid var(--gray-200);
   transition: var(--transition);
 }
 .instructor-time-page .freq-card:hover {
   box-shadow: var(--shadow-md);
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   border-color: var(--gray-300);
 }
 .instructor-time-page .freq-card h5 {
-  margin: 0 0 10px 0;
-  font-size: 0.9rem;
+  margin: 0 0 8px 0;
+  font-size: 0.8rem;
   color: var(--gray-600);
   border-bottom: 1px solid var(--gray-200);
-  padding-bottom: 6px;
+  padding-bottom: 4px;
   font-weight: 600;
 }
 .instructor-time-page .freq-card ul {
   list-style: none;
   padding: 0;
-  margin: 6px 0 0 0;
+  margin: 4px 0 0 0;
 }
 .instructor-time-page .freq-card ul li {
   display: flex;
   justify-content: space-between;
-  padding: 5px 0;
-  font-size: 0.85rem;
+  padding: 3px 0;
+  font-size: 0.75rem;
   border-bottom: 1px dashed var(--gray-100);
 }
 .instructor-time-page .freq-card ul li .count {
   background: var(--gray-200);
-  padding: 0 12px;
+  padding: 0 10px;
   border-radius: var(--radius-full);
   font-weight: 600;
   color: var(--gray-800);
 }
 .instructor-time-page .freq-total {
-  margin-top: 18px;
-  font-size: 0.95rem;
+  margin-top: 14px;
+  font-size: 0.85rem;
   color: var(--gray-700);
   text-align: center;
   font-weight: 500;
@@ -1416,14 +1496,14 @@
    پیام‌ها و حالت‌های خالی
    ============================================================ */
 .instructor-time-page .no-data-message {
-  padding: 40px 20px;
+  padding: 30px 16px;
   text-align: center;
   background: var(--gray-50);
   border-radius: var(--radius);
   color: var(--gray-500);
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   border: 2px dashed var(--gray-300);
-  margin-top: 12px;
+  margin-top: 10px;
   transition: var(--transition);
 }
 .instructor-time-page .no-data-message:hover {
@@ -1433,32 +1513,33 @@
 .instructor-time-page .error-message {
   background: #fef2f2;
   color: #991b1b;
-  padding: 14px 18px;
+  padding: 10px 14px;
   border-radius: var(--radius-sm);
   border-right: 4px solid var(--danger);
-  margin: 10px 0;
+  margin: 8px 0;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  font-size: 0.85rem;
 }
 .instructor-time-page .loading-state {
   text-align: center;
-  padding: 40px;
+  padding: 30px;
   color: var(--gray-500);
-  font-size: 1rem;
+  font-size: 0.9rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 .instructor-time-page .loading-state::before {
   content: '';
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   border: 3px solid var(--gray-200);
   border-top-color: var(--primary);
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin 0.7s linear infinite;
 }
 @keyframes spin {
   to { transform: rotate(360deg); }
@@ -1466,15 +1547,16 @@
 .instructor-time-page .info-warning {
   border-right: 4px solid var(--warning);
   background: #fffbeb;
-  padding: 14px 18px;
+  padding: 10px 14px;
   border-radius: var(--radius-sm);
-  margin: 14px 0;
+  margin: 10px 0;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  font-size: 0.85rem;
 }
 .instructor-time-page .info-warning .info-icon {
-  font-size: 1.2rem;
+  font-size: 1rem;
 }
 
 /* ============================================================
@@ -1482,45 +1564,47 @@
    ============================================================ */
 .instructor-time-page .empty-state {
   text-align: center;
-  padding: 60px 20px;
+  padding: 40px 16px;
 }
 .instructor-time-page .empty-icon {
-  font-size: 4rem;
+  font-size: 3rem;
   display: block;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
   animation: icon-float 3s ease-in-out infinite;
 }
 .instructor-time-page .empty-state h3 {
   color: var(--gray-800);
-  margin: 0 0 10px 0;
+  margin: 0 0 8px 0;
   font-weight: 700;
+  font-size: 1.1rem;
 }
 .instructor-time-page .empty-state p {
   color: var(--gray-500);
-  margin: 0 0 20px 0;
+  margin: 0 0 14px 0;
+  font-size: 0.9rem;
 }
 
 /* ============================================================
    نمایش سبد
    ============================================================ */
 .instructor-time-page .basket-display {
-  margin-bottom: 28px;
+  margin-bottom: 20px;
 }
 .instructor-time-page .basket-display h4 {
-  margin: 0 0 14px 0;
+  margin: 0 0 10px 0;
   color: var(--gray-800);
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   font-weight: 700;
 }
 .instructor-time-page .basket-summary {
-  margin-top: 14px;
+  margin-top: 10px;
 }
 .instructor-time-page .summary-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 24px;
+  gap: 18px;
   background: var(--gray-50);
-  padding: 14px 24px;
+  padding: 10px 18px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--gray-200);
 }
@@ -1529,11 +1613,11 @@
   flex-direction: column;
 }
 .instructor-time-page .summary-item .label {
-  font-size: 0.75rem;
+  font-size: 0.68rem;
   color: var(--gray-400);
 }
 .instructor-time-page .summary-item .value {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--gray-800);
 }
@@ -1543,53 +1627,64 @@
    ============================================================ */
 .instructor-time-page .unassigned-container,
 .instructor-time-page .manual-container {
-  margin-top: 28px;
+  margin-top: 20px;
 }
 .instructor-time-page .result-header.warning {
   border-right: 4px solid var(--warning);
   background: #fffbeb;
-  padding: 14px 18px;
+  padding: 10px 14px;
   border-radius: var(--radius-sm);
 }
 .instructor-time-page .result-header.warning h4 {
   color: #92400e;
-  margin: 0 0 4px 0;
+  margin: 0 0 2px 0;
   font-weight: 700;
+  font-size: 0.95rem;
 }
 .instructor-time-page .hint-text {
   color: var(--gray-500);
-  font-size: 0.9rem;
-  margin: 4px 0 0 0;
+  font-size: 0.82rem;
+  margin: 2px 0 0 0;
 }
 .instructor-time-page .manual-actions {
-  margin-top: 18px;
+  margin-top: 14px;
   display: flex;
-  gap: 14px;
+  gap: 10px;
 }
 
 /* ============================================================
    اقدامات انتهای صفحه
    ============================================================ */
 .instructor-time-page .result-actions {
-  margin-top: 28px;
+  margin-top: 20px;
   display: flex;
   justify-content: flex-end;
 }
 .instructor-time-page .result-actions .btn-primary {
   background: var(--primary-gradient);
   color: #fff;
-  padding: 12px 36px;
+  padding: 10px 34px;
   border: none;
   border-radius: var(--radius-full);
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.95rem;
   cursor: pointer;
   transition: var(--transition);
   box-shadow: 0 4px 20px rgba(99, 102, 241, 0.35);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.4;
+  min-height: 44px;
+  border: 1px solid rgba(255,255,255,0.12);
+  letter-spacing: 0.2px;
 }
 .instructor-time-page .result-actions .btn-primary:hover:not(:disabled) {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.45);
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 6px 32px rgba(99, 102, 241, 0.45);
+}
+.instructor-time-page .result-actions .btn-primary:active:not(:disabled) {
+  transform: translateY(-1px) scale(0.98);
 }
 .instructor-time-page .result-actions .btn-primary:disabled {
   opacity: 0.5;
@@ -1605,37 +1700,33 @@
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: 14px;
-  margin-bottom: 18px;
+  gap: 10px;
+  margin-bottom: 14px;
 }
 .instructor-time-page .result-header h4 {
   margin: 0;
   color: var(--gray-800);
   font-weight: 700;
+  font-size: 1rem;
 }
 .instructor-time-page .result-stats {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 6px;
 }
 .instructor-time-page .stat-badge {
   background: var(--gray-100);
-  padding: 4px 16px;
+  padding: 3px 12px;
   border-radius: var(--radius-full);
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   color: var(--gray-600);
   border: 1px solid var(--gray-200);
   transition: var(--transition);
 }
 .instructor-time-page .stat-badge:hover {
   background: var(--gray-200);
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   box-shadow: var(--shadow-sm);
-}
-.instructor-time-page .stat-badge.success {
-  background: #d1fae5;
-  color: #065f46;
-  border-color: #a7f3d0;
 }
 
 /* ============================================================
@@ -1657,52 +1748,65 @@
 
 @media (max-width: 768px) {
   .instructor-time-page {
-    padding: 12px;
+    padding: 10px;
   }
   .instructor-time-page .process-header,
   .instructor-time-page .process-body {
-    padding: 16px;
+    padding: 14px;
   }
   .instructor-time-page .process-title h2 {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
   }
   .instructor-time-page .process-icon {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
+  }
+  .instructor-time-page .controls-bar {
+    gap: 8px;
   }
   .instructor-time-page .controls-bar .btn {
     padding: 8px 18px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
+    min-height: 34px;
+    min-width: 60px;
   }
   .instructor-time-page .day-filter-btn {
-    padding: 6px 16px;
-    font-size: 0.75rem;
+    padding: 5px 14px;
+    font-size: 0.7rem;
     flex: 1 0 auto;
   }
   .instructor-time-page .day-filters {
-    gap: 6px;
+    gap: 4px;
     justify-content: center;
   }
   .instructor-time-page .view-tab {
-    padding: 6px 14px;
-    font-size: 0.8rem;
+    padding: 5px 12px;
+    font-size: 0.72rem;
   }
   .instructor-time-page .custom-table {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
+    min-width: 480px;
   }
   .instructor-time-page .custom-table th,
   .instructor-time-page .custom-table td {
-    padding: 8px 12px;
+    padding: 4px 8px;
+  }
+  .instructor-time-page .custom-table td:first-child {
+    max-width: 100px;
   }
   .instructor-time-page .frequency-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+  }
+  .instructor-time-page .matrix-table,
+  .instructor-time-page .calendar-table {
+    min-width: 400px;
+    font-size: 0.65rem;
   }
   .instructor-time-page .matrix-table th,
   .instructor-time-page .matrix-table td,
   .instructor-time-page .calendar-table th,
   .instructor-time-page .calendar-table td {
-    padding: 4px 8px;
-    font-size: 0.7rem;
-    min-width: 50px;
+    padding: 3px 6px;
+    min-width: 40px;
   }
   .instructor-time-page .instructor-selector,
   .instructor-time-page .course-selector {
@@ -1714,18 +1818,18 @@
     min-width: unset;
   }
   .instructor-time-page .summary-stats .stat-item {
-    min-width: 60px;
-    padding: 6px 12px;
+    min-width: 50px;
+    padding: 4px 10px;
   }
   .instructor-time-page .summary-stats .stat-value {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
   .instructor-time-page .result-stats {
-    gap: 6px;
+    gap: 4px;
   }
   .instructor-time-page .stat-badge {
-    font-size: 0.7rem;
-    padding: 2px 12px;
+    font-size: 0.62rem;
+    padding: 2px 10px;
   }
   .instructor-time-page .steps-header {
     flex-direction: column;
@@ -1739,18 +1843,34 @@
   }
   .instructor-time-page .step-item {
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
   }
   .instructor-time-page .step-item .step-number {
     min-width: unset;
-    font-size: 1rem;
+    font-size: 0.9rem;
+  }
+  .instructor-time-page .result-actions .btn-primary {
+    padding: 10px 24px;
+    font-size: 0.85rem;
+    min-height: 40px;
+  }
+  .instructor-time-page .conflicts-table,
+  .instructor-time-page .reasons-table {
+    min-width: 480px;
+    font-size: 0.68rem;
+  }
+  .instructor-time-page .conflicts-table th,
+  .instructor-time-page .conflicts-table td,
+  .instructor-time-page .reasons-table th,
+  .instructor-time-page .reasons-table td {
+    padding: 4px 8px;
   }
 }
 
 @media (max-width: 480px) {
   .instructor-time-page .process-header,
   .instructor-time-page .process-body {
-    padding: 12px;
+    padding: 10px;
   }
   .instructor-time-page .controls-bar {
     flex-direction: column;
@@ -1758,6 +1878,7 @@
   }
   .instructor-time-page .controls-bar .btn {
     justify-content: center;
+    width: 100%;
   }
   .instructor-time-page .workflow-badge {
     margin-right: 0;
@@ -1767,25 +1888,60 @@
     justify-content: center;
   }
   .instructor-time-page .view-tab {
-    padding: 6px 12px;
-    font-size: 0.75rem;
+    padding: 4px 10px;
+    font-size: 0.68rem;
   }
   .instructor-time-page .summary-grid {
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
+  }
+  .instructor-time-page .frequency-grid {
+    grid-template-columns: 1fr;
+  }
+  .instructor-time-page .step-item {
+    padding: 10px 14px;
+  }
+  .instructor-time-page .custom-table {
+    min-width: 360px;
+    font-size: 0.65rem;
+  }
+  .instructor-time-page .custom-table th,
+  .instructor-time-page .custom-table td {
+    padding: 3px 6px;
+  }
+  .instructor-time-page .classes-table,
+  .instructor-time-page .groups-table {
+    min-width: 400px;
+    font-size: 0.65rem;
+  }
+  .instructor-time-page .classes-table th,
+  .instructor-time-page .classes-table td,
+  .instructor-time-page .groups-table th,
+  .instructor-time-page .groups-table td {
+    padding: 3px 6px;
+  }
+  .instructor-time-page .matrix-table,
+  .instructor-time-page .calendar-table {
+    min-width: 320px;
+    font-size: 0.6rem;
+  }
+  .instructor-time-page .matrix-table th,
+  .instructor-time-page .matrix-table td,
+  .instructor-time-page .calendar-table th,
+  .instructor-time-page .calendar-table td {
+    padding: 2px 4px;
+    min-width: 30px;
   }
   .instructor-time-page .conflicts-table,
   .instructor-time-page .reasons-table {
-    font-size: 0.7rem;
+    min-width: 360px;
+    font-size: 0.62rem;
   }
   .instructor-time-page .conflicts-table th,
   .instructor-time-page .conflicts-table td,
   .instructor-time-page .reasons-table th,
   .instructor-time-page .reasons-table td {
-    padding: 4px 8px;
-  }
-  .instructor-time-page .step-item {
-    padding: 12px 16px;
+    padding: 3px 6px;
   }
 }
 
@@ -1793,18 +1949,18 @@
    استایل‌های دیتیلز و جدول‌های خاص (برای Steps)
    ============================================================ */
 .details-simple-table {
-  margin: 0.5rem 0;
+  margin: 0.3rem 0;
 }
 .details-table-simple {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: 0.78rem;
   background: #f8fafc;
-  border-radius: 0.5rem;
+  border-radius: 0.4rem;
   overflow: hidden;
 }
 .details-table-simple td {
-  padding: 0.4rem 0.8rem;
+  padding: 0.3rem 0.6rem;
   border-bottom: 1px solid #e2e8f0;
 }
 .details-table-simple .detail-key {
@@ -1822,15 +1978,15 @@
 .pref-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
-  margin-top: 0.5rem;
+  font-size: 0.78rem;
+  margin-top: 0.3rem;
 }
 .usage-table th,
 .pref-table th,
 .usage-table td,
 .pref-table td {
   border: 1px solid #e2e8f0;
-  padding: 0.4rem 0.6rem;
+  padding: 0.3rem 0.5rem;
   text-align: center;
 }
 .usage-table th,
@@ -1855,27 +2011,27 @@
   overflow-x: auto;
 }
 .details-table h5 {
-  margin: 0.5rem 0 0.2rem 0;
-  font-size: 0.95rem;
+  margin: 0.3rem 0 0.1rem 0;
+  font-size: 0.82rem;
 }
 .table-note {
-  margin-top: 0.3rem;
-  font-size: 0.85rem;
+  margin-top: 0.2rem;
+  font-size: 0.75rem;
   color: #718096;
   font-style: italic;
 }
 
 .step-backend-info {
-  margin: 0.5rem 0;
-  padding: 0.5rem 0.8rem;
+  margin: 0.3rem 0;
+  padding: 0.4rem 0.7rem;
   background: #f0f4ff;
-  border-radius: 0.5rem;
-  border-right: 4px solid #4299e1;
-  font-size: 0.9rem;
+  border-radius: 0.4rem;
+  border-right: 3px solid #4299e1;
+  font-size: 0.78rem;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.3rem 0.8rem;
+  gap: 0.2rem 0.6rem;
   transition: var(--transition);
 }
 .step-backend-info:hover {
@@ -1888,8 +2044,8 @@
 .step-backend-info .backend-method {
   font-family: monospace;
   background: #e2e8f0;
-  padding: 0.1rem 0.4rem;
-  border-radius: 0.25rem;
+  padding: 0.05rem 0.3rem;
+  border-radius: 0.2rem;
   color: #2d3748;
 }
 .step-backend-info .backend-desc {
@@ -1897,48 +2053,49 @@
 }
 .step-backend-info .backend-file {
   color: #718096;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
 }
 .step-backend-info .backend-line {
   color: #a0aec0;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
 }
 .pref-table tr:nth-child(even) {
   background-color: #f9fafb;
 }
-/* بخش خلاصه */
+
+/* بخش خلاصه - جمع‌وجورتر */
 .summary-section {
   background: #f8fafc;
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
+  border-radius: 0.5rem;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1.5rem;
   border: 1px solid #e2e8f0;
 }
 
 .summary-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.8rem;
+  margin-bottom: 1rem;
 }
 
 .stat-card {
   background: white;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  padding: 0.8rem;
+  border-radius: 0.4rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
   text-align: center;
 }
 
 .stat-card .stat-label {
   display: block;
-  font-size: 0.85rem;
+  font-size: 0.72rem;
   color: #64748b;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.15rem;
 }
 
 .stat-card .stat-value {
-  font-size: 1.8rem;
+  font-size: 1.4rem;
   font-weight: bold;
   color: #1e293b;
 }
@@ -1948,33 +2105,33 @@
 
 /* نوارهای وضعیت */
 .status-breakdown {
-  margin: 1.5rem 0;
+  margin: 1rem 0;
 }
 
 .status-bar-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.5rem;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
 }
 
 .status-bar-item .status-label {
-  width: 120px;
-  font-size: 0.9rem;
+  width: 100px;
+  font-size: 0.78rem;
   color: #334155;
 }
 
 .bar-track {
   flex: 1;
-  height: 8px;
+  height: 6px;
   background: #e2e8f0;
-  border-radius: 4px;
+  border-radius: 3px;
   overflow: hidden;
 }
 
 .bar-fill {
   height: 100%;
-  border-radius: 4px;
+  border-radius: 3px;
   transition: width 0.3s ease;
 }
 .bar-fill.full { background: #22c55e; }
@@ -1982,14 +2139,15 @@
 .bar-fill.none { background: #ef4444; }
 
 .bar-count {
-  min-width: 30px;
+  min-width: 26px;
   font-weight: 600;
+  font-size: 0.78rem;
   color: #1e293b;
 }
 
 /* دلایل */
 .reason-breakdown {
-  margin: 1.5rem 0;
+  margin: 1rem 0;
 }
 
 .reason-list {
@@ -2002,158 +2160,26 @@
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.5rem;
-  padding: 0.5rem 0;
+  gap: 0.3rem;
+  padding: 0.3rem 0;
   border-bottom: 1px solid #e2e8f0;
 }
 
 .reason-label {
   font-weight: 500;
   color: #1e293b;
-  min-width: 200px;
+  min-width: 160px;
+  font-size: 0.78rem;
 }
 
 .reason-count {
   color: #475569;
   font-weight: 600;
+  font-size: 0.78rem;
 }
 
 .reason-sample {
-  font-size: 0.85rem;
+  font-size: 0.72rem;
   color: #64748b;
-  margin-left: 0.5rem;
-}
-
-/* هشدار دروس گم‌شده */
-.missing-alert {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 0.5rem;
-  padding: 1rem;
-  margin-top: 1rem;
-}
-
-.missing-alert h5 {
-  color: #dc2626;
-  margin: 0 0 0.5rem 0;
-}
-
-.missing-alert p {
-  margin: 0.5rem 0;
-  color: #1e293b;
-}
-
-.missing-alert details {
-  margin-top: 0.5rem;
-}
-
-.missing-alert summary {
-  cursor: pointer;
-  color: #3b82f6;
-  font-weight: 500;
-}
-
-.missing-alert ul {
-  margin: 0.5rem 0 0 1.5rem;
-  color: #334155;
-}
-/* ============================================================
-   رنگ‌بندی جدول عدم تطابق (reasons-table)
-   ============================================================ */
-
-/* سطرهای تطابق نسبی - سبز کمرنگ */
-.reasons-table .mismatch-row.status-partial {
-  background-color: #dcfce7 !important; /* سبز بسیار کمرنگ */
-}
-.reasons-table .mismatch-row.status-partial:hover {
-  background-color: #bbf7d0 !important; /* سبز کمرنگ‌تر در هاور */
-}
-
-/* سطرهای بدون تطابق - قرمز کمرنگ */
-.reasons-table .mismatch-row.status-none {
-  background-color: #fee2e2 !important; /* قرمز بسیار کمرنگ */
-}
-.reasons-table .mismatch-row.status-none:hover {
-  background-color: #fecaca !important; /* قرمز کمرنگ‌تر در هاور */
-}
-
-/* سطرهای تخصیص‌نیافته - خاکستری کمرنگ */
-.reasons-table .mismatch-row.status-unassigned {
-  background-color: #f3f4f6 !important; /* خاکستری بسیار کمرنگ */
-}
-.reasons-table .mismatch-row.status-unassigned:hover {
-  background-color: #e5e7eb !important; /* خاکستری کمرنگ‌تر در هاور */
-}
-
-/* سطرهای بدون مطلوبیت - آبی کمرنگ */
-.reasons-table .mismatch-row.status-no_preference {
-  background-color: #e0f2fe !important; /* آبی بسیار کمرنگ */
-}
-.reasons-table .mismatch-row.status-no_preference:hover {
-  background-color: #bae6fd !important;
-}
-
-/* سطرهای تخصیص ناقص - نارنجی کمرنگ */
-.reasons-table .mismatch-row.status-no_assignment {
-  background-color: #ffedd5 !important; /* نارنجی بسیار کمرنگ */
-}
-.reasons-table .mismatch-row.status-no_assignment:hover {
-  background-color: #fed7aa !important;
-}
-
-/* سطرهای تطابق کامل (در صورت وجود در جدول) - سبز پررنگ‌تر */
-.reasons-table .mismatch-row.status-full {
-  background-color: #d1fae5 !important;
-}
-.reasons-table .mismatch-row.status-full:hover {
-  background-color: #a7f3d0 !important;
-}
-
-/* ============================================================
-   رنگ‌بندی سلول‌های جدول اصلی (custom-table) بر اساس وضعیت کلی
-   ============================================================ */
-
-/* ستون‌های مختلف با وضعیت partial → سبز کمرنگ */
-.cell-course_name-partial,
-.cell-day-partial,
-.cell-time-partial {
-  background-color: #dcfce7 !important;
-}
-
-/* ستون‌های مختلف با وضعیت none → قرمز کمرنگ */
-.cell-course_name-none,
-.cell-day-none,
-.cell-time-none {
-  background-color: #fee2e2 !important;
-}
-
-/* ستون‌های مختلف با وضعیت no_preference → خاکستری کمرنگ */
-.cell-course_name-no_preference,
-.cell-day-no_preference,
-.cell-time-no_preference {
-  background-color: #f3f4f6 !important;
-}
-
-/* ستون‌های مختلف با وضعیت full → آبی کمرنگ */
-.cell-course_name-full,
-.cell-day-full,
-.cell-time-full {
-  background-color: #dbeafe !important;
-}
-
-/* وضعیت‌های خاص برای ستون‌ها (در صورت نیاز) */
-.cell-course_name-teach_mismatch {
-  background-color: #fca5a5 !important;
-}
-.cell-day-day_mismatch {
-  background-color: #fecaca !important;
-}
-.cell-time-time_mismatch {
-  background-color: #fed7aa !important;
-}
-.cell-time-time_partial {
-  background-color: #bbf7d0 !important;
-}
-.cell-time-time_full {
-  background-color: #93c5fd !important;
+  margin-left: 0.3rem;
 }

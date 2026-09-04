@@ -8,8 +8,11 @@ from sqlalchemy.orm import Session
 from app.models.instructor import Instructor
 from app.models.teaching_preference import TeachingPreference
 from app.models.time_preference import TimePreference
-from app.utils.constants import DAY_MAP, COOPERATION_PRIORITY
-from app.utils.helpers import normalize_instructor_code, normalize_code, normalize_day
+from app.utils.helpers import normalize_instructor_code, normalize_code
+# استفاده از normalize_day و DAY_MAP از slot_times (به جای constants)
+from app.services.schedule.slot_times import normalize_day, DAY_MAP
+# در صورت نیاز به COOPERATION_PRIORITY، آن را از جای دیگر وارد کنید
+from app.utils.constants import COOPERATION_PRIORITY
 
 logger = logging.getLogger(__name__)
 

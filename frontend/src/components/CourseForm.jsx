@@ -1,5 +1,57 @@
+// frontend/src/components/CourseForm.jsx
 import { useState, useEffect } from "react";
+import "./CourseForm.css"; // در صورت وجود فایل CSS
 
+// ==========================================================
+// ثابت‌های برگرفته از بک‌اند (برای هماهنگی)
+// ==========================================================
+
+// نگاشت روزهای هفته (همان DAY_MAP در slot_times.py)
+const DAY_MAP = {
+  "شنبه": 0,
+  "یکشنبه": 1,
+  "دوشنبه": 2,
+  "سه‌شنبه": 3,
+  "سهشنبه": 3,
+  "چهارشنبه": 4,
+  "پنجشنبه": 5,
+  "جمعه": 6,
+  "sat": 0,
+  "sun": 1,
+  "mon": 2,
+  "tue": 3,
+  "wed": 4,
+  "thu": 5,
+  "fri": 6,
+};
+
+// لیست روزهای هفته (برای سلکت)
+const DAY_OPTIONS = [
+  { value: "شنبه", label: "شنبه" },
+  { value: "یکشنبه", label: "یکشنبه" },
+  { value: "دوشنبه", label: "دوشنبه" },
+  { value: "سه‌شنبه", label: "سه‌شنبه" },
+  { value: "چهارشنبه", label: "چهارشنبه" },
+  { value: "پنجشنبه", label: "پنجشنبه" },
+];
+
+// گزینه‌های ترم استاندارد (مطابق با TERM_ALIASES در بک‌اند)
+const TERM_OPTIONS = [
+  { value: "semester_1", label: "نیمسال اول (مهر)" },
+  { value: "semester_2", label: "نیمسال دوم (بهمن)" },
+  { value: "summer", label: "نیمسال تابستان" },
+];
+
+// گزینه‌های تعداد واحد
+const UNIT_OPTIONS = [
+  { value: 2, label: "۲ واحد" },
+  { value: 3, label: "۳ واحد" },
+  { value: 4, label: "۴ واحد" },
+];
+
+// ==========================================================
+// کامپوننت اصلی
+// ==========================================================
 export default function CourseForm({ course, onSubmit, onCancel, type }) {
   // ===== state اولیه بر اساس نوع =====
   const getInitialState = () => {
@@ -9,7 +61,7 @@ export default function CourseForm({ course, onSubmit, onCancel, type }) {
       title: "",
       status: "active",
       group: "continuous_before_1403",
-      estimated_capacity: 0,  // ← فیلد جدید برای دروس یکتا
+      estimated_capacity: 0,
     };
 
     // فیلدهای مخصوص دروس ارائه
@@ -20,6 +72,7 @@ export default function CourseForm({ course, onSubmit, onCancel, type }) {
         offered_title: "",
         unique_code: "",
         unique_title: "",
+        units: 2, // ← اضافه شد
         theoretical_hours: 0,
         practical_hours: 0,
         prerequisite: "",
@@ -28,6 +81,7 @@ export default function CourseForm({ course, onSubmit, onCancel, type }) {
         course_type: "theory",
         is_active: true,
         type_course: "",
+        term: "semester_1", // ← اضافه شد (برای ارتباط با اسلات‌ها)
       };
     }
 
@@ -87,10 +141,10 @@ export default function CourseForm({ course, onSubmit, onCancel, type }) {
     if (type === "term-courses") {
       return {
         level: "",
-        term: "",
+        term: "semester_1", // ← تغییر به سلکت استاندارد
         row_number: "",
         course_name: "",
-        units: "",
+        units: 2,
         course_type: "",
         approximate_term: "",
         description: "",
@@ -114,14 +168,14 @@ export default function CourseForm({ course, onSubmit, onCancel, type }) {
         instructor_name: "",
         instructor_username: "",
         status: "pending",
-        term_code: "",
+        term_code: "semester_1", // ← تغییر به سلکت استاندارد
       };
     }
 
     // فیلدهای مخصوص مطلوبیت‌های زمان‌بندی
     if (type === "time-preferences") {
       return {
-        day: "",
+        day: "شنبه",
         cooperation_type: "",
         end_time: "",
         expert_group: "",
@@ -132,6 +186,8 @@ export default function CourseForm({ course, onSubmit, onCancel, type }) {
         instructor_username: "",
         start_time: "",
         time_group: "",
+        term: "semester_1", // ← اضافه شد
+        units: 2, // ← اضافه شد (برای اعتبارسنجی اسلات)
       };
     }
 
@@ -188,7 +244,7 @@ export default function CourseForm({ course, onSubmit, onCancel, type }) {
             { value: "non_continuous", label: "کارشناسی ناپیوسته" },
           ],
         },
-        { name: "estimated_capacity", label: "برآورد ظرفیت", type: "number" }, // ← فیلد جدید
+        { name: "estimated_capacity", label: "برآورد ظرفیت", type: "number" },
       ];
     }
 
@@ -198,6 +254,20 @@ export default function CourseForm({ course, onSubmit, onCancel, type }) {
         { name: "offered_title", label: "عنوان درس در مقطع ارائه", type: "text", required: true },
         { name: "unique_code", label: "کد یکتا", type: "text", required: true },
         { name: "unique_title", label: "عنوان درس یکتا", type: "text", required: true },
+        {
+          name: "term",
+          label: "ترم ارائه",
+          type: "select",
+          options: TERM_OPTIONS,
+          required: true,
+        },
+        {
+          name: "units",
+          label: "تعداد واحد",
+          type: "select",
+          options: UNIT_OPTIONS,
+          required: true,
+        },
         { name: "theoretical_hours", label: "ساعت نظری", type: "number" },
         { name: "practical_hours", label: "ساعت عملی", type: "number" },
         { name: "prerequisite", label: "پیش‌نیاز", type: "text" },
@@ -274,10 +344,22 @@ export default function CourseForm({ course, onSubmit, onCancel, type }) {
     if (type === "term-courses") {
       return [
         { name: "level", label: "مقطع ارائه", type: "text", required: true },
-        { name: "term", label: "ترم", type: "text", required: true },
+        {
+          name: "term",
+          label: "ترم",
+          type: "select",
+          options: TERM_OPTIONS,
+          required: true,
+        },
         { name: "row_number", label: "ردیف", type: "number" },
         { name: "course_name", label: "نام درس", type: "text", required: true },
-        { name: "units", label: "واحد", type: "number" },
+        {
+          name: "units",
+          label: "واحد",
+          type: "select",
+          options: UNIT_OPTIONS,
+          required: true,
+        },
         { name: "course_type", label: "نوع درس", type: "text" },
         { name: "approximate_term", label: "ترم تقریبی", type: "number" },
         { name: "description", label: "توضیح", type: "text" },
@@ -310,7 +392,13 @@ export default function CourseForm({ course, onSubmit, onCancel, type }) {
             { value: "rejected", label: "رد شده" },
           ],
         },
-        { name: "term_code", label: "کد ترم تحصیلی", type: "text" },
+        {
+          name: "term_code",
+          label: "کد ترم تحصیلی",
+          type: "select",
+          options: TERM_OPTIONS,
+          required: true,
+        },
       ];
     }
 
@@ -322,14 +410,21 @@ export default function CourseForm({ course, onSubmit, onCancel, type }) {
           label: "روز",
           type: "select",
           required: true,
-          options: [
-            { value: "شنبه", label: "شنبه" },
-            { value: "یکشنبه", label: "یکشنبه" },
-            { value: "دوشنبه", label: "دوشنبه" },
-            { value: "سه‌شنبه", label: "سه‌شنبه" },
-            { value: "چهارشنبه", label: "چهارشنبه" },
-            { value: "پنجشنبه", label: "پنجشنبه" },
-          ],
+          options: DAY_OPTIONS,
+        },
+        {
+          name: "term",
+          label: "ترم (برای اعتبارسنجی اسلات)",
+          type: "select",
+          options: TERM_OPTIONS,
+          required: true,
+        },
+        {
+          name: "units",
+          label: "تعداد واحد (برای اعتبارسنجی اسلات)",
+          type: "select",
+          options: UNIT_OPTIONS,
+          required: true,
         },
         { name: "cooperation_type", label: "نوع همکاری", type: "text" },
         { name: "end_time", label: "زمان پایان", type: "text", required: true },
