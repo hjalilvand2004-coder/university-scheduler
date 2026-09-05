@@ -1,0 +1,109 @@
+﻿/* src/components/Feedback/FeedbackForm.css */
+.feedback-form-container {
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 24px;
+  border-radius: 12px;
+  background: #f9fafb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.feedback-form-container h3 {
+  margin-top: 0;
+  color: #1f2937;
+}
+
+.rating-group {
+  margin-bottom: 16px;
+}
+
+.rating-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #374151;
+}
+
+.stars {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.star {
+  font-size: 28px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #d1d5db;
+  transition: color 0.2s;
+  padding: 0 2px;
+}
+
+.star.active {
+  color: #f59e0b;
+}
+
+.star:hover {
+  transform: scale(1.1);
+}
+
+.rating-value {
+  margin-left: 12px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.comment-group {
+  margin: 16px 0;
+}
+
+.comment-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  resize: vertical;
+}
+
+.feedback-form-container button[type="submit"] {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.feedback-form-container button[type="submit"]:disabled {
+  background: #93c5fd;
+  cursor: not-allowed;
+}
+
+.feedback-form-container button[type="submit"]:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.feedback-success {
+  text-align: center;
+  padding: 30px;
+  background: #ecfdf5;
+  border-radius: 12px;
+}
+
+.feedback-success h3 {
+  color: #065f46;
+}
+
+.feedback-success button {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 12px;
+}
