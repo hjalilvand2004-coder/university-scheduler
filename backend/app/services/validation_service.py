@@ -49,11 +49,11 @@ class ValidationService:
         self.constraints = self._load_constraints()
         self.scoring = self._load_scoring()
 
-    # ----- بارگذاری فایل‌های پیکربندی -----
+    # ----- بارگذاری فایل‌های پیکربندی از پوشه config -----
     def _load_constraints(self) -> Dict:
-        """بارگذاری constraints.yaml از ریشه پروژه"""
+        """بارگذاری constraints.yaml از پوشه backend/config/"""
         config_path = os.path.join(
-            os.path.dirname(__file__), '..', '..', 'constraints.yaml'
+            os.path.dirname(__file__), '..', 'config', 'constraints.yaml'
         )
         try:
             with open(config_path, 'r', encoding='utf-8') as f:
@@ -65,16 +65,16 @@ class ValidationService:
                     data['soft_constraints'] = []
                 return data
         except FileNotFoundError:
-            logger.warning("constraints.yaml یافت نشد، از مقادیر پیش‌فرض استفاده می‌شود.")
+            logger.warning("constraints.yaml در مسیر config یافت نشد، از مقادیر پیش‌فرض استفاده می‌شود.")
             return self._default_constraints()
         except Exception as e:
             logger.error(f"خطا در بارگذاری constraints.yaml: {e}")
             return self._default_constraints()
 
     def _load_scoring(self) -> Dict:
-        """بارگذاری scoring.yaml"""
+        """بارگذاری scoring.yaml از پوشه backend/config/"""
         config_path = os.path.join(
-            os.path.dirname(__file__), '..', '..', 'scoring.yaml'
+            os.path.dirname(__file__), '..', 'config', 'scoring.yaml'
         )
         try:
             with open(config_path, 'r', encoding='utf-8') as f:
