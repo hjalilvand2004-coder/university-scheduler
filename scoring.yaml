@@ -1,0 +1,13 @@
+# scoring.yaml
+weights:
+  preferred_time: 10
+  preferred_instructor: 8
+  preferred_room: 6
+  minimize_gaps: 5
+  balance_workload: 4
+  department_distribution: 3
+
+scoring_rules:
+  base_score: 100
+  penalty_per_conflict: -20
+  bonus_per_preference: +5

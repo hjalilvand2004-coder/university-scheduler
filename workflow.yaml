@@ -1,0 +1,31 @@
+# workflow.yaml
+stages:
+  - name: data_collection
+    description: "جمع‌آوری داده‌های ورودی از سیستم‌های مختلف"
+    actions:
+      - load_courses
+      - load_instructors
+      - load_rooms
+      - load_historical_demand
+
+  - name: validation
+    description: "اعتبارسنجی داده‌ها و بررسی تعارضات"
+    actions:
+      - validate_prerequisites
+      - validate_instructor_availability
+      - validate_room_capacity
+      - check_conflicts
+
+  - name: optimization
+    description: "اجرای الگوریتم بهینه‌سازی با OR-Tools"
+    actions:
+      - run_cp_sat_solver
+      - apply_hard_constraints
+      - maximize_soft_constraints
+
+  - name: publication
+    description: "انتشار برنامه نهایی و ثبت نسخه"
+    actions:
+      - create_schedule_version
+      - notify_stakeholders
+      - archive_previous_version

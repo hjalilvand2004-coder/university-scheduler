@@ -1,0 +1,16 @@
+# constraints.yaml
+hard_constraints:
+  - no_instructor_conflict
+  - no_room_conflict
+  - no_student_conflict
+  - room_capacity_enough
+  - instructor_availability
+  - prerequisites_met
+
+soft_constraints:
+  - preferred_time_slots
+  - preferred_instructors
+  - preferred_rooms
+  - minimize_gaps
+  - balance_workload
+  - department_distribution

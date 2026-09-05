@@ -2,6 +2,8 @@ from ortools.sat.python import cp_model
 from typing import List, Dict, Any, Optional
 import logging
 from collections import defaultdict
+import yaml
+import os
 
 from app.schemas.course import Course, Instructor, Room, TimeSlot
 from app.services.demand_service import predict_demand, calculate_required_groups
@@ -9,6 +11,451 @@ from app.services.demand_service import predict_demand, calculate_required_group
 logger = logging.getLogger(__name__)
 
 
+# ============================================================
+# کلاس جدید: ScheduleOptimizer برای معماری ترکیبی هوشمند
+# ============================================================
+class ScheduleOptimizer:
+    """
+    کلاس بهینه‌ساز برنامه با استفاده از OR-Tools CP-SAT
+    پیاده‌سازی معماری ترکیبی هوشمند با قوانین سخت و نرم
+    """
+
+    def __init__(self, config_path: str = "scoring.yaml"):
+        """
+        مقداردهی اولیه بهینه‌ساز
+
+        Args:
+            config_path: مسیر فایل پیکربندی امتیازات
+        """
+        self.model = cp_model.CpModel()
+        self.solver = cp_model.CpSolver()
+        self.config = self._load_config(config_path)
+        self.variables = []
+        self.by_course = {}
+        self.by_instructor_slot = {}
+        self.by_room_slot = {}
+        self.by_cohort_slot = {}
+        self.unschedulable_courses = []
+
+    def _load_config(self, config_path: str) -> Dict[str, Any]:
+        """
+        بارگذاری فایل پیکربندی امتیازات
+
+        Args:
+            config_path: مسیر فایل پیکربندی
+
+        Returns:
+            دیکشنری شامل تنظیمات امتیازات
+        """
+        default_config = {
+            "weights": {
+                "preferred_time": 10,
+                "preferred_instructor": 8,
+                "preferred_room": 6,
+                "minimize_gaps": 5,
+                "balance_workload": 4,
+                "department_distribution": 3
+            },
+            "scoring_rules": {
+                "base_score": 100,
+                "penalty_per_conflict": -20,
+                "bonus_per_preference": 5
+            }
+        }
+
+        try:
+            if os.path.exists(config_path):
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    config = yaml.safe_load(f)
+                    if config:
+                        return config
+            return default_config
+        except Exception as e:
+            logger.warning(f"خطا در بارگذاری فایل پیکربندی {config_path}: {e}")
+            return default_config
+
+    def optimize(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        اجرای بهینه‌سازی با رعایت قوانین سخت و نرم
+
+        Args:
+            data: دیکشنری شامل داده‌های ورودی (دروس، اساتید، اتاق‌ها، زمان‌ها)
+
+        Returns:
+            نتیجه بهینه‌سازی یا None در صورت عدم موفقیت
+        """
+        logger.info("شروع بهینه‌سازی با OR-Tools...")
+
+        # 1. تعریف متغیرها (دروس، اساتید، اتاق‌ها، زمان‌ها)
+        self._define_variables(data)
+
+        # 2. اعمال قوانین سخت (hard constraints)
+        self._apply_hard_constraints()
+
+        # 3. تعریف تابع هدف بر اساس امتیازات نرم (soft constraints)
+        self._build_objective(data)
+
+        # 4. حل مسئله
+        self.solver.parameters.max_time_in_seconds = data.get('max_time', 30)
+        self.solver.parameters.num_search_workers = data.get('num_workers', 8)
+        self.solver.parameters.random_seed = 42
+
+        status = self.solver.Solve(self.model)
+
+        logger.info(f"وضعیت حل: {self.solver.StatusName(status)}")
+        logger.info(f"زمان حل: {self.solver.WallTime():.2f} ثانیه")
+
+        if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
+            return self._extract_solution(data)
+
+        logger.warning("هیچ جواب قابل قبولی یافت نشد")
+        return None
+
+    def _define_variables(self, data: Dict[str, Any]) -> None:
+        """
+        تعریف متغیرهای تصمیم برای دروس، اساتید، اتاق‌ها و زمان‌ها
+
+        Args:
+            data: دیکشنری شامل داده‌های ورودی
+        """
+        courses = data.get('courses', [])
+        instructors = data.get('instructors', [])
+        rooms = data.get('rooms', [])
+        slots = data.get('slots', [])
+        max_groups_per_course = data.get('max_groups_per_course', 3)
+
+        logger.info(f"تعریف متغیرها برای {len(courses)} درس، {len(instructors)} استاد، {len(rooms)} اتاق، {len(slots)} زمان")
+
+        for course in courses:
+            # استادان واجد شرایط
+            valid_instructors = [
+                instructor for instructor in instructors
+                if course.id in instructor.qualified_course_ids
+            ]
+
+            # اتاق‌های سازگار با نوع درس
+            compatible_rooms = [
+                room for room in rooms
+                if course.course_type in room.room_types
+            ]
+
+            if not valid_instructors or not compatible_rooms:
+                self.unschedulable_courses.append({
+                    "course_id": course.id,
+                    "course_code": course.code,
+                    "course_title": course.title,
+                    "reason": "برای درس استاد واجد شرایط یا کلاس سازگار با نوع درس پیدا نشد",
+                    "valid_instructors_count": len(valid_instructors),
+                    "compatible_rooms_count": len(compatible_rooms),
+                })
+                continue
+
+            # پیش‌بینی تقاضا
+            predicted_students = predict_demand(course)
+
+            # تعداد گروه‌های لازم
+            max_room_capacity = max(room.capacity for room in compatible_rooms) if compatible_rooms else 30
+            number_of_groups = calculate_required_groups(
+                predicted_students=predicted_students,
+                room_capacity=max_room_capacity,
+                max_groups=max_groups_per_course,
+            )
+
+            course_vars = []
+            students_per_group = (predicted_students + number_of_groups - 1) // number_of_groups
+
+            # اتاق‌های با ظرفیت کافی
+            valid_rooms = [
+                room for room in compatible_rooms
+                if room.capacity >= students_per_group
+            ]
+
+            if not valid_rooms:
+                self.unschedulable_courses.append({
+                    "course_id": course.id,
+                    "course_code": course.code,
+                    "course_title": course.title,
+                    "reason": "هیچ کلاسی ظرفیت کافی برای تعداد دانشجویان هر گروه ندارد",
+                    "predicted_students": predicted_students,
+                    "number_of_groups": number_of_groups,
+                    "students_per_group": students_per_group,
+                })
+                continue
+
+            for group_number in range(1, number_of_groups + 1):
+                group_candidates = []
+
+                for instructor in valid_instructors:
+                    for room in valid_rooms:
+                        for slot in slots:
+                            var_name = f"c{course.id}_g{group_number}_i{instructor.id}_r{room.id}_s{slot.id}"
+                            decision_var = self.model.NewBoolVar(var_name)
+
+                            candidate = {
+                                "var": decision_var,
+                                "course": course,
+                                "group_number": group_number,
+                                "instructor": instructor,
+                                "room": room,
+                                "slot": slot,
+                                "predicted_students": predicted_students,
+                                "students_per_group": students_per_group,
+                            }
+
+                            group_candidates.append(candidate)
+                            course_vars.append(candidate)
+                            self.variables.append(candidate)
+
+                            # ذخیره برای محدودیت‌ها
+                            self.by_instructor_slot.setdefault((instructor.id, slot.id), []).append(decision_var)
+                            self.by_room_slot.setdefault((room.id, slot.id), []).append(decision_var)
+
+                            for cohort in course.cohorts:
+                                if cohort:
+                                    self.by_cohort_slot.setdefault((cohort, slot.id), []).append(decision_var)
+
+                if group_candidates:
+                    self.model.Add(sum(item["var"] for item in group_candidates) == 1)
+
+            self.by_course[course.id] = course_vars
+
+        logger.info(f"تعداد متغیرهای تعریف شده: {len(self.variables)}")
+
+    def _apply_hard_constraints(self) -> None:
+        """
+        اعمال قوانین سخت (hard constraints)
+        """
+        logger.info("اعمال قوانین سخت...")
+
+        # 1. عدم تداخل استاد
+        for (inst_id, slot_id), decision_vars in self.by_instructor_slot.items():
+            self.model.Add(sum(decision_vars) <= 1)
+        logger.info(f"محدودیت تداخل استاد: {len(self.by_instructor_slot)} مورد")
+
+        # 2. عدم تداخل اتاق
+        for (room_id, slot_id), decision_vars in self.by_room_slot.items():
+            self.model.Add(sum(decision_vars) <= 1)
+        logger.info(f"محدودیت تداخل اتاق: {len(self.by_room_slot)} مورد")
+
+        # 3. عدم تداخل گروه دانشجویی
+        for (cohort, slot_id), decision_vars in self.by_cohort_slot.items():
+            self.model.Add(sum(decision_vars) <= 1)
+        logger.info(f"محدودیت تداخل گروه: {len(self.by_cohort_slot)} مورد")
+
+    def _build_objective(self, data: Dict[str, Any]) -> None:
+        """
+        تعریف تابع هدف بر اساس امتیازات نرم (soft constraints)
+
+        Args:
+            data: دیکشنری شامل داده‌های ورودی
+        """
+        logger.info("ساخت تابع هدف بر اساس امتیازات نرم...")
+
+        objective_terms = []
+        weights = self.config.get('weights', {})
+        scoring_rules = self.config.get('scoring_rules', {})
+        objective_mode = data.get('objective_mode', 'balanced')
+        weight_multiplier = data.get('weight_multiplier', {"teacher": 1.0, "course": 1.0, "compact": 1.0})
+
+        # تنظیم ضرایب بر اساس حالت
+        if objective_mode == "teacher_preferences":
+            weight_multiplier = {"teacher": 2.0, "course": 0.5, "compact": 0.5}
+        elif objective_mode == "graduation_priority":
+            weight_multiplier = {"teacher": 0.5, "course": 2.0, "compact": 0.5}
+        elif objective_mode == "compact_schedule":
+            weight_multiplier = {"teacher": 0.5, "course": 0.5, "compact": 2.0}
+
+        for item in self.variables:
+            decision_var = item["var"]
+            course = item["course"]
+            instructor = item["instructor"]
+            room = item["room"]
+            slot = item["slot"]
+
+            reward = 0
+
+            # 1. ترجیح روز استاد (وزن: teacher)
+            if slot.day in instructor.preferred_days:
+                reward += weights.get('preferred_time', 10) * 0.5 * weight_multiplier.get("teacher", 1.0)
+
+            # 2. ترجیح ساعت استاد (وزن: teacher)
+            if slot.id in instructor.preferred_slots:
+                reward += weights.get('preferred_time', 10) * 0.5 * weight_multiplier.get("teacher", 1.0)
+
+            # 3. ترجیح استاد (وزن: preferred_instructor)
+            if course.id in instructor.qualified_course_ids:
+                reward += weights.get('preferred_instructor', 8) * weight_multiplier.get("teacher", 1.0)
+
+            # 4. ترجیح اتاق (وزن: preferred_room)
+            if course.course_type in room.room_types:
+                reward += weights.get('preferred_room', 6) * weight_multiplier.get("compact", 1.0)
+
+            # 5. ترجیح روز درس (وزن: compact)
+            if course.preferred_days and slot.day in course.preferred_days:
+                reward += weights.get('minimize_gaps', 5) * weight_multiplier.get("compact", 1.0)
+
+            # 6. ترجیح ساعت درس (وزن: compact)
+            if course.preferred_slots and slot.id in course.preferred_slots:
+                reward += weights.get('minimize_gaps', 5) * weight_multiplier.get("compact", 1.0)
+
+            # 7. اهمیت درس برای فارغ‌التحصیلی (وزن: course)
+            if course.graduation_critical:
+                reward += scoring_rules.get('bonus_per_preference', 5) * 2 * weight_multiplier.get("course", 1.0)
+
+            # 8. گلوگاهی بودن درس (وزن: course)
+            if course.bottleneck:
+                reward += scoring_rules.get('bonus_per_preference', 5) * 2 * weight_multiplier.get("course", 1.0)
+
+            # 9. الزام درس در چارت (وزن: course)
+            if course.chart_required:
+                reward += scoring_rules.get('bonus_per_preference', 5) * 1.5 * weight_multiplier.get("course", 1.0)
+
+            # 10. تعادل بار کاری (وزن: balance_workload)
+            reward += weights.get('balance_workload', 4) * 0.2
+
+            objective_terms.append(reward * decision_var)
+
+        if objective_terms:
+            self.model.Maximize(sum(objective_terms))
+            logger.info(f"تابع هدف با {len(objective_terms)} عبارت تعریف شد")
+        else:
+            logger.warning("هیچ عبارتی برای تابع هدف تعریف نشد")
+
+    def _extract_solution(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        استخراج جواب بهینه از مدل
+
+        Args:
+            data: دیکشنری شامل داده‌های ورودی
+
+        Returns:
+            دیکشنری شامل جواب بهینه
+        """
+        logger.info("استخراج جواب بهینه...")
+
+        result = []
+        expected_group_count = 0
+
+        for course_id, course_variables in self.by_course.items():
+            selected_groups = {
+                item["group_number"]
+                for item in course_variables
+                if self.solver.Value(item["var"]) == 1
+            }
+            expected_group_count += len(selected_groups)
+
+        for item in self.variables:
+            if self.solver.Value(item["var"]) != 1:
+                continue
+
+            course = item["course"]
+            instructor = item["instructor"]
+            room = item["room"]
+            slot = item["slot"]
+
+            result.append({
+                "course_id": course.id,
+                "course_code": course.code,
+                "course_title": course.title,
+                "group_number": item["group_number"],
+                "instructor_id": instructor.id,
+                "instructor_name": instructor.name,
+                "room_id": room.id,
+                "room_name": room.name,
+                "room_capacity": room.capacity,
+                "slot_id": slot.id,
+                "day": slot.day,
+                "start": slot.start,
+                "end": slot.end,
+                "predicted_students": item.get("predicted_students", 0),
+                "students_per_group": item.get("students_per_group", 0),
+                "course_type": course.course_type.value if hasattr(course.course_type, "value") else str(course.course_type),
+                "cohorts": course.cohorts,
+            })
+
+        result.sort(key=lambda x: (x["day"], x["slot_id"], x["course_code"], x["group_number"]))
+
+        final_status = "optimal" if self.solver.StatusName() == "OPTIMAL" else "feasible"
+
+        return {
+            "status": final_status,
+            "objective_value": self.solver.ObjectiveValue(),
+            "classes": result,
+            "unschedulable_courses": self.unschedulable_courses,
+            "expected_group_count": expected_group_count,
+            "actual_group_count": len(result),
+            "message": "برنامه با موفقیت تولید شد و محدودیت‌های سخت رعایت شده‌اند",
+            "solver_time": self.solver.WallTime(),
+            "solver_status": self.solver.StatusName(),
+            "total_variables": len(self.variables),
+            "objective_mode": data.get('objective_mode', 'balanced'),
+        }
+
+
+# ============================================================
+# تابع جدید: پیدا کردن بهبود برای نقاط ضعف
+# ============================================================
+def find_improvement(schedule: List[Dict], weak_point: Dict) -> Optional[Dict]:
+    """
+    یافتن جابه‌جایی بهینه برای بهبود نقطه ضعف مشخص
+
+    Args:
+        schedule: لیست کلاس‌های زمان‌بندی‌شده
+        weak_point: نقطه ضعف شناسایی شده
+
+    Returns:
+        دیکشنری شامل اطلاعات جابه‌جایی پیشنهادی
+    """
+    logger.info(f"یافتن بهبود برای نقطه ضعف: {weak_point.get('type', 'unknown')}")
+
+    improvement = None
+    weak_type = weak_point.get('type')
+
+    if weak_type == 'unbalanced_days':
+        day = weak_point.get('day')
+        if day is not None:
+            day_classes = [item for item in schedule if item.get('day') == day]
+            if day_classes:
+                improvement = {
+                    'action': f"انتقال یک کلاس از روز {day} به روز دیگر",
+                    'reason': f"روز {day} دارای {weak_point.get('count')} کلاس است که بیشتر از میانگین است",
+                    'score_improvement': 5.0
+                }
+
+    elif weak_type == 'large_gap':
+        instructor = weak_point.get('instructor')
+        gap_minutes = weak_point.get('gap_minutes', 0)
+        if instructor and gap_minutes > 120:
+            improvement = {
+                'action': f"فشرده‌سازی کلاس‌های استاد {instructor}",
+                'reason': f"فاصله {gap_minutes} دقیقه‌ای بین کلاس‌ها وجود دارد",
+                'score_improvement': min(gap_minutes / 10, 10.0)
+            }
+
+    elif weak_type == 'overused_room':
+        room = weak_point.get('room')
+        if room:
+            improvement = {
+                'action': f"انتقال برخی کلاس‌ها از اتاق {room} به اتاق دیگر",
+                'reason': f"اتاق {room} دارای استفاده بیش از حد است",
+                'score_improvement': 3.0
+            }
+
+    elif weak_type == 'underused_room':
+        room = weak_point.get('room')
+        if room:
+            improvement = {
+                'action': f"استفاده بهتر از اتاق {room}",
+                'reason': f"اتاق {room} استفاده کمی دارد",
+                'score_improvement': 2.0
+            }
+
+    return improvement
+
+
+# ============================================================
+# تابع اصلی: solve_schedule (976 خط موجود)
+# ============================================================
 def solve_schedule(
     courses: list[Course],
     instructors: list[Instructor],

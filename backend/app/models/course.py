@@ -1,5 +1,7 @@
-from sqlalchemy import Column, Integer, String, Boolean, Float
+from sqlalchemy import Column, Integer, String, Boolean, Float, JSON, DateTime
+from sqlalchemy.sql import func
 from app.core.database import Base
+
 
 class UniqueCourse(Base):
     __tablename__ = "unique_courses"
@@ -9,6 +11,13 @@ class UniqueCourse(Base):
     status = Column(String, default="active")
     group = Column(String)
     estimated_capacity = Column(Integer, default=0)  # ← فیلد جدید
+
+    # فیلدهای جدید برای معماری ترکیبی هوشمند
+    historical_demand = Column(JSON, default=list)  # ذخیره داده‌های تقاضای ترم‌های گذشته
+    avg_rating = Column(Float, default=0.0)  # امتیاز متوسط از کاربران
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
 
 class OfferedCourse(Base):
     __tablename__ = "offered_courses"
@@ -25,3 +34,11 @@ class OfferedCourse(Base):
     course_type = Column(String)
     is_active = Column(Boolean, default=True)
     type_course = Column(String)
+
+    # فیلدهای جدید برای معماری ترکیبی هوشمند
+    preferred_instructors = Column(JSON, default=list)  # لیست اساتید ترجیحی
+    preferred_time_slots = Column(JSON, default=list)  # زمان‌های ترجیحی
+    enrollment_count = Column(Integer, default=0)  # تعداد دانشجویان ثبت‌نام شده
+    demand_prediction = Column(Integer, default=0)  # پیش‌بینی تقاضا برای ترم جاری
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
