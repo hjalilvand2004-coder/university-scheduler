@@ -5,6 +5,8 @@ from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 import logging
 import traceback
+from sqlalchemy import inspect, text
+from app.core.database import engine  # فرض بر این است که engine در این مسیر تعریف شده است
 
 from app.api.routes_schedule import router as schedule_router
 from app.api.routes_courses import router as courses_router
@@ -19,23 +21,63 @@ from app.api.routes_workflow import router as workflow_router
 from app.api.routes_baskets import router as baskets_router
 from app.api.routes_room_allocation import router as room_allocation_router
 from app.api.routes_optimization import router as optimization_router
-
-# ===== اضافه کردن روتر اسلات‌های زمانی =====
 from app.services.schedule.slot_times import router as slot_times_router
-
 from app.api import test_report
 
 # تنظیم لاگر
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
+# ===== تابع برای اضافه کردن ستون‌های گم‌شده به دیتابیس =====
+def ensure_missing_columns():
+    """
+    بررسی و اضافه کردن ستون‌های مورد نیاز به جداول موجود (برای SQLite)
+    """
+    required_columns = {
+        "unique_courses": ["historical_demand", "avg_rating"],
+        "offered_courses": ["preferred_instructors", "preferred_time_slots", "enrollment_count", "demand_prediction"],
+    }
+
+    with engine.connect() as conn:
+        for table, columns in required_columns.items():
+            # دریافت لیست ستون‌های موجود
+            inspector = inspect(engine)
+            existing_columns = [col['name'] for col in inspector.get_columns(table)]
+
+            for col in columns:
+                if col not in existing_columns:
+                    # اضافه کردن ستون به جدول
+                    try:
+                        # نوع داده‌ها بر اساس نیاز: برای TEXT و FLOAT
+                        if col in ["historical_demand", "avg_rating", "enrollment_count", "demand_prediction"]:
+                            col_type = "FLOAT"
+                        else:
+                            col_type = "TEXT"
+
+                        alter_sql = f"ALTER TABLE {table} ADD COLUMN {col} {col_type};"
+                        conn.execute(text(alter_sql))
+                        conn.commit()
+                        logger.info(f"✅ ستون '{col}' به جدول '{table}' اضافه شد.")
+                    except Exception as e:
+                        logger.error(f"❌ خطا در اضافه کردن ستون '{col}' به جدول '{table}': {e}")
+                else:
+                    logger.info(f"ℹ️ ستون '{col}' در جدول '{table}' وجود دارد.")
+
+
 # ===== استفاده از lifespan =====
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("🚀 راه‌اندازی سامانه هوشمند برنامه‌ریزی درسی...")
     try:
+        # مقداردهی اولیه دیتابیس (ایجاد جداول در صورت عدم وجود)
         init_db()
         logger.info("✅ دیتابیس با موفقیت مقداردهی شد.")
+
+        # اضافه کردن ستون‌های گم‌شده (برای رفع خطای no such column)
+        ensure_missing_columns()
+        logger.info("✅ ساختار دیتابیس به‌روزرسانی شد.")
+
     except Exception as e:
         logger.error(f"❌ خطا در مقداردهی دیتابیس: {e}")
         logger.error(traceback.format_exc())
@@ -81,9 +123,8 @@ app.include_router(baskets_router, prefix="/api", tags=["Baskets"])
 app.include_router(optimization_router, prefix="/api")
 app.include_router(room_allocation_router)
 app.include_router(test_report.router)
-
-# ===== اضافه کردن روتر اسلات‌های زمانی =====
 app.include_router(slot_times_router)
+
 
 # ===== اندپوینت ریشه =====
 @app.get("/")
@@ -98,10 +139,12 @@ def root():
         }
     }
 
+
 # ===== اندپوینت سلامت =====
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
+
 
 # ===== مدیریت خطاهای عمومی =====
 @app.exception_handler(Exception)
