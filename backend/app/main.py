@@ -6,7 +6,10 @@ from contextlib import asynccontextmanager
 import logging
 import traceback
 from sqlalchemy import inspect, text
-from app.core.database import engine  # فرض بر این است که engine در این مسیر تعریف شده است
+from app.core.database import engine
+
+from app.api import router as api_router
+
 
 from app.api.routes_schedule import router as schedule_router
 from app.api.routes_courses import router as courses_router
@@ -23,6 +26,10 @@ from app.api.routes_room_allocation import router as room_allocation_router
 from app.api.routes_optimization import router as optimization_router
 from app.services.schedule.slot_times import router as slot_times_router
 from app.api import test_report
+from app.api.routes_feedback import router as feedback_router
+
+# ===== ایمپورت جدید: روتر مرکزی برای ویژگی‌های جدید =====
+from app.api import router as api_router  # این شامل proposals, votes, ratings است
 
 # تنظیم لاگر
 logging.basicConfig(level=logging.INFO)
@@ -109,7 +116,7 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
-# ===== ثبت روترها =====
+# ===== ثبت روترهای موجود =====
 app.include_router(courses_router, tags=["Courses"])
 app.include_router(charts_router, tags=["Charts"])
 app.include_router(professors_rooms_router, tags=["Professors & Rooms"])
@@ -124,7 +131,12 @@ app.include_router(optimization_router, prefix="/api")
 app.include_router(room_allocation_router)
 app.include_router(test_report.router)
 app.include_router(slot_times_router)
+app.include_router(feedback_router)
 
+
+# ===== ثبت روتر جدید برای ویژگی‌های پیشنهاد درس، نظرسنجی و امتیازدهی =====
+# این روتر شامل مسیرهای /proposals, /votes, /ratings با پیشوند /api می‌باشد
+app.include_router(api_router, prefix="/api")
 
 # ===== اندپوینت ریشه =====
 @app.get("/")

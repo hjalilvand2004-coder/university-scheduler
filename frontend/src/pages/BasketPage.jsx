@@ -6,21 +6,6 @@ import { getInitialBasket, addStatisticsToBasket } from "../api/workflowApi";
 import "./BasketPage.css";
 
 // ============================================================
-// ثابت‌های هماهنگ با بک‌اند (کلیدهای قدیمی اما بک‌اند نرمال‌سازی می‌کند)
-// ============================================================
-const TERM_OPTIONS = [
-  { value: "mehr", label: "نیمسال اول (مهر)" },
-  { value: "bahman", label: "نیمسال دوم (بهمن)" },
-  { value: "summer", label: "نیمسال تابستان" },
-];
-
-const TERM_DISPLAY = {
-  mehr: "مهر",
-  bahman: "بهمن",
-  summer: "تابستان",
-};
-
-// ============================================================
 // کامپوننت مودال ایجاد سبد جدید (مشترک)
 // ============================================================
 function CreateBasketModal({ onClose, onBasketCreated }) {
@@ -81,9 +66,8 @@ function CreateBasketModal({ onClose, onBasketCreated }) {
             <div className="form-group">
               <label>ترم</label>
               <select value={semester} onChange={(e) => setSemester(e.target.value)}>
-                {TERM_OPTIONS.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
+                <option value="mehr">مهر</option>
+                <option value="bahman">بهمن</option>
               </select>
             </div>
             <div className="form-group">
@@ -173,7 +157,7 @@ function BasketSelector({ onSelectBasket }) {
               {baskets.map((basket) => (
                 <tr key={basket.id}>
                   <td className="basket-title">{basket.title}</td>
-                  <td>{TERM_DISPLAY[basket.semester] || basket.semester}</td>
+                  <td>{basket.semester === "mehr" ? "مهر" : "بهمن"}</td>
                   <td>{basket.year}</td>
                   <td>{new Date(basket.created_at).toLocaleDateString('fa-IR')}</td>
                   <td className="item-count">{basket.items?.length || 0}</td>
@@ -416,7 +400,7 @@ function BasketWizard({
   };
 
   // ============================================================
-  // دریافت لیست دروس (ایجاد سبد جدید) - اصلاح‌شده با مدیریت خطای دقیق‌تر
+  // دریافت لیست دروس (ایجاد سبد جدید)
   // ============================================================
   const handleFetchData = async () => {
     if (!basketId) {
@@ -439,12 +423,8 @@ function BasketWizard({
     setIsLoading(true);
     setError(null);
     try {
-      // استفاده از semester از basketMeta (که هم‌اکنون به صورت mehr/bahman/summer است)
-      const semesterValue = basketMeta.semester || semester || "mehr";
-      console.log("📤 ارسال درخواست به سرور با:", { semester: semesterValue, levels, year: basketMeta.year });
-
       const initialResult = await getInitialBasket({
-        semester: semesterValue,
+        semester: basketMeta.semester || semester,
         levels,
         year: basketMeta.year,
       });
@@ -471,22 +451,7 @@ function BasketWizard({
       setFullData(merged);
       setExpandedClasses(null);
     } catch (e) {
-      console.error("❌ خطا در دریافت لیست دروس:", e);
-      // نمایش پیام خطای دقیق‌تر از سرور
-      let errorMessage = "خطا در دریافت لیست دروس. لطفاً دوباره تلاش کنید.";
-      if (e.response) {
-        const detail = e.response.data?.detail;
-        if (typeof detail === 'string') {
-          errorMessage = detail;
-        } else if (typeof detail === 'object') {
-          errorMessage = JSON.stringify(detail);
-        } else {
-          errorMessage = e.response.statusText || errorMessage;
-        }
-      } else if (e.message) {
-        errorMessage = e.message;
-      }
-      setError(`⚠️ ${errorMessage}`);
+      setError(e.message);
     } finally {
       setIsLoading(false);
     }
@@ -715,7 +680,7 @@ function BasketWizard({
           </span>
           {basketMeta.title && (
             <span className="basket-meta" style={{ marginRight: "20px", fontSize: "0.9rem", color: "#666" }}>
-              {basketMeta.title} ({TERM_DISPLAY[basketMeta.semester] || basketMeta.semester} {basketMeta.year})
+              {basketMeta.title} ({basketMeta.semester === "mehr" ? "مهر" : "بهمن"} {basketMeta.year})
             </span>
           )}
         </div>

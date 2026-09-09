@@ -1,13 +1,20 @@
-from app.models.basket import Basket
-from app.models.basket_item import BasketItem
-from app.models.course import UniqueCourse, OfferedCourse
-from app.models.instructor import Instructor
-from app.models.room import Room
-from app.models.schedule import ScheduledClass
-from app.models.schedule_history import ScheduleHistory
-from app.models.term_course import TermCourse
-from app.models.teaching_preference import TeachingPreference
-from app.models.time_preference import TimePreference
-from app.models.workflow import ScheduleWorkflow
-from app.models.basket_item import BasketItem
+from .basket import Basket
+from .basket_item import BasketItem
+from .course import UniqueCourse, OfferedCourse
+from .instructor import Instructor
+from .room import Room
+from .schedule import ScheduledClass
+from .schedule_history import ScheduleHistory
+from .term_course import TermCourse
+from .teaching_preference import TeachingPreference
+from .time_preference import TimePreference
+from .workflow import ScheduleWorkflow
 from .unassigned_class import UnassignedClass
+from .vote_poll import VotePoll
+
+
+# مدل‌های جدید (برای ویژگی‌های درخواستی)
+from .student import Student
+from .course_proposal import CourseProposal
+from .course_vote import CourseVote
+from .course_rating import CourseRating

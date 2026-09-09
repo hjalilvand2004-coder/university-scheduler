@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, Float, JSON, DateTime
+from sqlalchemy.orm import relationship  # ← ایمپورت ضروری برای رابطه
 from sqlalchemy.sql import func
 from app.core.database import Base
 
@@ -10,13 +11,16 @@ class UniqueCourse(Base):
     title = Column(String)
     status = Column(String, default="active")
     group = Column(String)
-    estimated_capacity = Column(Integer, default=0)  # ← فیلد جدید
+    estimated_capacity = Column(Integer, default=0)
 
     # فیلدهای جدید برای معماری ترکیبی هوشمند
-    historical_demand = Column(JSON, default=list)  # ذخیره داده‌های تقاضای ترم‌های گذشته
-    avg_rating = Column(Float, default=0.0)  # امتیاز متوسط از کاربران
+    historical_demand = Column(JSON, default=list)
+    avg_rating = Column(Float, default=0.0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # ===== رابطه با VotePoll (برای رفع خطای Mapper) =====
+    vote_polls = relationship("VotePoll", back_populates="course")
 
 
 class OfferedCourse(Base):
@@ -36,9 +40,9 @@ class OfferedCourse(Base):
     type_course = Column(String)
 
     # فیلدهای جدید برای معماری ترکیبی هوشمند
-    preferred_instructors = Column(JSON, default=list)  # لیست اساتید ترجیحی
-    preferred_time_slots = Column(JSON, default=list)  # زمان‌های ترجیحی
-    enrollment_count = Column(Integer, default=0)  # تعداد دانشجویان ثبت‌نام شده
-    demand_prediction = Column(Integer, default=0)  # پیش‌بینی تقاضا برای ترم جاری
+    preferred_instructors = Column(JSON, default=list)
+    preferred_time_slots = Column(JSON, default=list)
+    enrollment_count = Column(Integer, default=0)
+    demand_prediction = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

@@ -15,6 +15,16 @@ export default defineConfig({
     host: '0.0.0.0',      // گوش دادن روی تمام شبکه (برای تست با IP)
     port: 5173,
     strictPort: true,      // اگر پورت اشغال بود خطا بدهد (برای عیب‌یابی)
+    // ===== تنظیمات پروکسی برای هدایت درخواست‌های API به بک‌اند =====
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',  // آدرس بک‌اند
+        changeOrigin: true,                // تغییر origin برای جلوگیری از CORS
+        secure: false,                    // غیرفعال کردن بررسی SSL در محیط توسعه
+        // در صورت نیاز به تغییر مسیر می‌توان از rewrite استفاده کرد
+        // rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
   },
   // (اختیاری) اگر پوشه public دارید، مطمئن شوید مسیر آن درست است
   publicDir: path.join(__dirname, 'public'),

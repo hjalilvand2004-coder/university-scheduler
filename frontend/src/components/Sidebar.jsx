@@ -1,4 +1,4 @@
-// frontend/src/components/Sidebar.jsx
+﻿// frontend/src/components/Sidebar.jsx
 import { useState } from "react";
 import "./Sidebar.css";
 
@@ -8,6 +8,8 @@ export default function Sidebar({ onNavigate, activePage }) {
     dashboard: true,
     "اطلاعات پایه": true,
     "برنامه‌ریزی درسی": true,
+    "تعامل دانشجویی": true,
+    مدیریت: true,           // دسته جدید مدیریت
     "تولید برنامه هفتگی": true,
     تنظیمات: true,
   });
@@ -53,11 +55,31 @@ export default function Sidebar({ onNavigate, activePage }) {
       ],
     },
     {
+      title: "تعامل دانشجویی",
+      icon: "💬",
+      color: "#ec4899",
+      items: [
+        { id: "proposal", label: "پیشنهاد دروس", icon: "📝" },
+        { id: "vote", label: "نظرسنجی دروس", icon: "👍" },
+        { id: "rating", label: "امتیازدهی به برنامه", icon: "⭐" },
+      ],
+    },
+    {
+      title: "مدیریت",            // دسته جدید برای ابزارهای مدیریتی
+      icon: "⚡",
+      color: "#f43f5e",
+      items: [
+        { id: "vote-management", label: "مدیریت نظرسنجی", icon: "🗳️" },
+        // در آینده می‌توانید آیتم‌های مدیریتی دیگر را اضافه کنید
+        // { id: "user-management", label: "مدیریت کاربران", icon: "👥" },
+      ],
+    },
+    {
       title: "تولید برنامه هفتگی",
       icon: "🚀",
       color: "#f59e0b",
       items: [
-        { id: "basket", label: "مدیریت سبد دروس", icon: "📦" },  // تغییر برچسب برای وضوح
+        { id: "basket", label: "مدیریت سبد دروس", icon: "📦" },
         { id: "instructor-time", label: "زمان‌بندی استاد و درس", icon: "⏳" },
         { id: "room-allocation", label: "تخصیص اتاق", icon: "🏢" },
         { id: "optimization", label: "بهینه‌سازی برنامه", icon: "⚡" },

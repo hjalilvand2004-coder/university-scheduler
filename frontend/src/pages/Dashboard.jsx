@@ -1,10 +1,14 @@
-// frontend/src/pages/Dashboard.jsx
+﻿// frontend/src/pages/Dashboard.jsx
 import { useEffect, useState, useCallback } from "react";
 import Sidebar from "../components/Sidebar";
 import BaseInfoPages from "./BaseInfoPages";
 import SchedulePages from "./SchedulePages";
 import DashboardHome from "./DashboardHome";
 import BasketListPage from "./BasketListPage";
+import ProposalForm from "./ProposalForm";
+import VoteForm from "./VoteForm";
+import RatingForm from "./RatingForm";
+import VoteManagement from "./VoteManagement"; // اضافه شده
 
 // ===== APIهای اطلاعات پایه =====
 import {
@@ -721,6 +725,7 @@ export default function Dashboard() {
   // رندر محتوای اصلی
   // ============================================================
   const renderContent = () => {
+    // ----- صفحه لیست سبدها -----
     if (activePage === "basket-list") {
       return (
         <BasketListPage
@@ -736,6 +741,7 @@ export default function Dashboard() {
       );
     }
 
+    // ----- صفحات اطلاعات پایه -----
     const basePages = [
       "unique-courses",
       "offered-courses",
@@ -796,6 +802,27 @@ export default function Dashboard() {
       );
     }
 
+    // ===== صفحه مدیریت نظرسنجی (جدید) =====
+    if (activePage === "vote-management") {
+      return <VoteManagement />;
+    }
+
+    // ----- صفحات جدید تعامل دانشجویی (پیشنهاد، نظرسنجی، امتیازدهی) -----
+    const studentPages = ["proposal", "vote", "rating"];
+    if (studentPages.includes(activePage)) {
+      switch (activePage) {
+        case "proposal":
+          return <ProposalForm />;
+        case "vote":
+          return <VoteForm />;
+        case "rating":
+          return <RatingForm />;
+        default:
+          return null;
+      }
+    }
+
+    // ----- صفحات برنامه‌ریزی (سبد، زمان‌بندی، تخصیص اتاق، بهینه‌سازی) -----
     const schedulePages = ["basket", "instructor-time", "room-allocation", "optimization", "schedule"];
     if (schedulePages.includes(activePage)) {
       return (
@@ -844,6 +871,7 @@ export default function Dashboard() {
       );
     }
 
+    // ----- صفحه داشبورد پیش‌فرض (در صورت عدم تطابق با هیچ‌کدام) -----
     return (
       <DashboardHome
         uniqueCourses={uniqueCourses}
