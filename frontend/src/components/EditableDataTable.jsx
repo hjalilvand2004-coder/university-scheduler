@@ -1,5 +1,6 @@
 // frontend/src/components/EditableDataTable.jsx
 import React, { useState, useRef, useEffect } from "react";
+import { FiTrash2 } from "react-icons/fi";
 import "./EditableDataTable.css";
 
 /**
@@ -51,7 +52,7 @@ export default function EditableDataTable({
           title="حذف"
           aria-label="حذف ردیف"
         >
-          ❌
+          <FiTrash2 />
         </button>
       ),
     });

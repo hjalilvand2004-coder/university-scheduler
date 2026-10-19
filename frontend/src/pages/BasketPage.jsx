@@ -1,5 +1,6 @@
 // frontend/src/pages/BasketPage.jsx
 import { useState, useEffect, useRef } from "react";
+import { FiPlus, FiTrash2, FiX, FiCheck, FiArrowLeft, FiUserPlus } from 'react-icons/fi';
 import axios from "axios";
 import EditableDataTable from "../components/EditableDataTable";
 import { getInitialBasket, addStatisticsToBasket } from "../api/workflowApi";
@@ -48,7 +49,7 @@ function CreateBasketModal({ onClose, onBasketCreated }) {
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3>➕ ایجاد سبد جدید</h3>
-          <button className="modal-close" onClick={onClose}>✕</button>
+          <button className="modal-close" onClick={onClose} title="بستن"><FiX /></button>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
@@ -83,10 +84,10 @@ function CreateBasketModal({ onClose, onBasketCreated }) {
           </div>
           <div className="modal-footer">
             <button type="button" className="btn-secondary" onClick={onClose} disabled={loading}>
-              انصراف
+              <FiX /> انصراف
             </button>
             <button type="submit" className="btn-primary" disabled={loading}>
-              {loading ? "در حال ایجاد..." : "ایجاد سبد"}
+              <FiCheck /> {loading ? "در حال ایجاد..." : "ایجاد سبد"}
             </button>
           </div>
         </form>
@@ -133,7 +134,7 @@ function BasketSelector({ onSelectBasket }) {
       <div className="selector-header">
         <h3>📋 انتخاب سبد دروس</h3>
         <button onClick={() => setShowCreateModal(true)} className="btn-primary">
-          ➕ ایجاد سبد جدید
+          <FiPlus /> ایجاد سبد جدید
         </button>
       </div>
       {baskets.length === 0 ? (
@@ -688,10 +689,10 @@ function BasketWizard({
           {hasData && (
             <>
               <button onClick={() => setShowModal(true)} className="btn-add-record">
-                ➕ افزودن رکورد
+                <FiUserPlus /> افزودن رکورد
               </button>
               <button onClick={clearBasket} className="btn-danger">
-                🗑️ حذف سبد
+                <FiTrash2 /> حذف سبد
               </button>
             </>
           )}
@@ -806,7 +807,7 @@ function BasketWizard({
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3><span className="modal-icon">➕</span> افزودن درس جدید</h3>
-              <button className="modal-close" onClick={() => setShowModal(false)}>✕</button>
+              <button className="modal-close" onClick={() => setShowModal(false)} title="بستن"><FiX /></button>
             </div>
             <div className="modal-body">
               {formError && <div className="form-error">{formError}</div>}
@@ -841,10 +842,10 @@ function BasketWizard({
             </div>
             <div className="modal-footer">
               <button className="btn-secondary" onClick={() => setShowModal(false)} disabled={isAdding}>
-                انصراف
+                <FiX /> انصراف
               </button>
               <button className="btn-primary" onClick={handleAddRecord} disabled={isAdding}>
-                {isAdding ? "در حال افزودن..." : "افزودن"}
+                <FiCheck /> {isAdding ? "در حال افزودن..." : "افزودن"}
               </button>
             </div>
           </div>
@@ -955,7 +956,7 @@ export default function BasketPage({
           </div>
           <div className="result-actions">
             <button onClick={onNext} className="btn-primary" disabled={loading}>
-              {loading ? "در حال..." : "⏳ مرحله بعد: زمان‌بندی استاد"}
+              {loading ? "در حال..." : "مرحله بعد: زمان‌بندی استاد"} <FiArrowLeft />
             </button>
           </div>
         </div>

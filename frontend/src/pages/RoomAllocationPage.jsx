@@ -1,5 +1,6 @@
 // frontend/src/pages/RoomAllocationPage.jsx
 import { useState, useEffect } from "react";
+import { FiRefreshCw, FiFolder, FiEraser } from 'react-icons/fi';
 import axios from "axios";
 import EditableDataTable from "../components/EditableDataTable";
 import "./RoomAllocationPage.css";
@@ -610,13 +611,13 @@ export default function RoomAllocationPage({
           )}
           {!effectiveInstructorData && !isLoadingData && (
             <button onClick={handleRetryLoad} className="btn-secondary">
-              🔄 تلاش مجدد
+              <FiRefreshCw /> تلاش مجدد
             </button>
           )}
           {/* دکمه بارگذاری تخصیص قبلی */}
           {hasPreviousAllocation && roomAllocationData.length === 0 && (
             <button onClick={loadPreviousAllocation} className="btn-secondary" style={{ backgroundColor: "#FFD700", color: "#333" }}>
-              📂 بارگذاری تخصیص قبلی
+              <FiFolder /> بارگذاری تخصیص قبلی
             </button>
           )}
         </div>

@@ -1,5 +1,6 @@
 // frontend/src/pages/BaseInfoPages.jsx
 import React, { useState } from "react";
+import { FiSearch, FiDownload } from "react-icons/fi";
 import CourseList from "../components/CourseList";
 import "./BaseInfoPages.css";
 
@@ -48,6 +49,7 @@ export function UniqueCoursesPage({ courses, onAdd, onUpdate, onDelete, onUpload
     >
       <div className="page-toolbar">
         <div className="search-box">
+          <FiSearch className="search-icon-ic" />
           <input
             type="text"
             placeholder="جستجوی کد یا عنوان درس..."
@@ -55,11 +57,11 @@ export function UniqueCoursesPage({ courses, onAdd, onUpdate, onDelete, onUpload
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
           />
-          <span className="search-icon">🔍</span>
+          <span className="search-icon" style={{ display: "none" }}>🔍</span>
         </div>
         <div className="toolbar-actions">
           <button className="btn-export" onClick={() => alert("خروجی اکسل")}>
-            📥 خروجی اکسل
+            <FiDownload /> خروجی اکسل
           </button>
         </div>
       </div>

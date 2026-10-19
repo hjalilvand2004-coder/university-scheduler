@@ -1,5 +1,6 @@
 // frontend/src/pages/ProposalForm.jsx
 import React, { useState, useEffect } from 'react';
+import { FiSend, FiRefreshCw } from 'react-icons/fi';
 import axios from 'axios';
 import './ProposalForm.css';
 
@@ -175,7 +176,7 @@ const ProposalForm = () => {
       <div className="error-container">
         <span className="error-icon">🚫</span>
         <p style={{ whiteSpace: 'pre-line' }}>{error}</p>
-        <button onClick={() => window.location.reload()}>تلاش مجدد</button>
+        <button onClick={() => window.location.reload()}><FiRefreshCw /> تلاش مجدد</button>
       </div>
     );
   }
@@ -275,7 +276,7 @@ const ProposalForm = () => {
         {/* دکمه ثبت و پیام‌ها */}
         <div className="form-actions">
           <button type="submit" disabled={submitting || loading} className="submit-btn">
-            {submitting ? '⏳ در حال ثبت...' : '📤 ثبت پیشنهاد'}
+            <FiSend /> {submitting ? 'در حال ثبت...' : 'ثبت پیشنهاد'}
           </button>
           <span className="selected-count">{selectedCourses.length} درس انتخاب شده</span>
         </div>

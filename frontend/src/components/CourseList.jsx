@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FiPlus, FiSearch, FiX, FiEdit2, FiTrash2, FiSave } from "react-icons/fi";
 import CourseForm from "./CourseForm";
 import ExcelUpload from "./ExcelUpload";
 import TimeSlotSelector from "./TimeSlotSelector";
@@ -234,6 +235,7 @@ export default function CourseList({
         <h2>{title}</h2>
         <div className="course-list-actions">
           <div className="search-box">
+            <FiSearch />
             <input
               type="text"
               placeholder="جستجو..."
@@ -242,8 +244,8 @@ export default function CourseList({
               className="search-input"
             />
             {searchTerm && (
-              <button className="clear-search" onClick={() => setSearchTerm("")}>
-                ✕
+              <button className="clear-search" onClick={() => setSearchTerm("")} title="پاک‌کردن جستجو">
+                <FiX />
               </button>
             )}
           </div>
@@ -257,7 +259,7 @@ export default function CourseList({
                 : () => setShowForm(true)
             }
           >
-            ➕ افزودن
+            <FiPlus /> افزودن
           </button>
           <ExcelUpload onUpload={onUpload} type={type} />
         </div>
@@ -298,14 +300,14 @@ export default function CourseList({
                 onClick={handleTimeSubmit}
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "در حال ذخیره..." : "💾 ذخیره همه"}
+                <FiSave /> {isSubmitting ? "در حال ذخیره..." : "ذخیره همه"}
               </button>
               <button
                 className="btn-secondary"
                 onClick={() => setShowTimeModal(false)}
                 disabled={isSubmitting}
               >
-                ❌ انصراف
+                <FiX /> انصراف
               </button>
             </div>
           </div>
@@ -415,14 +417,14 @@ export default function CourseList({
                 onClick={handleTeachingSubmit}
                 disabled={isSubmittingTeaching}
               >
-                {isSubmittingTeaching ? "در حال ذخیره..." : "💾 ذخیره"}
+                <FiSave /> {isSubmittingTeaching ? "در حال ذخیره..." : "ذخیره"}
               </button>
               <button
                 className="btn-secondary"
                 onClick={() => setShowTeachingModal(false)}
                 disabled={isSubmittingTeaching}
               >
-                ❌ انصراف
+                <FiX /> انصراف
               </button>
             </div>
           </div>
@@ -480,14 +482,14 @@ export default function CourseList({
                       onClick={() => handleEdit(course)}
                       title="ویرایش"
                     >
-                      ✏️
+                      <FiEdit2 />
                     </button>
                     <button
                       className="btn-delete"
                       onClick={() => onDelete(course.id)}
                       title="حذف"
                     >
-                      🗑️
+                      <FiTrash2 />
                     </button>
                   </td>
                 </tr>

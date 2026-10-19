@@ -1,5 +1,6 @@
 ﻿// frontend/src/pages/Dashboard.jsx
 import { useEffect, useState, useCallback } from "react";
+import { FiClipboard } from "react-icons/fi";
 import Sidebar from "../components/Sidebar";
 import BaseInfoPages from "./BaseInfoPages";
 import SchedulePages from "./SchedulePages";
@@ -929,7 +930,7 @@ export default function Dashboard() {
               onClick={() => setActivePage("basket-list")}
               title="رفتن به لیست سبدهای دروس"
             >
-              📋 لیست سبدها
+              <FiClipboard /> لیست سبدها
             </button>
           </div>
         </header>

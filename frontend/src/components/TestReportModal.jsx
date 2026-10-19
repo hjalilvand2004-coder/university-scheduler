@@ -1,5 +1,7 @@
 // frontend/src/components/TestReportModal.jsx
 import React, { useState, useEffect, useMemo } from 'react';
+import { FiX } from "react-icons/fi";
+
 import axios from 'axios';
 import './TestReportModal.css';
 
@@ -307,7 +309,7 @@ const TestReportModal = ({ isOpen, onClose }) => {
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3>📊 گزارش تست‌ها</h3>
-          <button className="modal-close" onClick={onClose}>✕</button>
+          <button className="modal-close" onClick={onClose} title="بستن"><FiX /></button>
         </div>
 
         <div className="modal-body">
@@ -404,7 +406,7 @@ const TestReportModal = ({ isOpen, onClose }) => {
         </div>
 
         <div className="modal-footer">
-          <button onClick={onClose} className="btn-close">بستن</button>
+          <button onClick={onClose} className="btn-close"><FiX /> بستن</button>
         </div>
       </div>
     </div>

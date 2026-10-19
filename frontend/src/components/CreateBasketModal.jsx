@@ -1,5 +1,6 @@
 // frontend/src/components/CreateBasketModal.jsx
 import { useState } from "react";
+import { FiX, FiCheck } from "react-icons/fi";
 import axios from "axios";
 import "./CreateBasketModal.css";
 
@@ -39,7 +40,7 @@ export default function CreateBasketModal({ onClose, onBasketCreated }) {
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3>➕ ایجاد سبد جدید</h3>
-          <button className="modal-close" onClick={onClose}>✕</button>
+          <button className="modal-close" onClick={onClose} title="بستن"><FiX /></button>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
@@ -74,10 +75,10 @@ export default function CreateBasketModal({ onClose, onBasketCreated }) {
           </div>
           <div className="modal-footer">
             <button type="button" className="btn-secondary" onClick={onClose} disabled={loading}>
-              انصراف
+              <FiX /> انصراف
             </button>
             <button type="submit" className="btn-primary" disabled={loading}>
-              {loading ? "در حال ایجاد..." : "ایجاد سبد"}
+              <FiCheck /> {loading ? "در حال ایجاد..." : "ایجاد سبد"}
             </button>
           </div>
         </form>

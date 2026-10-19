@@ -1,5 +1,6 @@
 // frontend/src/pages/BasketListPage.jsx
 import { useState, useEffect } from "react";
+import { FiPlus, FiEye, FiX, FiCheck } from "react-icons/fi";
 import axios from "axios";
 import "./BasketListPage.css";
 
@@ -44,7 +45,7 @@ function CreateBasketModal({ onClose, onBasketCreated }) {
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3>➕ ایجاد سبد جدید</h3>
-          <button className="modal-close" onClick={onClose}>✕</button>
+          <button className="modal-close" onClick={onClose} title="بستن"><FiX /></button>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
@@ -79,10 +80,10 @@ function CreateBasketModal({ onClose, onBasketCreated }) {
           </div>
           <div className="modal-footer">
             <button type="button" className="btn-secondary" onClick={onClose} disabled={loading}>
-              انصراف
+              <FiX /> انصراف
             </button>
             <button type="submit" className="btn-primary" disabled={loading}>
-              {loading ? "در حال ایجاد..." : "ایجاد سبد"}
+              <FiCheck /> {loading ? "در حال ایجاد..." : "ایجاد سبد"}
             </button>
           </div>
         </form>
@@ -147,7 +148,7 @@ export default function BasketListPage({ onNavigateToBasket, onNavigateToNewBask
       <div className="basket-list-header">
         <h2>📋 لیست سبدهای دروس</h2>
         <button onClick={handleCreateNewBasket} className="btn-primary">
-          ➕ ایجاد سبد جدید
+          <FiPlus /> ایجاد سبد جدید
         </button>
       </div>
 
@@ -181,7 +182,7 @@ export default function BasketListPage({ onNavigateToBasket, onNavigateToNewBask
                       onClick={() => handleSelectBasket(basket.id)}
                       className="btn-view-details"
                     >
-                      مشاهده جزئیات
+                      <FiEye /> مشاهده جزئیات
                     </button>
                   </td>
                 </tr>

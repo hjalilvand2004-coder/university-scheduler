@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { FiUpload } from "react-icons/fi";
 
 export default function ExcelUpload({ onUpload, type }) {
   const fileInputRef = useRef(null);
@@ -24,7 +25,7 @@ export default function ExcelUpload({ onUpload, type }) {
         className="btn-upload"
         onClick={() => fileInputRef.current?.click()}
       >
-        📤 بارگذاری اکسل
+        <FiUpload /> بارگذاری اکسل
       </button>
     </div>
   );

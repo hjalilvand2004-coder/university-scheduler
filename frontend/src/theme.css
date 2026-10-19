@@ -168,13 +168,19 @@ body {
 .main-content {
   background: transparent !important;
   padding: 0 !important;
+  /* سایدبار یک آیتم flex است؛ هر مارجینی گپ خالی می‌سازد */
+  margin: 0 !important;
 }
 
+/* کلاس قدیمی expanded دیگر استفاده نمی‌شود — خنثی می‌شود */
+.main-content.expanded { margin: 0 !important; }
+
+/* محتوا از لبه سایدبار تا انتهای صفحه — بدون حاشیه مرکزی */
 .content-area {
   padding: 26px 30px 44px !important;
-  max-width: 1560px;
-  margin: 0 auto;
-  width: 100%;
+  max-width: none !important;
+  margin: 0 !important;
+  width: 100% !important;
 }
 
 /* نوار بالایی شیشه‌ای */
@@ -574,3 +580,407 @@ img { max-width: 100%; }
 }
 
 .header-cta-btn:active { transform: translateY(0); }
+
+/* ============================================================
+   ۱۶) سیستم دکمه‌های یکپارچه با آیکون (react-icons)
+   همه دکمه‌ها ظاهر یکدست دارند؛ آیکون‌ها با فاصله‌گذاری دقیق
+   ============================================================ */
+button svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+button:not(.sidebar-item):not(.sidebar-category-header):not(.quick-action-btn) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 7px 16px;
+  font-size: 13px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* دکمه اصلی — گرادیان برند */
+.btn-primary,
+button[type="submit"].btn-primary {
+  background: var(--t-gradient-brand) !important;
+  color: #fff !important;
+  border: none !important;
+  font-weight: 700 !important;
+  box-shadow: 0 8px 18px -8px rgba(79, 70, 229, .55), inset 0 1px 0 rgba(255,255,255,.18) !important;
+}
+.btn-primary:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px -8px rgba(124, 58, 237, .6) !important;
+}
+.btn-primary:disabled { opacity: .55; cursor: not-allowed; transform: none; filter: none; }
+
+/* دکمه ثانویه — سفید ظریف */
+.btn-secondary {
+  background: var(--t-surface) !important;
+  color: var(--t-ink-soft) !important;
+  border: 1.5px solid var(--t-line) !important;
+  font-weight: 600 !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .04) !important;
+}
+.btn-secondary:hover {
+  border-color: #fca5a5 !important;
+  color: #dc2626 !important;
+  background: #fff7f7 !important;
+  transform: translateY(-1px);
+}
+.btn-secondary:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+
+/* دکمه آپلود اکسل */
+.btn-upload {
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5) !important;
+  color: #047857 !important;
+  border: 1.5px solid #a7f3d0 !important;
+  font-weight: 700 !important;
+}
+.btn-upload:hover {
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px -8px rgba(16, 185, 129, .45) !important;
+}
+
+/* دکمه خروجی اکسل */
+.btn-export {
+  background: linear-gradient(135deg, #eff6ff, #dbeafe) !important;
+  color: #1d4ed8 !important;
+  border: 1.5px solid #bfdbfe !important;
+  font-weight: 700 !important;
+}
+.btn-export:hover {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px -8px rgba(37, 99, 235, .45) !important;
+}
+
+/* دکمه‌های آیکونی جدول (ویرایش/حذف ردیف) */
+.btn-edit,
+.btn-delete {
+  width: 32px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 0 !important;
+  border-radius: 9px !important;
+  display: inline-grid !important;
+  place-items: center;
+}
+.btn-edit {
+  background: #eef2ff !important;
+  color: #4f46e5 !important;
+  border: 1px solid #c7d2fe !important;
+}
+.btn-edit:hover {
+  background: var(--t-gradient-brand) !important;
+  color: #fff !important;
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 6px 14px -6px rgba(79, 70, 229, .6) !important;
+}
+.btn-delete {
+  background: #fef2f2 !important;
+  color: #dc2626 !important;
+  border: 1px solid #fecaca !important;
+}
+.btn-delete:hover {
+  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+  color: #fff !important;
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 6px 14px -6px rgba(220, 38, 38, .6) !important;
+}
+.btn-delete-row {
+  width: 30px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  padding: 0 !important;
+  border-radius: 8px !important;
+  display: inline-grid !important;
+  place-items: center;
+  background: #fef2f2 !important;
+  color: #dc2626 !important;
+  border: 1px solid #fecaca !important;
+}
+.btn-delete-row:hover {
+  background: #dc2626 !important;
+  color: #fff !important;
+  transform: scale(1.06);
+}
+
+/* دکمه بستن مودال */
+.modal-close {
+  width: 34px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 !important;
+  border-radius: 10px !important;
+  display: inline-grid !important;
+  place-items: center;
+  background: var(--t-surface-2) !important;
+  color: var(--t-muted) !important;
+  border: 1px solid var(--t-line) !important;
+  font-size: 18px;
+  line-height: 1;
+}
+.modal-close:hover {
+  background: #fef2f2 !important;
+  color: #dc2626 !important;
+  border-color: #fecaca !important;
+  transform: rotate(90deg);
+}
+
+/* دکمه‌های عمومی بدون کلاس — خاکستری ظریف */
+button:not([class]) {
+  background: var(--t-surface);
+  color: var(--t-ink-soft);
+  border: 1.5px solid var(--t-line);
+  font-weight: 600;
+}
+button:not([class]):hover {
+  border-color: #c7d2fe;
+  color: var(--t-primary-strong);
+  background: #f6f7ff;
+}
+
+/* ============================================================
+   ۱۷) فرم‌های ظریف و شکیل
+   ============================================================ */
+.form-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(235px, 1fr)) !important;
+  gap: 16px 18px !important;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.form-group label {
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  color: var(--t-ink-soft) !important;
+  letter-spacing: .1px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.form-group label .required {
+  color: var(--t-rose);
+  font-weight: 800;
+}
+
+.form-group input:not([type="checkbox"]):not([type="file"]),
+.form-group select,
+.form-group textarea,
+.modal-form input:not([type="checkbox"]):not([type="file"]),
+.modal-form select,
+.modal-form textarea {
+  height: 40px !important;
+  padding: 0 12px !important;
+  border-radius: 10px !important;
+  border: 1.5px solid var(--t-line) !important;
+  background: var(--t-surface-2) !important;
+  font-size: 13.5px !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .03) !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.form-group textarea,
+.modal-form textarea {
+  height: auto !important;
+  min-height: 76px;
+  padding: 10px 12px !important;
+  resize: vertical;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  background: #fff !important;
+  border-color: #818cf8 !important;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, .12) !important;
+}
+
+.form-group input[readonly] {
+  background: #f1f5f9 !important;
+  color: var(--t-muted) !important;
+  cursor: default;
+}
+
+.form-group input[type="checkbox"] {
+  width: 17px !important;
+  height: 17px !important;
+  min-width: 17px;
+  accent-color: var(--t-primary);
+  cursor: pointer;
+}
+
+.checkbox-group {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 8px !important;
+  padding-top: 24px;
+}
+
+/* نوار اکشن فرم — جداکننده ظریف */
+.form-actions,
+.modal-footer {
+  display: flex !important;
+  gap: 10px !important;
+  justify-content: flex-start !important;
+  margin-top: 20px !important;
+  padding-top: 16px !important;
+  border-top: 1px dashed var(--t-line) !important;
+}
+
+/* مودال‌های ظریف‌تر */
+.modal-content {
+  background: linear-gradient(180deg, #ffffff, #fbfcff) !important;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px !important;
+  background: var(--t-gradient-brand-soft) !important;
+  border-bottom: 1px solid rgba(199, 210, 254, .6) !important;
+}
+
+.modal-header h3 {
+  font-size: 15.5px !important;
+  font-weight: 800 !important;
+  color: var(--t-ink) !important;
+  margin: 0 !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-body {
+  padding: 20px !important;
+  max-height: 62vh;
+  overflow-y: auto;
+}
+
+/* جعبه جستجو ظریف */
+.search-box {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+.search-box > svg {
+  position: absolute;
+  inset-inline-start: 11px;
+  width: 15px;
+  height: 15px;
+  color: var(--t-faint);
+  pointer-events: none;
+  z-index: 1;
+}
+.search-input {
+  padding-inline-start: 34px !important;
+  height: 38px !important;
+  border-radius: 10px !important;
+  background: var(--t-surface) !important;
+}
+.clear-search,
+.search-clear {
+  position: absolute !important;
+  inset-inline-end: 8px !important;
+  width: 22px !important;
+  height: 22px !important;
+  min-height: 22px !important;
+  padding: 0 !important;
+  border-radius: 7px !important;
+  display: inline-grid !important;
+  place-items: center;
+  background: #eef2ff !important;
+  color: var(--t-primary) !important;
+  border: none !important;
+  font-size: 12px;
+}
+.clear-search:hover, .search-clear:hover { background: #e0e7ff !important; }
+
+/* هدر لیست‌ها (مانند مدیریت دروس) */
+.course-list-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.course-list-header h2 {
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  color: var(--t-ink) !important;
+  margin: 0 !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.course-list-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+/* فوتر جدول */
+.table-footer {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--t-muted);
+  background: var(--t-surface-2);
+  border-top: 1px solid var(--t-line);
+}
+
+/* نشان وضعیت فعال/غیرفعال */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+.status-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.status-badge.active { background: #ecfdf5; color: #059669; }
+.status-badge.inactive { background: #f1f5f9; color: #64748b; }
+
+/* دکمه خطر (حذف) */
+.btn-danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+  color: #fff !important;
+  border: none !important;
+  font-weight: 700 !important;
+  box-shadow: 0 8px 18px -8px rgba(220, 38, 38, .55) !important;
+}
+.btn-danger:hover { filter: brightness(1.08); transform: translateY(-1px); }

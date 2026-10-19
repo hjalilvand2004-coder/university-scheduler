@@ -1,5 +1,6 @@
 // frontend/src/components/CourseForm.jsx
 import { useState, useEffect } from "react";
+import { FiSave, FiX } from "react-icons/fi";
 import "./CourseForm.css"; // در صورت وجود فایل CSS
 
 // ==========================================================
@@ -469,8 +470,8 @@ export default function CourseForm({ course, onSubmit, onCancel, type }) {
             {type === "teaching-preferences" && " مطلوبیت تدریس"}
             {type === "time-preferences" && " مطلوبیت زمان‌بندی"}
           </h3>
-          <button className="modal-close" onClick={onCancel}>
-            ×
+          <button className="modal-close" onClick={onCancel} title="بستن">
+            <FiX />
           </button>
         </div>
         <form onSubmit={handleSubmit} className="modal-form">
@@ -516,10 +517,10 @@ export default function CourseForm({ course, onSubmit, onCancel, type }) {
           </div>
           <div className="form-actions">
             <button type="submit" className="btn-primary">
-              💾 ذخیره
+              <FiSave /> ذخیره
             </button>
             <button type="button" className="btn-secondary" onClick={onCancel}>
-              ❌ انصراف
+              <FiX /> انصراف
             </button>
           </div>
         </form>
