@@ -76,7 +76,7 @@ export default function RoomAllocationPage({
     const fetchRooms = async () => {
       setIsLoadingRooms(true);
       try {
-        const response = await axios.get("http://localhost:8000/api/professors-rooms/rooms/list");
+        const response = await axios.get("/api/professors-rooms/rooms/list");
         setRoomsList(Array.isArray(response.data) ? response.data : []);
       } catch (err) {
         console.error("خطا در دریافت لیست اتاق‌ها:", err);
@@ -93,7 +93,7 @@ export default function RoomAllocationPage({
     if (!scenarioId) return;
     setIsCheckingPrevious(true);
     try {
-      const response = await axios.get(`http://localhost:8000/api/room-allocation/${scenarioId}`);
+      const response = await axios.get(`/api/room-allocation/${scenarioId}`);
       const data = response.data;
       if (data && data.length > 0) {
         // چک می‌کنیم که آیا حداقل یک کلاس اتاق دارد
@@ -154,7 +154,7 @@ export default function RoomAllocationPage({
     setLoadError(null);
     try {
       const response = await axios.get(
-        `http://localhost:8000/api/schedule/workflow/scheduled-classes/by-basket/${basketIdToUse}`
+        `/api/schedule/workflow/scheduled-classes/by-basket/${basketIdToUse}`
       );
       const data = response.data;
 
@@ -464,7 +464,7 @@ export default function RoomAllocationPage({
 
     try {
       const response = await axios.put(
-        `http://localhost:8000/api/room-allocation/class/${draggedClass.id}/room`,
+        `/api/room-allocation/class/${draggedClass.id}/room`,
         { room_id: targetRoomId }
       );
       console.log('✅ اتاق با موفقیت به‌روزرسانی شد:', response.data);

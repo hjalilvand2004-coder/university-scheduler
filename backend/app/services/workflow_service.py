@@ -15,6 +15,7 @@ from app.models.course import UniqueCourse
 
 # ===== وارد کردن توابع از فایل مرجع اسلات‌ها =====
 from app.services.schedule.slot_times import normalize_term, get_slots, time_to_minutes
+from app.utils.term_normalizer import normalize_term as normalize_term_numeric
 
 from app.optimization.cp_sat_solver import solve_room_allocation, optimize_schedule
 
@@ -39,22 +40,34 @@ class WorkflowService:
         """
         دریافت دروس ترمیک بر اساس ترم‌های فرد/زوج و یکپارچه‌سازی
         """
-        target_terms = [1, 3, 5, 7] if semester == "mehr" else [2, 4, 6, 8]
-
+        # نکته: normalize_term (نسخه slot_times) کلید استاندارد برمی‌گرداند:
+        #   "semester_1" | "semester_2" | "summer"
+        # ترم‌های فرد (مهر) → semester_1 و ترم‌های زوج (بهمن) → semester_2
+        # تابستان در هر دو ترم به‌عنوان دوره جاری پذیرفته می‌شود.
         term_courses = self.db.query(TermCourse).filter(
             TermCourse.level.in_(levels)
         ).all()
 
         integrated = []
         for tc in term_courses:
-            tn = normalize_term(tc.term)
-            if tn not in target_terms:
+            semester_key = normalize_term(tc.term)
+            if semester == "mehr":
+                keep = semester_key in ("semester_1", "summer")
+            else:
+                keep = semester_key in ("semester_2", "summer")
+            if not keep:
                 continue
+            # term_number باید حتماً عدد صحیح باشد چون در مراحل بعدی
+            # (data_preparer و course_scorer) روی آن عملیات ریاضی انجام می‌شود.
+            tn = normalize_term_numeric(tc.term)
+            if not tn or tn <= 0:
+                tn = {"semester_1": 1, "semester_2": 2, "summer": 3}.get(semester_key, 1)
             integrated.append({
                 "id": tc.id,
                 "level": tc.level,
                 "term": tc.term,
                 "term_number": tn,
+                "term_key": semester_key,
                 "course_name": tc.course_name,
                 "unique_code": tc.unique_course_code,
                 "unique_name": tc.unique_course_name,
@@ -133,11 +146,16 @@ class WorkflowService:
                     tc.course_name in BOTTLENECK_COURSES or
                     (tc.unique_course_code and tc.unique_course_code in BOTTLENECK_COURSES)
                 )
+                _sem_key = normalize_term(tc.term)
+                _tn = normalize_term_numeric(tc.term)
+                if not _tn or _tn <= 0:
+                    _tn = {"semester_1": 1, "semester_2": 2, "summer": 3}.get(_sem_key, 1)
                 new_courses.append({
                     "id": tc.id,
                     "level": tc.level,
                     "term": tc.term,
-                    "term_number": normalize_term(tc.term),
+                    "term_number": _tn,
+                    "term_key": _sem_key,
                     "course_name": tc.course_name,
                     "unique_code": tc.unique_course_code,
                     "unique_name": tc.unique_course_name,

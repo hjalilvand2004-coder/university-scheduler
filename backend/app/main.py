@@ -1,10 +1,13 @@
 # app/main.py
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 import logging
+import os
 import traceback
+from pathlib import Path
 from sqlalchemy import inspect, text
 from app.core.database import engine
 
@@ -141,6 +144,9 @@ app.include_router(api_router, prefix="/api")
 # ===== اندپوینت ریشه =====
 @app.get("/")
 def root():
+    # در حالت Portable، اگر رابط کاربری ساخته‌شده موجود باشد، آن را سرو کن
+    if _FRONTEND_DIST:
+        return FileResponse(_FRONTEND_DIST / "index.html")
     return {
         "service": "Intelligent University Scheduler",
         "version": app.version,
@@ -170,3 +176,64 @@ async def global_exception_handler(request: Request, exc: Exception):
             "error": str(exc)
         }
     )
+
+
+# =====================================================================
+# حالت Portable: سرو کردن رابط کاربری ساخته‌شده (frontend/dist)
+# اگر پوشه dist وجود داشته باشد، فایل‌های استاتیک + SPA fallback فعال می‌شود
+# و کل برنامه روی یک سرور (http://localhost:8000) قابل استفاده است.
+# =====================================================================
+def _find_frontend_dist() -> Path | None:
+    """جستجوی پوشه dist رابط کاربری در مسیرهای معمول"""
+    candidates = []
+    env_dir = os.getenv("FRONTEND_DIST_DIR")
+    if env_dir:
+        candidates.append(Path(env_dir))
+    base = Path(__file__).resolve().parent.parent.parent  # backend/
+    candidates += [
+        base / "frontend" / "dist",          # حالت توسعه از مخزن
+        base / "frontend_dist",              # حالت Portable (کنار کد)
+        Path.cwd() / "frontend" / "dist",    # اجرا از ریشه پروژه
+        Path.cwd() / "frontend_dist",        # اجرا از کنار فایل exe
+        Path.cwd() / "_internal" / "frontend_dist",  # حالت PyInstaller
+        Path(getattr(sys, "_MEIPASS", "/nonexistent")) / "frontend_dist",  # PyInstaller onefile
+    ]
+    for c in candidates:
+        try:
+            if (c / "index.html").exists():
+                return c
+        except Exception:
+            continue
+    return None
+
+
+import sys
+
+_FRONTEND_DIST = _find_frontend_dist()
+
+if _FRONTEND_DIST:
+    _assets_dir = _FRONTEND_DIST / "assets"
+    if _assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=_assets_dir), name="assets")
+
+    from fastapi import HTTPException
+    from fastapi.responses import RedirectResponse
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def spa_fallback(full_path: str, request: Request):
+        """سرو فایل‌های استاتیک یا بازگشت به index.html برای مسیرهای SPA"""
+        # مسیرهای API هرگز نباید به index.html هدایت شوند
+        if full_path == "api" or full_path.startswith("api/"):
+            # بازسازی رفتار استاندارد FastAPI برای اسلش انتهایی
+            # (مثلاً /api/baskets -> /api/baskets/)
+            if not full_path.endswith("/"):
+                return RedirectResponse(url=request.url.path + "/", status_code=307)
+            raise HTTPException(status_code=404, detail="Not Found")
+        if full_path:
+            file_path = (_FRONTEND_DIST / full_path).resolve()
+            # جلوگیری از path traversal
+            if str(file_path).startswith(str(_FRONTEND_DIST.resolve())) and file_path.is_file():
+                return FileResponse(file_path)
+        return FileResponse(_FRONTEND_DIST / "index.html")
+
+    logger.info(f"🌐 رابط کاربری وب از مسیر {_FRONTEND_DIST} سرو می‌شود (حالت تک‌سروری)")

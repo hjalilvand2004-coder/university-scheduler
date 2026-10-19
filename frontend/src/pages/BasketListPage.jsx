@@ -24,7 +24,7 @@ function CreateBasketModal({ onClose, onBasketCreated }) {
     setLoading(true);
     setError("");
     try {
-      const res = await axios.post("http://localhost:8000/api/baskets/", {
+      const res = await axios.post("/api/baskets/", {
         title: title.trim(),
         semester,
         year: year.trim(),
@@ -105,7 +105,7 @@ export default function BasketListPage({ onNavigateToBasket, onNavigateToNewBask
   const fetchBaskets = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:8000/api/baskets");
+      const res = await axios.get("/api/baskets");
       setBaskets(res.data);
     } catch (err) {
       setError("خطا در دریافت لیست سبدها");

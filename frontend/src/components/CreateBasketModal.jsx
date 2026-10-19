@@ -19,7 +19,7 @@ export default function CreateBasketModal({ onClose, onBasketCreated }) {
     setLoading(true);
     setError("");
     try {
-      const res = await axios.post("http://localhost:8000/api/baskets/", {
+      const res = await axios.post("/api/baskets/", {
         title: title.trim(),
         semester,
         year,

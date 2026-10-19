@@ -1,0 +1,576 @@
+/* ============================================================
+   THEME.CSS — لایه‌ی بازطراحی کامل سامانه
+   این فایل بعد از style.css بارگذاری می‌شود و ظاهر کلی را
+   به طراحی مدرن، جذاب و یکدست ارتقا می‌دهد.
+   ============================================================ */
+
+/* ============================================================
+   ۱) فونت محلی وزیرمتن (بدون نیاز به اینترنت — حالت Portable)
+   ============================================================ */
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('/fonts/Vazirmatn-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('/fonts/Vazirmatn-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('/fonts/Vazirmatn-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('/fonts/Vazirmatn-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('/fonts/Vazirmatn-ExtraBold.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('/fonts/Vazirmatn-Black.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ============================================================
+   ۲) توکن‌های طراحی (Design Tokens)
+   ============================================================ */
+:root {
+  /* پالت اصلی — بنفش نیلی */
+  --t-primary: #4f46e5;
+  --t-primary-strong: #4338ca;
+  --t-violet: #7c3aed;
+  --t-cyan: #06b6d4;
+  --t-pink: #ec4899;
+  --t-amber: #f59e0b;
+  --t-emerald: #10b981;
+  --t-rose: #f43f5e;
+
+  --t-gradient-brand: linear-gradient(135deg, #4f46e5 0%, #7c3aed 55%, #a855f7 100%);
+  --t-gradient-brand-soft: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 50%, #ecfeff 100%);
+  --t-gradient-hero: linear-gradient(120deg, #312e81 0%, #4f46e5 45%, #7c3aed 100%);
+  --t-gradient-dark: linear-gradient(180deg, #10142b 0%, #171d3f 60%, #1e1b4b 100%);
+
+  --t-ink: #0f172a;
+  --t-ink-soft: #334155;
+  --t-muted: #64748b;
+  --t-faint: #94a3b8;
+  --t-line: #e2e8f0;
+
+  --t-surface: #ffffff;
+  --t-surface-2: #f8fafc;
+  --t-canvas: #eef1f8;
+
+  --t-shadow-card: 0 1px 2px rgba(15, 23, 42, .04), 0 8px 24px -8px rgba(15, 23, 42, .10);
+  --t-shadow-card-hover: 0 2px 4px rgba(15, 23, 42, .05), 0 18px 40px -12px rgba(79, 70, 229, .22);
+  --t-shadow-pop: 0 24px 64px -16px rgba(15, 23, 42, .28);
+  --t-ring: 0 0 0 3px rgba(99, 102, 241, .18);
+
+  --t-r-sm: 8px;
+  --t-r-md: 12px;
+  --t-r-lg: 16px;
+  --t-r-xl: 22px;
+
+  /* سازگاری با متغیرهای قدیمی پروژه */
+  --gradient-primary: var(--t-gradient-brand);
+  --shadow-md: var(--t-shadow-card);
+  --shadow-lg: var(--t-shadow-card-hover);
+  --radius-lg: var(--t-r-lg);
+  --radius-xl: var(--t-r-xl);
+}
+
+/* ============================================================
+   ۳) بوم پس‌زمینه — گرادیان نرم لایه‌لایه
+   ============================================================ */
+body {
+  font-family: 'Vazirmatn', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  background:
+    radial-gradient(1200px 600px at 85% -10%, rgba(124, 58, 237, .10), transparent 60%),
+    radial-gradient(900px 500px at -10% 15%, rgba(6, 182, 212, .08), transparent 55%),
+    radial-gradient(700px 500px at 50% 110%, rgba(236, 72, 153, .06), transparent 60%),
+    var(--t-canvas) !important;
+  background-attachment: fixed;
+  color: var(--t-ink);
+  letter-spacing: -0.1px;
+}
+
+::selection { background: rgba(99, 102, 241, .22); }
+
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #c7d2fe, #a5b4fc);
+  border-radius: 99px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #a5b4fc, #818cf8); background-clip: padding-box; }
+
+/* ============================================================
+   ۴) انیمیشن‌های مشترک
+   ============================================================ */
+@keyframes t-fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes t-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes t-scale-in {
+  from { opacity: 0; transform: scale(.96) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes t-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@keyframes t-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes t-spin {
+  to { transform: rotate(360deg); }
+}
+
+.t-anim { animation: t-fade-up .45s cubic-bezier(.22,.68,.36,1) both; }
+.t-anim-delay-1 { animation-delay: .06s; }
+.t-anim-delay-2 { animation-delay: .12s; }
+.t-anim-delay-3 { animation-delay: .18s; }
+.t-anim-delay-4 { animation-delay: .24s; }
+
+/* ============================================================
+   ۵) پوسته اصلی — چیدمان کلی
+   ============================================================ */
+.dashboard-container {
+  background: transparent !important;
+  gap: 0;
+}
+
+.main-content {
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+.content-area {
+  padding: 26px 30px 44px !important;
+  max-width: 1560px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* نوار بالایی شیشه‌ای */
+.main-header {
+  position: sticky !important;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 30px !important;
+  background: rgba(255, 255, 255, .78) !important;
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  border-bottom: 1px solid rgba(226, 232, 240, .9) !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,.6) inset, 0 8px 24px -18px rgba(15, 23, 42, .25) !important;
+}
+
+.main-header h1 {
+  font-size: 19px !important;
+  font-weight: 800 !important;
+  color: var(--t-ink) !important;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 !important;
+}
+
+.main-header h1::before {
+  content: '';
+  width: 10px;
+  height: 26px;
+  border-radius: 99px;
+  background: var(--t-gradient-brand);
+  box-shadow: 0 4px 12px -2px rgba(79, 70, 229, .5);
+  flex-shrink: 0;
+}
+
+.header-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--t-muted) !important;
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.header-info > span {
+  background: var(--t-surface);
+  border: 1px solid var(--t-line);
+  padding: 7px 14px;
+  border-radius: 99px;
+  box-shadow: var(--t-shadow-card);
+  white-space: nowrap;
+}
+
+/* ============================================================
+   ۶) دکمه‌ها — همه‌ی صفحات به‌صورت خودکار ارتقا می‌یابند
+   ============================================================ */
+button:not(.sidebar-item):not(.sidebar-category-header):not(.quick-action-btn):not(.t-btn-plain) {
+  font-family: inherit;
+  border-radius: var(--t-r-md);
+  font-weight: 600;
+  transition: transform .16s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease, color .2s ease, opacity .2s ease;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none !important;
+  box-shadow: var(--t-ring) !important;
+}
+
+/* ============================================================
+   ۷) فرم‌ها
+   ============================================================ */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+select,
+textarea {
+  font-family: inherit !important;
+  font-size: 13.5px !important;
+  border-radius: var(--t-r-md) !important;
+  border: 1.5px solid var(--t-line) !important;
+  background: var(--t-surface) !important;
+  color: var(--t-ink) !important;
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease !important;
+}
+
+input:hover, select:hover, textarea:hover { border-color: #cbd5e1 !important; }
+
+input:focus, select:focus, textarea:focus {
+  border-color: #818cf8 !important;
+  box-shadow: var(--t-ring) !important;
+  background: #fff !important;
+}
+
+input::placeholder, textarea::placeholder { color: var(--t-faint) !important; }
+
+label { font-weight: 600; color: var(--t-ink-soft); }
+
+/* ============================================================
+   ۸) جدول‌ها
+   ============================================================ */
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13.5px;
+}
+
+table thead th {
+  background: linear-gradient(180deg, #f8fafc, #f1f5f9) !important;
+  color: var(--t-ink-soft) !important;
+  font-weight: 700 !important;
+  font-size: 12.5px !important;
+  letter-spacing: .2px;
+  border-bottom: 1px solid var(--t-line) !important;
+  padding: 11px 14px !important;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+table tbody td {
+  padding: 11px 14px !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  color: var(--t-ink-soft);
+  background: var(--t-surface);
+  transition: background .15s ease;
+}
+
+table tbody tr:hover td { background: #f6f7ff !important; }
+table tbody tr:last-child td { border-bottom: none !important; }
+
+/* ============================================================
+   ۹) مودال‌ها
+   ============================================================ */
+.modal-overlay,
+[class*="modal-overlay"],
+[class*="ModalOverlay"] {
+  background: rgba(15, 23, 42, .45) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: t-fade-in .22s ease both !important;
+}
+
+.modal-overlay > div,
+[class*="modal-content"],
+[class*="ModalContent"] {
+  border-radius: var(--t-r-xl) !important;
+  box-shadow: var(--t-shadow-pop) !important;
+  border: 1px solid rgba(226, 232, 240, .8) !important;
+  animation: t-scale-in .28s cubic-bezier(.22,.68,.36,1) both !important;
+  overflow: hidden;
+}
+
+/* ============================================================
+   ۱۰) کارت‌ها و باکس‌های عمومی
+   ============================================================ */
+.stat-card {
+  border-radius: var(--t-r-xl) !important;
+  background: var(--t-surface) !important;
+  border: 1px solid rgba(226, 232, 240, .9) !important;
+  box-shadow: var(--t-shadow-card) !important;
+  transition: transform .2s ease, box-shadow .25s ease !important;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--t-shadow-card-hover) !important;
+}
+
+/* ============================================================
+   ۱۱) هشدارها و پیام‌ها
+   ============================================================ */
+[class*="alert-"],
+[class*="success-message"],
+[class*="error-message"],
+[class*="warning-message"] {
+  border-radius: var(--t-r-md) !important;
+  border: 1px solid transparent !important;
+  font-weight: 600;
+  animation: t-fade-up .3s ease both;
+}
+
+/* ============================================================
+   ۱۲) حالت بارگذاری و حالت خالی
+   ============================================================ */
+.dashboard-loading {
+  min-height: 55vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: var(--t-muted);
+  font-weight: 600;
+}
+
+.dashboard-loading .spinner,
+.spinner {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  border: 4px solid #e0e7ff !important;
+  border-top-color: var(--t-primary) !important;
+  border-left-color: var(--t-violet) !important;
+  animation: t-spin .8s linear infinite !important;
+}
+
+.empty-schedule,
+[class*="empty-state"] {
+  background: var(--t-surface) !important;
+  border: 1.5px dashed #c7d2fe !important;
+  border-radius: var(--t-r-xl) !important;
+  padding: 48px 24px !important;
+  text-align: center;
+}
+
+.empty-schedule .empty-icon,
+[class*="empty-state"] .empty-icon {
+  font-size: 44px;
+  display: inline-block;
+  animation: t-float 3.2s ease-in-out infinite;
+  filter: drop-shadow(0 10px 16px rgba(79, 70, 229, .25));
+}
+
+.empty-schedule p { color: var(--t-ink-soft); font-weight: 700; margin-top: 8px; }
+.empty-schedule .empty-hint { color: var(--t-muted); font-weight: 500; font-size: 13px; }
+
+/* ============================================================
+   ۱۳) چیدمان داشبورد (صفحه اصلی)
+   ============================================================ */
+.dashboard-home {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.dashboard-summary {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(158px, 1fr)) !important;
+  gap: 14px !important;
+}
+
+.dashboard-summary .stat-card {
+  border-top: none !important;
+  padding: 18px 16px 16px !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-summary .stat-card h3 {
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  color: var(--t-muted) !important;
+  margin-bottom: 10px !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dashboard-summary .stat-number {
+  font-size: 30px !important;
+  font-weight: 900 !important;
+  color: var(--t-ink) !important;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* دسترسی سریع */
+.quick-actions {
+  background: var(--t-surface) !important;
+  border: 1px solid rgba(226, 232, 240, .9) !important;
+  border-radius: var(--t-r-xl) !important;
+  box-shadow: var(--t-shadow-card) !important;
+  padding: 22px !important;
+}
+
+.quick-actions h3 {
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  color: var(--t-ink) !important;
+  margin-bottom: 16px !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.quick-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-start;
+  padding: 12px 14px !important;
+  background: var(--t-surface-2) !important;
+  border: 1.5px solid var(--t-line) !important;
+  border-radius: var(--t-r-md) !important;
+  color: var(--t-ink-soft) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  cursor: pointer;
+}
+
+.quick-action-btn:hover {
+  background: var(--t-gradient-brand-soft) !important;
+  border-color: #c7d2fe !important;
+  color: var(--t-primary-strong) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -10px rgba(79, 70, 229, .35);
+}
+
+/* ============================================================
+   ۱۴) بهبودهای عمومی صفحه‌ها
+   ============================================================ */
+.page-header,
+[class*="page-header"] h2,
+.content-area h2 {
+  color: var(--t-ink);
+  font-weight: 800;
+}
+
+/* کارت‌های بخش‌های مختلف */
+[class*="section-card"],
+[class*="panel"],
+[class*="card"] {
+  transition: box-shadow .25s ease, transform .2s ease;
+}
+
+/* برچسب‌های شمارنده و نشان‌ها */
+[class*="badge"],
+[class*="count-badge"],
+[class*="chip"] {
+  font-weight: 700;
+}
+
+/* لینک‌ها */
+a { color: var(--t-primary); text-decoration: none; }
+a:hover { color: var(--t-violet); }
+
+/* کد و pre */
+code, pre {
+  font-family: 'Sarasa Mono SC', 'Consolas', monospace;
+  background: #f1f5f9;
+  border-radius: 8px;
+  font-size: 12.5px;
+}
+
+/* جلوگیری از پرش افقی */
+#root { min-height: 100vh; }
+img { max-width: 100%; }
+
+/* ریسپانسیو */
+@media (max-width: 1100px) {
+  .content-area { padding: 20px 18px 36px !important; }
+}
+@media (max-width: 720px) {
+  .content-area { padding: 14px 12px 28px !important; }
+  .main-header { padding: 12px 14px !important; }
+  .main-header h1 { font-size: 15px !important; }
+}
+
+/* ============================================================
+   ۱۵) نوار بالایی — المان‌های اختصاصی
+   ============================================================ */
+.header-semester-pill b { color: var(--t-primary-strong); }
+
+.header-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px !important;
+  background: var(--t-gradient-brand) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 99px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 10px 22px -8px rgba(79, 70, 229, .55);
+  transition: transform .18s ease, box-shadow .22s ease, filter .2s ease;
+}
+
+.header-cta-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.07);
+  box-shadow: 0 14px 28px -8px rgba(124, 58, 237, .6);
+}
+
+.header-cta-btn:active { transform: translateY(0); }

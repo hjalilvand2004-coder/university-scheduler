@@ -232,7 +232,7 @@ const TestReportModal = ({ isOpen, onClose }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get('http://localhost:8000/api/test-report/');
+      const response = await axios.get('/api/test-report/');
       setReport(response.data);
     } catch (err) {
       setError(err.response?.data?.detail || 'خطا در دریافت گزارش تست');

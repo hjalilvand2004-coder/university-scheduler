@@ -61,7 +61,9 @@ class OptimizationService:
         # در صورت وجود OR-Tools
         try:
             from app.optimization.cp_sat_solver import optimize_schedule
-            return optimize_schedule(schedule, term=term)
+            # توجه: امضای تابع optimize_schedule فقط (schedule, objective_mode) است؛
+            # پارامتر term در این تابع پشتیبانی نمی‌شود و ارسال آن باعث TypeError می‌شد.
+            return optimize_schedule(schedule)
         except (ImportError, AttributeError):
             logger.warning("تابع optimize_schedule در دسترس نیست، از هیوریستیک ساده استفاده می‌شود.")
             return self._heuristic_optimize(schedule, term)

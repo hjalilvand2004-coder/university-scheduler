@@ -1,7 +1,7 @@
 // frontend/src/api/workflowApi.js
 import axios from "axios";
 
-const API_BASE = "http://localhost:8000/api/schedule/workflow";
+const API_BASE = "/api/schedule/workflow";
 
 // ============================================================
 // گام‌های workflow قدیمی (۵ مرحله‌ای)

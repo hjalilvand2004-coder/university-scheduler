@@ -329,8 +329,7 @@ def generate_schedule_from_db(
                 instructors=instructors,
                 rooms=rooms,
                 slots=slots,
-                max_groups_per_course=max_groups_per_course,
-                term=term_key  # ارسال ترم به حل‌کننده (در صورت پشتیبانی)
+                max_groups_per_course=max_groups_per_course
             )
             logger.info(f"وضعیت حل: {solution.get('status')}")
             logger.info(f"تعداد کلاس‌های تولیدشده: {len(solution.get('classes', []))}")
@@ -611,8 +610,7 @@ def generate_alternative_scenarios(
                 rooms=rooms,
                 slots=slots,
                 max_groups_per_course=max_groups_per_course,
-                objective_mode=mode["objective_mode"],
-                term=term_key
+                objective_mode=mode["objective_mode"]
             )
             scenarios.append({
                 "name": mode["name"],

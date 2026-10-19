@@ -2385,24 +2385,24 @@ export default function OptimizationPage({
     const fetchAllData = async () => {
       try {
         const [teachRes, timeRes, instructorsRes, roomsRes, coursesRes] = await Promise.all([
-          axios.get('http://localhost:8000/api/teaching-preferences/').catch(() => ({ data: [] })),
-          axios.get('http://localhost:8000/api/time-preferences/').catch(() => ({ data: [] })),
-          axios.get('http://localhost:8000/api/professors-rooms/instructors/list').catch(() => ({ data: [] })),
-          axios.get('http://localhost:8000/api/professors-rooms/rooms/list').catch(() => ({ data: [] })),
-          axios.get('http://localhost:8000/api/term-courses/').catch(() => ({ data: [] })),
+          axios.get('/api/teaching-preferences/').catch(() => ({ data: [] })),
+          axios.get('/api/time-preferences/').catch(() => ({ data: [] })),
+          axios.get('/api/professors-rooms/instructors/list').catch(() => ({ data: [] })),
+          axios.get('/api/professors-rooms/rooms/list').catch(() => ({ data: [] })),
+          axios.get('/api/term-courses/').catch(() => ({ data: [] })),
         ]);
 
         let historyData = [];
         let prereqData = {};
         try {
-          const historyRes = await axios.get('http://localhost:8000/api/teaching-history/');
+          const historyRes = await axios.get('/api/teaching-history/');
           historyData = historyRes.data || [];
         } catch (e) {
           console.warn('⚠️ teaching-history API not available, using empty data');
         }
 
         try {
-          const prereqRes = await axios.get('http://localhost:8000/api/prerequisite-map/');
+          const prereqRes = await axios.get('/api/prerequisite-map/');
           prereqData = prereqRes.data || {};
         } catch (e) {
           console.warn('⚠️ prerequisite-map API not available, using empty data');
@@ -2506,9 +2506,9 @@ export default function OptimizationPage({
     try {
       let url = '';
       if (basketIdToUse) {
-        url = `http://localhost:8000/api/schedule/workflow/scheduled-classes/by-basket/${basketIdToUse}`;
+        url = `/api/schedule/workflow/scheduled-classes/by-basket/${basketIdToUse}`;
       } else if (workflowIdToUse) {
-        url = `http://localhost:8000/api/schedule/workflow/${workflowIdToUse}/scheduled-classes`;
+        url = `/api/schedule/workflow/${workflowIdToUse}/scheduled-classes`;
       } else {
         throw new Error('شناسه معتبری برای بارگذاری وجود ندارد.');
       }
@@ -2523,7 +2523,7 @@ export default function OptimizationPage({
         defaultTerm = normalizeSemester(result.semester);
       } else if (basketIdToUse) {
         try {
-          const basketRes = await axios.get(`http://localhost:8000/api/baskets/${basketIdToUse}`);
+          const basketRes = await axios.get(`/api/baskets/${basketIdToUse}`);
           if (basketRes.data && basketRes.data.semester) {
             defaultTerm = normalizeSemester(basketRes.data.semester);
           }
@@ -2976,9 +2976,9 @@ export default function OptimizationPage({
     };
 
     try {
-      const response = await axios.post('http://localhost:8000/api/schedule/workflow/schedule/manual', payload);
+      const response = await axios.post('/api/schedule/workflow/schedule/manual', payload);
       if (classItem.room_id) {
-        await axios.put(`http://localhost:8000/api/room-allocation/class/${classItem.id}/room`, {
+        await axios.put(`/api/room-allocation/class/${classItem.id}/room`, {
           room_id: classItem.room_id,
         });
       }

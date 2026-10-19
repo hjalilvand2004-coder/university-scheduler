@@ -47,7 +47,7 @@ async function fetchValidSlots(term, units) {
     return slotsCache.get(key);
   }
   try {
-    const response = await axios.get("http://localhost:8000/slot-times/search", {
+    const response = await axios.get("/api/slot-times/search", {
       params: { term, units }
     });
     const slots = response.data.slots || [];
@@ -240,7 +240,7 @@ export default function InstructorTimePage({
     const fetchInstructors = async () => {
       setLoadingInstructors(true);
       try {
-        const response = await axios.get("http://localhost:8000/api/professors-rooms/instructors/list");
+        const response = await axios.get("/api/professors-rooms/instructors/list");
         const data = response.data;
         if (Array.isArray(data)) {
           setInstructorsData(data);
@@ -283,7 +283,7 @@ export default function InstructorTimePage({
         hasLoadedBasket.current = true;
         if (basketId) {
           try {
-            const response = await axios.get(`http://localhost:8000/api/baskets/${basketId}`);
+            const response = await axios.get(`/api/baskets/${basketId}`);
             setBasketMeta({
               title: response.data.title || "",
               semester: response.data.semester || "",
@@ -319,7 +319,7 @@ export default function InstructorTimePage({
         loadingBasketRef.current = true;
         setIsLoadingBasket(true);
         try {
-          const response = await axios.get(`http://localhost:8000/api/baskets/${basketId}`);
+          const response = await axios.get(`/api/baskets/${basketId}`);
           const basket = response.data;
           setBasketMeta({
             title: basket.title || "",
@@ -348,7 +348,7 @@ export default function InstructorTimePage({
         setIsLoadingBasket(true);
         try {
           const response = await axios.get(
-            `http://localhost:8000/api/schedule/workflow/basket/${workflowId}`
+            `/api/schedule/workflow/basket/${workflowId}`
           );
           const data = response.data;
           if (data.basket && data.basket.length > 0) {
@@ -384,7 +384,7 @@ export default function InstructorTimePage({
     if (!basketId) return null;
     try {
       const response = await axios.get(
-        `http://localhost:8000/api/schedule/workflow/scheduled-classes/by-basket/${basketId}`
+        `/api/schedule/workflow/scheduled-classes/by-basket/${basketId}`
       );
       return response.data;
     } catch (err) {
@@ -399,7 +399,7 @@ export default function InstructorTimePage({
   const loadExistingScheduleForBasket = async (basketId) => {
     try {
       const response = await axios.get(
-        `http://localhost:8000/api/schedule/workflow/scheduled-classes/by-basket/${basketId}`
+        `/api/schedule/workflow/scheduled-classes/by-basket/${basketId}`
       );
       const data = response.data;
       if (data.scenario_id) setWorkflowId(data.scenario_id);
@@ -550,7 +550,7 @@ export default function InstructorTimePage({
       setIsLoadingExistingSchedule(true);
       try {
         const response = await axios.get(
-          `http://localhost:8000/api/schedule/workflow/${workflowId}/scheduled-classes`
+          `/api/schedule/workflow/${workflowId}/scheduled-classes`
         );
         const data = response.data;
 
@@ -693,7 +693,7 @@ export default function InstructorTimePage({
   // ============================
   const createWorkflow = async () => {
     try {
-      const response = await axios.post("http://localhost:8000/api/schedule/workflow/step1", {
+      const response = await axios.post("/api/schedule/workflow/step1", {
         semester: basketMeta.semester || "semester_1",
         levels: ["کارشناسی"],
         year: basketMeta.year || "1403",
@@ -719,7 +719,7 @@ export default function InstructorTimePage({
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`http://localhost:8000/api/schedule/workflow/${workflowId}`);
+      await axios.delete(`/api/schedule/workflow/${workflowId}`);
       removeUnassignedFromStorage(basketId, workflowId);
       setInstructorTimeDataLocal(null);
       setIsScheduleSaved(false);
@@ -811,7 +811,7 @@ export default function InstructorTimePage({
         year: basketMeta.year || "1403",
         overwrite: shouldOverwrite,
       };
-      await axios.post("http://localhost:8000/api/schedule/workflow/save-schedule", savePayload);
+      await axios.post("/api/schedule/workflow/save-schedule", savePayload);
       console.log("✅ [handleLocalProcess] ذخیره با موفقیت انجام شد.");
 
       setIsScheduleSaved(true);
@@ -1236,7 +1236,7 @@ export default function InstructorTimePage({
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/schedule/workflow/schedule/manual",
+        "/api/schedule/workflow/schedule/manual",
         payload
       );
       alert(`✅ ${response.data.success_count} کلاس با موفقیت ویرایش شد.`);
@@ -1304,7 +1304,7 @@ export default function InstructorTimePage({
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/schedule/workflow/schedule/manual",
+        "/api/schedule/workflow/schedule/manual",
         payload
       );
       alert(`✅ کلاس با موفقیت به روز و زمان جدید منتقل شد.`);
@@ -1340,7 +1340,7 @@ export default function InstructorTimePage({
     if (!basketId) return false;
     try {
       const response = await axios.get(
-        `http://localhost:8000/api/schedule/workflow/scheduled-classes/by-basket/${basketId}`
+        `/api/schedule/workflow/scheduled-classes/by-basket/${basketId}`
       );
       const data = response.data;
       if (data.scenario_id) setWorkflowId(data.scenario_id);
@@ -1470,7 +1470,7 @@ export default function InstructorTimePage({
     setError(null);
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/schedule/workflow/schedule/manual",
+        "/api/schedule/workflow/schedule/manual",
         {
           assignments: payloadAssignments,
           basket_id: parseInt(basketId),
@@ -1596,7 +1596,7 @@ export default function InstructorTimePage({
     setError(null);
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/schedule/workflow/schedule/manual",
+        "/api/schedule/workflow/schedule/manual",
         {
           assignments: assignments,
           basket_id: parseInt(basketId),
@@ -2256,7 +2256,7 @@ export default function InstructorTimePage({
                 console.log("🔍 [NextStep] stateها false هستند، از سرور بررسی می‌شود...");
                 try {
                   const response = await axios.get(
-                    `http://localhost:8000/api/schedule/workflow/scheduled-classes/by-basket/${basketId}`
+                    `/api/schedule/workflow/scheduled-classes/by-basket/${basketId}`
                   );
                   console.log("📡 [NextStep] پاسخ سرور:", response.data);
                   const data = response.data;

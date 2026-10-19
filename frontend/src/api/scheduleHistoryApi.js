@@ -3,7 +3,7 @@ import axios from "axios";
 
 // استفاده از همان baseURL که در سایر APIها تنظیم شده است
 const api = axios.create({
-  baseURL: "http://127.0.0.1:8000/api",
+  baseURL: "/api",
 });
 
 // ============================================

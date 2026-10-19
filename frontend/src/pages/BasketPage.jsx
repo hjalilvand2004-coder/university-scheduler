@@ -28,7 +28,7 @@ function CreateBasketModal({ onClose, onBasketCreated }) {
     setLoading(true);
     setError("");
     try {
-      const res = await axios.post("http://localhost:8000/api/baskets/", {
+      const res = await axios.post("/api/baskets/", {
         title: title.trim(),
         semester,
         year: year.trim(),
@@ -107,7 +107,7 @@ function BasketSelector({ onSelectBasket }) {
   const fetchBaskets = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:8000/api/baskets");
+      const res = await axios.get("/api/baskets");
       setBaskets(res.data);
     } catch (err) {
       setError("خطا در دریافت لیست سبدها");
@@ -240,7 +240,7 @@ function BasketWizard({
       setError(null);
       try {
         console.log(`📥 بارگذاری سبد با basketId: ${basketId}`);
-        const response = await axios.get(`http://localhost:8000/api/baskets/${basketId}`);
+        const response = await axios.get(`/api/baskets/${basketId}`);
         const basket = response.data;
         console.log("✅ پاسخ دریافتی:", basket);
         setBasketMeta({
@@ -279,7 +279,7 @@ function BasketWizard({
       try {
         console.log(`📥 بارگذاری سبد با workflowId: ${workflowId}`);
         const response = await axios.get(
-          `http://localhost:8000/api/schedule/workflow/basket/${workflowId}`
+          `/api/schedule/workflow/basket/${workflowId}`
         );
         const data = response.data;
         console.log("✅ پاسخ دریافتی:", data);
@@ -382,12 +382,12 @@ function BasketWizard({
 
     try {
       if (basketId) {
-        await axios.delete(`http://localhost:8000/api/baskets/${basketId}`);
+        await axios.delete(`/api/baskets/${basketId}`);
         setBasketId(null);
         setBasketMeta({ title: "", semester: "", year: "" });
         if (onBasketCreated) onBasketCreated(null);
       } else if (workflowId) {
-        await axios.delete(`http://localhost:8000/api/schedule/workflow/basket/${workflowId}`);
+        await axios.delete(`/api/schedule/workflow/basket/${workflowId}`);
       }
       setFullData(null);
       setExpandedClasses(null);
@@ -472,7 +472,7 @@ function BasketWizard({
     try {
       // حذف آیتم‌های قبلی
       try {
-        await axios.delete(`http://localhost:8000/api/baskets/${basketId}/items`);
+        await axios.delete(`/api/baskets/${basketId}/items`);
       } catch (e) {
         console.warn("حذف آیتم‌های قبلی ممکن است پشتیبانی نشود، ادامه می‌دهیم.");
       }
@@ -481,7 +481,7 @@ function BasketWizard({
       for (const item of classes) {
         // فقط فیلدهای مورد نیاز را نگه می‌داریم
         const { basket_id, id, created_at, updated_at, ...cleanItem } = item;
-        await axios.post(`http://localhost:8000/api/baskets/${basketId}/items`, cleanItem);
+        await axios.post(`/api/baskets/${basketId}/items`, cleanItem);
       }
 
       console.log("✅ سبد با موفقیت ذخیره شد");

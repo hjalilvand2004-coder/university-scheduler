@@ -62,6 +62,30 @@ import { generateSchedule, getRankedCourses } from "../api/scheduleApi";
 // ===== لیست مقاطع پیش‌فرض =====
 const DEFAULT_LEVELS = ["پیوسته 1394", "پیوسته 1403", "ناپیوسته"];
 
+// ===== عنوان صفحات برای نوار بالایی =====
+const PAGE_TITLES = {
+  "dashboard": { title: "📊 داشبورد مدیریت برنامه‌ریزی" },
+  "unique-courses": { title: "📚 مدیریت دروس یکتا" },
+  "offered-courses": { title: "📖 مدیریت دروس ارائه‌شده" },
+  "instructors": { title: "👨‍🏫 مدیریت اساتید" },
+  "rooms": { title: "🏫 مدیریت کلاس‌ها و سالن‌ها" },
+  "schedule-history": { title: "📜 سوابق برنامه‌ریزی" },
+  "term-courses": { title: "📅 مدیریت دروس ترمیک" },
+  "teaching-preferences": { title: "📋 مطلوبیت‌های تدریس اساتید" },
+  "time-preferences": { title: "⏰ مطلوبیت‌های زمان‌بندی" },
+  "proposal": { title: "📝 پیشنهاد دروس توسط دانشجویان" },
+  "vote": { title: "👍 نظرسنجی دروس" },
+  "rating": { title: "⭐ امتیازدهی به برنامه" },
+  "vote-management": { title: "🗳️ مدیریت نظرسنجی‌ها" },
+  "basket-list": { title: "🗂️ لیست سبدهای دروس" },
+  "basket": { title: "📦 مدیریت سبد دروس" },
+  "instructor-time": { title: "⏳ زمان‌بندی استاد و درس" },
+  "room-allocation": { title: "🏢 تخصیص کلاس و سالن" },
+  "optimization": { title: "⚡ بهینه‌سازی برنامه هفتگی" },
+  "schedule": { title: "🗓️ تولید برنامه (حالت قدیمی)" },
+  "preferences": { title: "⚙️ تنظیمات سامانه" },
+};
+
 export default function Dashboard() {
   // ===== وضعیت‌های عمومی =====
   const [activePage, setActivePage] = useState("basket-list");
@@ -895,20 +919,15 @@ export default function Dashboard() {
       <Sidebar onNavigate={setActivePage} activePage={activePage} />
       <div className="main-content">
         <header className="main-header">
-          <h1>سامانه هوشمند برنامه‌ریزی درسی</h1>
+          <h1>{PAGE_TITLES[activePage]?.title || "سامانه هوشمند برنامه‌ریزی درسی"}</h1>
           <div className="header-info">
-            <span>ترم: {semester === "mehr" ? "مهر" : "بهمن"}</span>
+            <span className="header-semester-pill">
+              📅 ترم جاری: <b>{semester === "mehr" ? "مهر" : "بهمن"}</b>
+            </span>
             <button
+              className="header-cta-btn"
               onClick={() => setActivePage("basket-list")}
-              style={{
-                marginRight: "1rem",
-                padding: "0.3rem 1rem",
-                background: "#6366f1",
-                color: "#fff",
-                border: "none",
-                borderRadius: "0.5rem",
-                cursor: "pointer",
-              }}
+              title="رفتن به لیست سبدهای دروس"
             >
               📋 لیست سبدها
             </button>
