@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سامانه هوشمند برنامه‌ریزی درسی دانشگاه | ماه افزار هوشمند رسا</title>
+<meta name="description" content="سامانه هوشمند برنامه‌ریزی و چیدمان دروس دانشگاهی با موتور بهینه‌سازی CP-SAT گوگل — تولید خودکار برنامه هفتگی بدون تداخل، رعایت ظرفیت سالن‌ها و مطلوبیت اساتید. توسعه‌ی شرکت ماه افزار هوشمند رسا MahAI.ir">
+<meta property="og:title" content="سامانه هوشمند برنامه‌ریزی درسی دانشگاه">
+<meta property="og:description" content="تولید خودکار برنامه هفتگی کلاس‌ها با موتور بهینه‌سازی CP-SAT — بدون تداخل، بهینه و هوشمند.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%236366f1'/><stop offset='1' stop-color='%23d946ef'/></linearGradient></defs><path fill='url(%23g)' d='M22 9L12 4 2 9l10 5 10-5z'/><path fill='url(%23g)' opacity='.75' d='M6 11.5V16c0 1.5 3 3 6 3s6-1.5 6-3v-4.5z'/></svg>">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+<style>
+/* ============ Reset & Tokens ============ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#070b1a; --bg2:#0a1128;
+  --card:rgba(255,255,255,.045); --border:rgba(255,255,255,.09);
+  --txt:#e8ecf8; --muted:#9aa7c7; --soft:#c3cbe4;
+  --indigo:#6366f1; --violet:#8b5cf6; --fuchsia:#d946ef; --cyan:#22d3ee;
+  --amber:#fbbf24; --green:#34d399; --rose:#fb7185; --sky:#38bdf8;
+  --grad:linear-gradient(135deg,#6366f1,#8b5cf6 50%,#d946ef);
+  --radius:20px;
+  --shadow:0 24px 60px -24px rgba(0,0,0,.6);
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+html{scroll-behavior:smooth;scroll-padding-top:92px}
+body{
+  font-family:'Vazirmatn',Tahoma,'Segoe UI',sans-serif;
+  background:var(--bg);color:var(--txt);line-height:1.9;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+}
+::selection{background:rgba(139,92,246,.45);color:#fff}
+::-webkit-scrollbar{width:10px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#4338ca,#7c3aed);border-radius:8px}
+a{color:inherit;text-decoration:none}
+ul{list-style:none}
+button{font-family:inherit}
+.container{width:min(1200px,92%);margin-inline:auto}
+section{padding:100px 0;position:relative}
+.ic{width:1.25em;height:1.25em;flex-shrink:0;vertical-align:-.28em}
+.ic-lg{width:1.6em;height:1.6em}
+
+/* ============ Scroll Progress ============ */
+.progress{position:fixed;top:0;right:0;height:3px;width:0;background:var(--grad);z-index:120;box-shadow:0 0 12px rgba(139,92,246,.8);border-radius:0 0 0 4px}
+
+/* ============ Navbar ============ */
+.nav{position:fixed;inset-inline:0;top:0;z-index:110;padding:16px 0;transition:all .4s var(--ease)}
+.nav.scrolled{padding:9px 0;background:rgba(7,11,26,.78);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{display:flex;align-items:center;gap:12px;cursor:pointer}
+.brand-logo{width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,rgba(99,102,241,.25),rgba(217,70,239,.15));border:1px solid rgba(139,92,246,.4);display:grid;place-items:center;color:#c7d2fe;box-shadow:0 8px 24px -8px rgba(124,58,237,.6);animation:logoGlow 4s ease-in-out infinite}
+@keyframes logoGlow{0%,100%{box-shadow:0 8px 24px -8px rgba(124,58,237,.5)}50%{box-shadow:0 8px 34px -6px rgba(139,92,246,.85)}}
+.brand-name{font-weight:800;font-size:1rem;line-height:1.4}
+.brand-sub{font-size:.68rem;color:var(--muted)}
+.nav-links{display:flex;gap:4px;align-items:center}
+.nav-links a{padding:9px 15px;border-radius:12px;color:var(--soft);font-size:.88rem;font-weight:500;transition:.25s;position:relative}
+.nav-links a:hover{color:#fff;background:rgba(255,255,255,.07)}
+.nav-links a.active{color:#fff;background:rgba(139,92,246,.16)}
+.nav-cta{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:13px;background:var(--grad);color:#fff;font-size:.86rem;font-weight:700;transition:.3s;box-shadow:0 10px 26px -10px rgba(124,58,237,.7)}
+.nav-cta:hover{transform:translateY(-2px);box-shadow:0 16px 34px -10px rgba(124,58,237,.85)}
+.hamburger{display:none;flex-direction:column;gap:5px;background:none;border:1px solid var(--border);border-radius:10px;padding:11px 10px;cursor:pointer}
+.hamburger span{width:20px;height:2px;background:var(--txt);border-radius:2px;transition:.3s}
+.nav-open .hamburger span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.nav-open .hamburger span:nth-child(2){opacity:0}
+.nav-open .hamburger span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+/* ============ Hero ============ */
+.hero{min-height:100svh;display:flex;align-items:center;padding:150px 0 90px;overflow:hidden}
+.hero-bg{position:absolute;inset:0;z-index:-3;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(100px);opacity:.5;animation:orb 16s ease-in-out infinite alternate}
+.orb1{width:560px;height:560px;background:#4338ca;top:-140px;right:-120px}
+.orb2{width:480px;height:480px;background:#7c3aed;bottom:-160px;left:-100px;animation-delay:-6s}
+.orb3{width:400px;height:400px;background:#c026d3;top:28%;left:34%;opacity:.25;animation-delay:-11s}
+@keyframes orb{from{transform:translate(0,0) scale(1)}to{transform:translate(-70px,50px) scale(1.18)}}
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(148,163,184,.075) 1px,transparent 1px),linear-gradient(90deg,rgba(148,163,184,.075) 1px,transparent 1px);background-size:54px 54px;-webkit-mask-image:radial-gradient(ellipse 85% 65% at 50% 38%,#000 25%,transparent 78%);mask-image:radial-gradient(ellipse 85% 65% at 50% 38%,#000 25%,transparent 78%)}
+#particles{position:absolute;inset:0;z-index:-1}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:60px;align-items:center}
+.badge{display:inline-flex;align-items:center;gap:9px;padding:8px 18px;border-radius:999px;background:rgba(99,102,241,.14);border:1px solid rgba(99,102,241,.38);color:#c7d2fe;font-size:.8rem;font-weight:600;backdrop-filter:blur(8px)}
+.badge .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(52,211,153,.16);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+.hero h1{font-size:clamp(2.05rem,4.6vw,3.45rem);font-weight:900;line-height:1.45;margin:24px 0 18px;letter-spacing:-.5px}
+.grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-sub{color:var(--muted);font-size:1.05rem;max-width:565px;text-align:justify}
+.hero-ctas{display:flex;gap:14px;margin:32px 0 42px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:14px 28px;border-radius:15px;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .3s var(--ease);border:none}
+.btn-primary{background:var(--grad);color:#fff;box-shadow:0 14px 36px -10px rgba(124,58,237,.65)}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 22px 46px -12px rgba(124,58,237,.9);filter:brightness(1.08)}
+.btn-ghost{border:1px solid var(--border);background:rgba(255,255,255,.045);color:var(--txt);backdrop-filter:blur(8px)}
+.btn-ghost:hover{transform:translateY(-3px);border-color:rgba(139,92,246,.55);background:rgba(139,92,246,.1)}
+.hero-stats{display:flex;border:1px solid var(--border);border-radius:18px;background:rgba(255,255,255,.03);backdrop-filter:blur(12px);overflow:hidden;flex-wrap:wrap;box-shadow:var(--shadow)}
+.stat{flex:1;min-width:118px;padding:20px 10px;text-align:center;position:relative}
+.stat+.stat::before{content:'';position:absolute;inset-inline-start:0;top:24%;height:52%;width:1px;background:var(--border)}
+.stat-num{font-size:1.75rem;font-weight:900;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.3}
+.stat-label{font-size:.72rem;color:var(--muted);margin-top:2px}
+
+/* ============ Hero Mockup ============ */
+.mock-wrap{position:relative;perspective:1200px}
+.mock{position:relative;border-radius:26px;background:linear-gradient(160deg,rgba(255,255,255,.085),rgba(255,255,255,.02));border:1px solid var(--border);padding:24px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 50px 100px -40px rgba(0,0,0,.7);transform-style:preserve-3d;will-change:transform;transition:transform .15s ease-out}
+.mock::before{content:'';position:absolute;inset:-1px;border-radius:27px;padding:1px;background:linear-gradient(135deg,rgba(99,102,241,.5),transparent 40%,transparent 60%,rgba(217,70,239,.4));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.mock-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.mock-title{font-size:.92rem;font-weight:800;display:flex;align-items:center;gap:8px}
+.mock-title .ic{color:var(--violet)}
+.mock-pill{font-size:.62rem;padding:4px 11px;border-radius:999px;background:rgba(52,211,153,.13);border:1px solid rgba(52,211,153,.4);color:#6ee7b7;font-weight:700}
+.mock-days{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:8px}
+.mock-days span{font-size:.66rem;color:var(--muted);text-align:center;padding:6px 0;border-radius:8px;background:rgba(255,255,255,.045);font-weight:600}
+.mock-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.slot{height:47px;border-radius:10px;background:rgba(255,255,255,.035);border:1px dashed rgba(255,255,255,.08)}
+.slot.filled{border:none;display:flex;flex-direction:column;justify-content:center;padding:4px 9px;animation:slotIn .9s var(--ease) both;position:relative;overflow:hidden}
+.slot.filled::after{content:'';position:absolute;inset-inline-start:0;top:0;height:100%;width:3px;background:rgba(255,255,255,.35)}
+.slot b{font-size:.64rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.5}
+.slot i{font-size:.56rem;font-style:normal;opacity:.8;line-height:1.3}
+.s1{background:linear-gradient(135deg,rgba(99,102,241,.85),rgba(99,102,241,.55));box-shadow:0 8px 20px -8px rgba(99,102,241,.7)}
+.s2{background:linear-gradient(135deg,rgba(34,211,238,.8),rgba(34,211,238,.5));box-shadow:0 8px 20px -8px rgba(34,211,238,.6);color:#062a33}
+.s3{background:linear-gradient(135deg,rgba(139,92,246,.85),rgba(139,92,246,.55));box-shadow:0 8px 20px -8px rgba(139,92,246,.7)}
+.s4{background:linear-gradient(135deg,rgba(251,191,36,.82),rgba(251,191,36,.52));box-shadow:0 8px 20px -8px rgba(251,191,36,.55);color:#332604}
+.s5{background:linear-gradient(135deg,rgba(217,70,239,.82),rgba(217,70,239,.5));box-shadow:0 8px 20px -8px rgba(217,70,239,.65)}
+.s6{background:linear-gradient(135deg,rgba(52,211,153,.8),rgba(52,211,153,.5));box-shadow:0 8px 20px -8px rgba(52,211,153,.55);color:#03271c}
+@keyframes slotIn{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+.chip-float{position:absolute;display:flex;align-items:center;gap:9px;padding:11px 15px;border-radius:15px;background:rgba(13,18,38,.88);border:1px solid var(--border);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-size:.77rem;font-weight:700;box-shadow:0 18px 44px -14px rgba(0,0,0,.6);animation:float 6.5s ease-in-out infinite;z-index:3;white-space:nowrap}
+.chip1{top:-20px;right:-12px}
+.chip2{bottom:40px;left:-20px;animation-delay:-2.2s}
+.chip3{bottom:-18px;right:26%;animation-delay:-4.3s}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-13px)}}
+.chip-ic{width:27px;height:27px;border-radius:9px;display:grid;place-items:center;flex-shrink:0}
+.chip-ic.g{background:rgba(52,211,153,.16);color:var(--green)}
+.chip-ic.c{background:rgba(34,211,238,.14);color:var(--cyan)}
+.chip-ic.v{background:rgba(139,92,246,.16);color:#c4b5fd}
+
+/* ============ Marquee ============ */
+.marquee{padding:19px 0;border-block:1px solid var(--border);background:rgba(255,255,255,.02);overflow:hidden;direction:ltr}
+.marquee-track{display:flex;gap:46px;width:max-content;animation:scroll 30s linear infinite}
+.marquee-track span{display:flex;align-items:center;gap:10px;color:#aeb9d8;font-size:.9rem;font-weight:600;white-space:nowrap}
+.marquee-track span::before{content:'✦';color:var(--violet);font-size:.8rem}
+@keyframes scroll{to{transform:translateX(-50%)}}
+
+/* ============ Section Head ============ */
+.sec-head{text-align:center;max-width:760px;margin:0 auto 60px}
+.sec-tag{display:inline-flex;align-items:center;gap:8px;padding:7px 17px;border-radius:999px;font-size:.76rem;font-weight:700;color:#c7d2fe;background:rgba(99,102,241,.13);border:1px solid rgba(99,102,241,.35)}
+.sec-title{font-size:clamp(1.55rem,3.1vw,2.35rem);font-weight:900;margin:16px 0 12px;line-height:1.5}
+.sec-desc{color:var(--muted);font-size:.98rem;text-align:justify}
+
+/* ============ Why Cards ============ */
+.why-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.why-card{position:relative;padding:28px 22px;border-radius:var(--radius);background:var(--card);border:1px solid var(--border);transition:all .35s var(--ease);overflow:hidden}
+.why-card::before{content:'';position:absolute;top:0;inset-inline:0;height:2px;background:var(--grad);opacity:0;transition:.35s}
+.why-card:hover{transform:translateY(-9px);border-color:rgba(139,92,246,.5);box-shadow:0 28px 56px -22px rgba(99,102,241,.4)}
+.why-card:hover::before{opacity:1}
+.why-ic{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;margin-bottom:16px;background:rgba(251,113,133,.12);border:1px solid rgba(251,113,133,.3);color:var(--rose)}
+.why-card h3{font-size:.98rem;font-weight:800;margin-bottom:10px;line-height:1.6}
+.why-fix{display:flex;gap:8px;align-items:flex-start;padding-top:12px;border-top:1px dashed rgba(255,255,255,.09);font-size:.8rem;color:var(--muted)}
+.why-fix .ic{color:var(--green);margin-top:4px}
+.why-fix b{color:#6ee7b7;font-weight:600}
+
+/* ============ Feature Cards (بخش‌های سامانه) ============ */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.feat-card{padding:28px 24px;border-radius:var(--radius);background:var(--card);border:1px solid var(--border);transition:all .35s var(--ease);position:relative;overflow:hidden}
+.feat-card::after{content:'';position:absolute;width:190px;height:190px;border-radius:50%;background:var(--fc);filter:blur(90px);opacity:0;transition:.5s;top:-60px;inset-inline-end:-60px}
+.feat-card:hover{transform:translateY(-7px);border-color:color-mix(in srgb,var(--fc) 55%,transparent);box-shadow:0 26px 54px -20px color-mix(in srgb,var(--fc) 38%,transparent)}
+.feat-card:hover::after{opacity:.14}
+.feat-ic{width:54px;height:54px;border-radius:15px;display:grid;place-items:center;background:color-mix(in srgb,var(--fc) 15%,transparent);color:var(--fc);border:1px solid color-mix(in srgb,var(--fc) 38%,transparent);margin-bottom:16px;position:relative;z-index:1}
+.feat-card h3{font-size:1.02rem;font-weight:800;margin-bottom:8px;position:relative;z-index:1}
+.feat-card p{color:var(--muted);font-size:.84rem;position:relative;z-index:1}
+.feat-items{display:flex;flex-wrap:wrap;gap:7px;margin-top:15px;position:relative;z-index:1}
+.feat-items span{font-size:.71rem;padding:5px 11px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--soft);transition:.25s}
+.feat-card:hover .feat-items span{border-color:color-mix(in srgb,var(--fc) 35%,transparent)}
+
+/* ============ Timeline (فرایند) ============ */
+.timeline{position:relative;max-width:880px;margin-inline:auto}
+.tl-line{position:absolute;top:8px;bottom:8px;right:30px;width:2px;background:rgba(255,255,255,.08);border-radius:2px}
+.tl-fill{position:absolute;top:8px;right:30px;width:2px;height:0;background:var(--grad);border-radius:2px;box-shadow:0 0 14px rgba(139,92,246,.9);transition:height .15s linear}
+.tl-step{position:relative;padding:0 92px 44px 0}
+.tl-step:last-child{padding-bottom:0}
+.tl-dot{position:absolute;right:15px;top:2px;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#0d1330;border:2px solid var(--fc);color:var(--fc);font-weight:800;font-size:.82rem;z-index:2;box-shadow:0 0 0 7px rgba(13,19,48,.9)}
+.tl-card{padding:24px 26px;border-radius:var(--radius);background:var(--card);border:1px solid var(--border);transition:all .35s var(--ease)}
+.tl-card:hover{border-color:color-mix(in srgb,var(--fc) 50%,transparent);transform:translateX(-7px);box-shadow:0 20px 44px -18px color-mix(in srgb,var(--fc) 35%,transparent)}
+.tl-card h3{font-size:1.08rem;font-weight:800;margin-bottom:7px;display:flex;align-items:center;gap:10px}
+.tl-card h3 .ic{color:var(--fc)}
+.tl-card p{color:var(--muted);font-size:.9rem;text-align:justify}
+.tl-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}
+.tl-chips span{font-size:.72rem;padding:5px 12px;border-radius:999px;background:color-mix(in srgb,var(--fc) 10%,transparent);border:1px solid color-mix(in srgb,var(--fc) 30%,transparent);color:var(--soft)}
+
+/* ============ Forms Tabs ============ */
+.tabs{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:36px}
+.tab{display:inline-flex;align-items:center;gap:8px;padding:11px 19px;border-radius:13px;border:1px solid var(--border);background:rgba(255,255,255,.03);color:var(--soft);cursor:pointer;font-size:.84rem;font-weight:600;transition:all .25s var(--ease)}
+.tab:hover{border-color:rgba(139,92,246,.5);color:#fff;transform:translateY(-2px)}
+.tab.active{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 12px 30px -10px rgba(124,58,237,.65)}
+.form-panel{display:none;grid-template-columns:1fr 1fr;gap:30px;align-items:start;animation:fadeUp .55s var(--ease) both}
+.form-panel.active{display:grid}
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+.mock-form{padding:28px;border-radius:22px;background:linear-gradient(170deg,rgba(255,255,255,.075),rgba(255,255,255,.02));border:1px solid var(--border);box-shadow:var(--shadow)}
+.mf-title{display:flex;gap:11px;align-items:center;font-weight:800;font-size:.95rem;margin-bottom:20px;padding-bottom:15px;border-bottom:1px solid var(--border)}
+.mf-title .ic{color:var(--violet)}
+.mf-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.mf-field label{display:block;font-size:.72rem;color:var(--muted);margin-bottom:7px;font-weight:600}
+.mf-field.full{grid-column:1/-1}
+.inp{width:100%;padding:11.5px 14px;border-radius:11px;background:rgba(10,16,36,.72);border:1px solid var(--border);font-size:.84rem;color:#e6ebff;font-family:inherit;transition:.25s;outline:none}
+.inp:focus{border-color:var(--violet);box-shadow:0 0 0 4px rgba(139,92,246,.17);background:rgba(10,16,36,.95)}
+select.inp{cursor:pointer;-webkit-appearance:none;appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(12px) calc(50% - 2px),calc(17px) calc(50% - 2px);background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+.mf-submit{grid-column:1/-1;display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:13px;border-radius:12px;background:var(--grad);color:#fff;font-size:.88rem;font-weight:800;cursor:pointer;border:none;transition:.3s;box-shadow:0 12px 30px -10px rgba(124,58,237,.6)}
+.mf-submit:hover{transform:translateY(-2px);filter:brightness(1.1)}
+.chips-select{display:flex;flex-wrap:wrap;gap:7px}
+.chips-select span{font-size:.72rem;padding:6px 12px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.04);cursor:default;transition:.2s;font-weight:600}
+.chips-select span.on{background:rgba(52,211,153,.14);border-color:rgba(52,211,153,.5);color:#6ee7b7}
+.dropzone{grid-column:1/-1;border:2px dashed rgba(139,92,246,.45);border-radius:15px;padding:34px 20px;text-align:center;color:var(--muted);background:rgba(139,92,246,.05);transition:.3s;cursor:pointer}
+.dropzone:hover{border-color:var(--violet);background:rgba(139,92,246,.1)}
+.dropzone .ic{width:2.1em;height:2.1em;color:var(--violet);margin-bottom:8px}
+.dropzone b{display:block;color:var(--txt);font-size:.9rem;margin-bottom:4px}
+.dropzone small{font-size:.72rem}
+.stars{color:var(--amber);font-size:1.25rem;letter-spacing:5px;direction:ltr;text-align:right}
+.form-info h3{font-size:1.3rem;font-weight:800;margin-bottom:12px}
+.form-info>p{color:var(--muted);font-size:.9rem;margin-bottom:18px;text-align:justify}
+.form-info ul li{display:flex;gap:10px;padding:10px 0;font-size:.87rem;color:var(--soft);border-bottom:1px dashed rgba(255,255,255,.07);line-height:1.7}
+.form-info ul li:last-child{border-bottom:none}
+.form-info ul li .ic{color:var(--green);margin-top:6px}
+
+/* ============ Logic Section ============ */
+.formula{direction:ltr;max-width:660px;margin:0 auto 50px;padding:24px 28px;border-radius:18px;background:rgba(10,16,36,.85);border:1px solid rgba(139,92,246,.4);text-align:center;font-family:'Consolas','Menlo',monospace;font-size:1.05rem;color:#c7d2fe;box-shadow:0 0 70px -20px rgba(124,58,237,.55)}
+.formula .fx{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700}
+.formula .cmt{display:block;direction:rtl;font-family:'Vazirmatn',sans-serif;font-size:.78rem;color:var(--muted);margin-top:10px}
+.hs-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:48px}
+.hs-card{border-radius:var(--radius);padding:28px;border:1px solid}
+.hs-hard{border-color:rgba(251,113,133,.35);background:linear-gradient(170deg,rgba(251,113,133,.09),rgba(255,255,255,.02))}
+.hs-soft{border-color:rgba(34,211,238,.32);background:linear-gradient(170deg,rgba(34,211,238,.08),rgba(255,255,255,.02))}
+.hs-head{display:flex;gap:12px;align-items:center;margin-bottom:8px;font-weight:900;font-size:1.05rem}
+.hs-head .ic{width:1.5em;height:1.5em}
+.hs-hard .hs-head .ic{color:var(--rose)}
+.hs-soft .hs-head .ic{color:var(--cyan)}
+.hs-badge{font-size:.63rem;padding:4px 11px;border-radius:999px;font-weight:700}
+.hs-hard .hs-badge{background:rgba(251,113,133,.15);color:#fda4af;border:1px solid rgba(251,113,133,.4)}
+.hs-soft .hs-badge{background:rgba(34,211,238,.13);color:#67e8f9;border:1px solid rgba(34,211,238,.4)}
+.hs-sub{font-size:.8rem;color:var(--muted);margin-bottom:14px}
+.hs-list li{display:flex;gap:11px;padding:11px 0;font-size:.87rem;border-bottom:1px dashed rgba(255,255,255,.08);line-height:1.7}
+.hs-list li:last-child{border-bottom:none}
+.hs-list li b{font-weight:700}
+.hs-hard .hs-list .ic{color:var(--rose);margin-top:6px}
+.hs-soft .hs-list .ic{color:var(--cyan);margin-top:6px}
+.hs-list li small{display:block;color:var(--muted);font-size:.74rem;font-weight:400}
+.modes{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:52px}
+.mode{padding:26px 18px;border-radius:19px;background:var(--card);border:1px solid var(--border);transition:all .3s var(--ease);text-align:center;position:relative;overflow:hidden}
+.mode::before{content:'';position:absolute;inset:0;background:var(--grad);opacity:0;transition:.3s}
+.mode:hover{transform:translateY(-7px);border-color:rgba(139,92,246,.55);box-shadow:0 22px 46px -18px rgba(124,58,237,.5)}
+.mode:hover::before{opacity:.07}
+.mode-ic{width:46px;height:46px;margin:0 auto 13px;border-radius:13px;display:grid;place-items:center;background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.35);color:#c4b5fd}
+.mode h4{font-size:.95rem;font-weight:800;margin-bottom:3px;position:relative}
+.mode .m-en{direction:ltr;display:block;font-size:.64rem;color:var(--muted);letter-spacing:.6px;margin-bottom:9px;font-family:'Consolas',monospace}
+.mode p{font-size:.75rem;color:var(--muted);position:relative;line-height:1.75}
+.pipe-wrap{margin-top:8px}
+.pipe-title{text-align:center;font-size:.88rem;color:var(--muted);margin-bottom:20px;font-weight:600}
+.pipeline{display:flex;align-items:stretch;justify-content:center}
+.pipe-node{flex:1;max-width:225px;padding:22px 16px;border-radius:17px;background:var(--card);border:1px solid var(--border);text-align:center;transition:.3s}
+.pipe-node:hover{border-color:rgba(139,92,246,.5);transform:translateY(-4px)}
+.pipe-node .ic{width:1.9em;height:1.9em;color:var(--violet);margin-bottom:8px}
+.pipe-node b{display:block;font-size:.88rem;margin-bottom:3px}
+.pipe-node span{font-size:.7rem;color:var(--muted)}
+.pipe-arrow{display:grid;place-items:center;padding:0 13px;color:var(--violet);animation:arrowFlow 1.7s infinite}
+.pipe-arrow:nth-of-type(4){animation-delay:.2s}
+.pipe-arrow:nth-of-type(6){animation-delay:.4s}
+@keyframes arrowFlow{0%,100%{opacity:.4;transform:translateX(0)}50%{opacity:1;transform:translateX(-5px)}}
+.rounds{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:34px}
+.round-chip{display:inline-flex;align-items:center;gap:9px;padding:10px 18px;border-radius:999px;background:rgba(255,255,255,.035);border:1px solid var(--border);font-size:.78rem;font-weight:600;color:var(--soft);transition:.3s}
+.round-chip:hover{border-color:rgba(139,92,246,.5);color:#fff}
+.round-chip b{width:22px;height:22px;border-radius:50%;background:var(--grad);display:grid;place-items:center;font-size:.66rem;color:#fff}
+.round-sep{align-self:center;color:var(--muted)}
+
+/* ============ Considerations ============ */
+.cons-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
+.cons-card{padding:24px 20px;border-radius:var(--radius);background:var(--card);border:1px solid var(--border);transition:all .35s var(--ease);position:relative;overflow:hidden}
+.cons-card::before{content:'';position:absolute;top:0;inset-inline:0;height:3px;background:var(--fc);opacity:.85}
+.cons-card:hover{transform:translateY(-8px);border-color:color-mix(in srgb,var(--fc) 55%,transparent);box-shadow:0 26px 50px -20px color-mix(in srgb,var(--fc) 35%,transparent)}
+.cons-head{display:flex;gap:10px;align-items:center;margin-bottom:16px;font-weight:800;font-size:.93rem}
+.cons-head .ic{color:var(--fc)}
+.cons-list{display:flex;flex-direction:column;gap:8px}
+.cons-list li{font-size:.76rem;color:#b9c3de;padding:8px 11px;border-radius:10px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.055);transition:.25s;line-height:1.65}
+.cons-list li:hover{background:color-mix(in srgb,var(--fc) 10%,transparent);border-color:color-mix(in srgb,var(--fc) 35%,transparent);color:#fff;transform:translateX(-3px)}
+
+/* ============ Tech ============ */
+.tech-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:16px}
+.tech{padding:24px 14px;border-radius:17px;background:var(--card);border:1px solid var(--border);text-align:center;transition:all .3s var(--ease)}
+.tech:hover{transform:translateY(-7px);background:rgba(139,92,246,.09);border-color:rgba(139,92,246,.5);box-shadow:0 20px 40px -18px rgba(124,58,237,.5)}
+.tech-ic{width:50px;height:50px;margin:0 auto 12px;border-radius:14px;display:grid;place-items:center;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.3);color:#c4b5fd}
+.tech b{display:block;font-size:.84rem;margin-bottom:4px;direction:ltr}
+.tech span{font-size:.68rem;color:var(--muted);display:block;line-height:1.7}
+
+/* ============ Footer ============ */
+.footer{border-top:1px solid var(--border);padding:80px 0 32px;position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(139,92,246,.07),transparent 45%)}
+.footer::before{content:'';position:absolute;top:0;inset-inline:0;height:1px;background:linear-gradient(90deg,transparent,rgba(139,92,246,.7),transparent)}
+.footer-inner{text-align:center;position:relative}
+.footer-orb{width:340px;height:340px;border-radius:50%;background:rgba(124,58,237,.16);filter:blur(90px);position:absolute;top:-120px;right:50%;transform:translateX(50%);pointer-events:none}
+.footer-mark{width:64px;height:64px;margin:0 auto 18px;border-radius:19px;background:var(--grad);display:grid;place-items:center;color:#fff;box-shadow:0 18px 44px -12px rgba(124,58,237,.75);animation:logoGlow 4s ease-in-out infinite}
+.company{font-size:clamp(1.45rem,3vw,2.1rem);font-weight:900;margin-bottom:8px}
+.company-en{direction:ltr;color:#c7d2fe;font-size:1rem;letter-spacing:3px;font-weight:700;margin-bottom:16px}
+.company-en a{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;transition:.25s}
+.company-en a:hover{filter:brightness(1.25)}
+.footer-tag{color:var(--muted);max-width:540px;margin:0 auto 30px;font-size:.92rem}
+.footer-links{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:40px}
+.f-link{display:inline-flex;align-items:center;gap:9px;padding:11px 22px;border-radius:13px;border:1px solid var(--border);background:rgba(255,255,255,.04);font-size:.85rem;font-weight:600;transition:.3s}
+.f-link:hover{transform:translateY(-3px);border-color:rgba(139,92,246,.55);background:rgba(139,92,246,.1);color:#fff}
+.copy{border-top:1px solid var(--border);padding-top:24px;font-size:.78rem;color:#7c88a8;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.copy .heart{color:var(--rose);display:inline-block;animation:pulse 1.6s infinite}
+
+/* ============ Back to top ============ */
+.to-top{position:fixed;bottom:28px;left:28px;width:48px;height:48px;border-radius:15px;background:var(--grad);display:grid;place-items:center;color:#fff;cursor:pointer;opacity:0;pointer-events:none;transition:.35s var(--ease);z-index:100;border:none;box-shadow:0 14px 34px -10px rgba(124,58,237,.8)}
+.to-top.show{opacity:1;pointer-events:auto}
+.to-top:hover{transform:translateY(-4px)}
+
+/* ============ Reveal on scroll ============ */
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .85s var(--ease),transform .85s var(--ease)}
+.reveal.visible{opacity:1;transform:none}
+.reveal-r{opacity:0;transform:translateX(-40px);transition:opacity .85s var(--ease),transform .85s var(--ease)}
+.reveal-r.visible{opacity:1;transform:none}
+
+/* ============ Responsive ============ */
+@media (max-width:1080px){
+  .hero-grid{grid-template-columns:1fr;gap:64px}
+  .mock-wrap{max-width:580px;margin-inline:auto;width:100%}
+  .hero-sub{max-width:100%}
+  .why-grid{grid-template-columns:repeat(2,1fr)}
+  .feat-grid{grid-template-columns:repeat(2,1fr)}
+  .modes{grid-template-columns:repeat(2,1fr)}
+  .tech-grid{grid-template-columns:repeat(3,1fr)}
+  .cons-grid{grid-template-columns:repeat(3,1fr)}
+  .hs-grid,.form-panel{grid-template-columns:1fr}
+  .pipeline{flex-wrap:wrap;gap:12px}
+  .pipe-arrow{transform:rotate(90deg);padding:0}
+  .pipe-node{min-width:44%}
+}
+@media (max-width:720px){
+  section{padding:74px 0}
+  .nav-links{position:fixed;top:64px;inset-inline:12px;flex-direction:column;align-items:stretch;background:rgba(10,15,34,.97);border:1px solid var(--border);border-radius:18px;padding:14px;backdrop-filter:blur(22px);display:none;box-shadow:var(--shadow)}
+  .nav-open .nav-links{display:flex;animation:fadeUp .35s var(--ease) both}
+  .nav-links a{padding:13px 16px;font-size:.95rem}
+  .hamburger{display:flex}
+  .nav-cta{display:none}
+  .hero{padding-top:124px}
+  .hero-ctas .btn{width:100%;justify-content:center}
+  .why-grid,.feat-grid,.modes,.tech-grid,.cons-grid{grid-template-columns:1fr}
+  .hero-stats{flex-wrap:wrap}
+  .stat{min-width:46%}
+  .stat:nth-child(odd)::before{display:none}
+  .chip1{right:0}
+  .chip2{left:0}
+  .chip3{right:4%}
+  .tl-step{padding:0 70px 36px 0}
+  .tl-line,.tl-fill{right:22px}
+  .tl-dot{right:7px}
+  .mock-days span{font-size:.56rem;padding:4px 0}
+  .slot{height:38px}
+  .slot b{font-size:.52rem}
+  .slot i{display:none}
+  .formula{font-size:.85rem;padding:18px}
+  .copy{justify-content:center;text-align:center}
+}
+@media (max-width:460px){
+  .chip-float{font-size:.66rem;padding:8px 11px;gap:6px}
+  .chip-ic{width:22px;height:22px}
+  .hero-stats{border-radius:14px}
+  .stat-num{font-size:1.35rem}
+  .mock{padding:14px}
+  .mf-grid{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+
+<!-- ======== SVG Icon Sprite ======== -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <defs>
+    <g id="i-grad-cap"><path d="M22 9L12 4 2 9l10 5 10-5z"/><path d="M6 11.5V16c0 1.5 3 3 6 3s6-1.5 6-3v-4.5"/><line x1="22" y1="9" x2="22" y2="14"/></g>
+    <g id="i-grid"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></g>
+    <g id="i-book"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></g>
+    <g id="i-layers"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></g>
+    <g id="i-users"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></g>
+    <g id="i-home"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></g>
+    <g id="i-calendar"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></g>
+    <g id="i-clock"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></g>
+    <g id="i-file"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></g>
+    <g id="i-edit"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></g>
+    <g id="i-thumbs"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></g>
+    <g id="i-star"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></g>
+    <g id="i-settings"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></g>
+    <g id="i-package"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></g>
+    <g id="i-activity"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></g>
+    <g id="i-zap"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></g>
+    <g id="i-pie"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></g>
+    <g id="i-inbox"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></g>
+    <g id="i-check"><polyline points="20 6 9 17 4 12"/></g>
+    <g id="i-x"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></g>
+    <g id="i-arrow"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></g>
+    <g id="i-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></g>
+    <g id="i-cpu"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></g>
+    <g id="i-target"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></g>
+    <g id="i-shield"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></g>
+    <g id="i-upload"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></g>
+    <g id="i-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></g>
+    <g id="i-external"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></g>
+    <g id="i-up"><polyline points="18 15 12 9 6 15"/></g>
+    <g id="i-sliders"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></g>
+    <g id="i-award"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></g>
+    <g id="i-database"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></g>
+    <g id="i-monitor"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></g>
+    <g id="i-globe"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></g>
+    <g id="i-trending"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></g>
+    <g id="i-heart"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></g>
+    <g id="i-alert"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></g>
+    <g id="i-rotate"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></g>
+    <g id="i-search"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></g>
+    <g id="i-chev"><polyline points="9 18 15 12 9 6"/></g>
+  </defs>
+</svg>
+
+<!-- ======== Navbar ======== -->
+<header class="nav" id="nav">
+  <div class="container nav-inner">
+    <div class="brand" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+      <div class="brand-logo"><svg class="ic ic-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-grad-cap"/></svg></div>
+      <div>
+        <div class="brand-name">برنامه‌ریز هوشمند دانشگاه</div>
+        <div class="brand-sub">سامانه چیدمان و زمان‌بندی دروس</div>
+      </div>
+    </div>
+    <nav class="nav-links" id="navLinks">
+      <a href="#sections">بخش‌های سامانه</a>
+      <a href="#process">فرایند تولید برنامه</a>
+      <a href="#forms">فرم‌های اطلاعاتی</a>
+      <a href="#logic">منطق زمان‌بندی</a>
+      <a href="#considerations">ملاحظات</a>
+      <a href="#tech">فناوری‌ها</a>
+    </nav>
+    <a class="nav-cta" href="https://github.com/hjalilvand2004-coder/university-scheduler/releases" target="_blank" rel="noopener">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-download"/></svg>
+      دانلود نسخه قابل حمل
+    </a>
+    <button class="hamburger" id="hamburger" aria-label="منو"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<!-- ======== Hero ======== -->
+<section class="hero" id="top">
+  <div class="hero-bg">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+    <div class="grid-bg"></div>
+    <canvas id="particles"></canvas>
+  </div>
+  <div class="container hero-grid">
+    <div class="hero-text">
+      <span class="badge"><span class="dot"></span> مبتنی بر موتور بهینه‌سازی CP-SAT گوگل — نسخه ۲.۱</span>
+      <h1>سامانه هوشمند <span class="grad-text">برنامه‌ریزی درسی</span> دانشگاه</h1>
+      <p class="hero-sub">از ثبت اطلاعات پایه تا انتشار جدول نهایی؛ سامانه با تحلیل ملاحظات آموزشی، ظرفیت فضاهای آموزشی، محدودیت‌های اساتید و تقاضای واقعی دانشجویان، بهترین چیدمان هفتگی کلاس‌ها را به‌صورت خودکار تولید می‌کند — چیدمانی که تضمین ریاضیِ «بدون تداخل» دارد و در چند دقیقه آماده می‌شود؛ کاری که به‌صورت دستی روزها زمان می‌برد.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-primary" href="#sections"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-grid"/></svg> آشنایی با بخش‌های سامانه</a>
+        <a class="btn btn-ghost" href="https://github.com/hjalilvand2004-coder/university-scheduler/releases" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-download"/></svg> دریافت نسخه قابل حمل</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><div class="stat-num" data-count="146">۰</div><div class="stat-label">درس در پایگاه نمونه</div></div>
+        <div class="stat"><div class="stat-num" data-count="24">۰</div><div class="stat-label">فضای آموزشی</div></div>
+        <div class="stat"><div class="stat-num" data-count="6">۰</div><div class="stat-label">مرحله فرایند هوشمند</div></div>
+        <div class="stat"><div class="stat-num" data-count="4">۰</div><div class="stat-label">حالت بهینه‌سازی</div></div>
+        <div class="stat"><div class="stat-num">۰</div><div class="stat-label">تداخل در خروجی نهایی</div></div>
+      </div>
+    </div>
+    <div class="mock-wrap" id="tiltWrap">
+      <div class="mock" id="tiltCard">
+        <div class="mock-head">
+          <div class="mock-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-calendar"/></svg> برنامه هفتگی — ترم مهر</div>
+          <span class="mock-pill">تأییدشده · بدون تداخل</span>
+        </div>
+        <div class="mock-days"><span>شنبه</span><span>یکشنبه</span><span>دوشنبه</span><span>سه‌شنبه</span><span>چهارشنبه</span><span>پنجشنبه</span></div>
+        <div class="mock-grid">
+          <div class="slot filled s1" style="animation-delay:.15s"><b>ریاضی مهندسی</b><i>۸:۰۰ — دکتر رضایی</i></div>
+          <div class="slot"></div>
+          <div class="slot filled s3" style="animation-delay:.3s"><b>پایگاه داده</b><i>۸:۰۰ — دکتر کریمی</i></div>
+          <div class="slot"></div>
+          <div class="slot filled s6" style="animation-delay:.45s"><b>سیستم عامل</b><i>۸:۰۰ — دکتر موسوی</i></div>
+          <div class="slot"></div>
+          <div class="slot"></div>
+          <div class="slot filled s2" style="animation-delay:.6s"><b>برنامه‌سازی پیشرفته</b><i>۱۰:۰۰ — مهندسی نوری</i></div>
+          <div class="slot"></div>
+          <div class="slot filled s5" style="animation-delay:.75s"><b>هوش مصنوعی</b><i>۱۰:۰۰ — دکتر صادقی</i></div>
+          <div class="slot"></div>
+          <div class="slot"></div>
+          <div class="slot"></div>
+          <div class="slot"></div>
+          <div class="slot filled s4" style="animation-delay:.9s"><b>شبکه‌های کامپیوتری</b><i>۱۳:۰۰ — دکتر احمدی</i></div>
+          <div class="slot"></div>
+          <div class="slot"></div>
+          <div class="slot filled s1" style="animation-delay:1.05s"><b>کارآموزی</b><i>۱۵:۰۰ — عملی</i></div>
+          <div class="slot"></div>
+          <div class="slot filled s4" style="animation-delay:1.2s"><b>آمار و احتمال</b><i>۱۵:۰۰ — دکتر جعفری</i></div>
+          <div class="slot"></div>
+          <div class="slot"></div>
+          <div class="slot"></div>
+          <div class="slot"></div>
+          <div class="slot"></div>
+        </div>
+      </div>
+      <div class="chip-float chip1"><span class="chip-ic g"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg></span> بدون تداخل استاد و کلاس</div>
+      <div class="chip-float chip2"><span class="chip-ic v"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-star"/></svg></span> مطلوبیت اساتید: ۹۲٪</div>
+      <div class="chip-float chip3"><span class="chip-ic c"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-target"/></svg></span> بهینه‌سازی ظرفیت سالن‌ها</div>
+    </div>
+  </div>
+</section>
+
+<!-- ======== Marquee ======== -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span>چیدمان بدون تداخل</span><span>بهره‌وری کامل فضاهای آموزشی</span><span>مطلوبیت زمانی اساتید</span><span>الگوریتم CP-SAT گوگل</span><span>رابط فارسی راست‌به‌چپ</span><span>نسخه قابل حمل ویندوز</span><span>ورود داده از اکسل</span><span>تقویم رنگی هفتگی</span><span>تعامل دانشجویی</span><span>بهینه‌سازی چندهدفه</span>
+    <span>چیدمان بدون تداخل</span><span>بهره‌وری کامل فضاهای آموزشی</span><span>مطلوبیت زمانی اساتید</span><span>الگوریتم CP-SAT گوگل</span><span>رابط فارسی راست‌به‌چپ</span><span>نسخه قابل حمل ویندوز</span><span>ورود داده از اکسل</span><span>تقویم رنگی هفتگی</span><span>تعامل دانشجویی</span><span>بهینه‌سازی چندهدفه</span>
+  </div>
+</div>
+
+<!-- ======== Why ======== -->
+<section id="why">
+  <div class="container">
+    <div class="sec-head reveal">
+      <span class="sec-tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-zap"/></svg> چرا برنامه‌ریزی هوشمند؟</span>
+      <h2 class="sec-title">مشکلات چیدمان سنتی، <span class="grad-text">راه‌حل هوشمند</span></h2>
+      <p class="sec-desc">چیدمان دستی برنامه هفتگی یکی از پیچیده‌ترین و پرمخاطره‌ترین کارهای اداری هر دانشگاه است؛ صدها متغیر باید هم‌زمان در ذهن نگه داشته شوند و کوچک‌ترین بی‌دقتی، به تداخل کلاس‌ها و نارضایتی گسترده منجر می‌شود. این سامانه دقیقاً همین نقطه را هدف گرفته است.</p>
+    </div>
+    <div class="why-grid">
+      <div class="why-card reveal">
+        <div class="why-ic"><svg class="ic ic-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-clock"/></svg></div>
+        <h3>برنامه‌ریزی دستی، روزها زمان می‌برد</h3>
+        <div class="why-fix"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg><span><b>راه‌حل:</b> موتور بهینه‌ساز CP-SAT نتیجه کامل را در چند دقیقه تولید می‌کند.</span></div>
+      </div>
+      <div class="why-card reveal">
+        <div class="why-ic"><svg class="ic ic-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-alert"/></svg></div>
+        <h3>تداخل‌های پنهان انسانی</h3>
+        <div class="why-fix"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg><span><b>راه‌حل:</b> تضمین ریاضیِ عدم تداخل استاد، کلاس و گروه دانشجویی.</span></div>
+      </div>
+      <div class="why-card reveal">
+        <div class="why-ic"><svg class="ic ic-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-home"/></svg></div>
+        <h3>هدررفت ظرفیت سالن‌ها</h3>
+        <div class="why-fix"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg><span><b>راه‌حل:</b> تخصیص هوشمند فضا بر اساس ظرفیت و نیاز واقعی هر درس.</span></div>
+      </div>
+      <div class="why-card reveal">
+        <div class="why-ic"><svg class="ic ic-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-users"/></svg></div>
+        <h3>نارضایتی از زمان‌های پیشنهادی</h3>
+        <div class="why-fix"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg><span><b>راه‌حل:</b> لحاظ مطلوبیت زمانی اساتید و تقاضای واقعی دانشجویان.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ======== Sections (بخش‌های سامانه) ======== -->
+<section id="sections">
+  <div class="container">
+    <div class="sec-head reveal">
+      <span class="sec-tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-layers"/></svg> بخش‌های سامانه</span>
+      <h2 class="sec-title">یک اکوسیستم کامل برای <span class="grad-text">چرخه برنامه‌ریزی</span></h2>
+      <p class="sec-desc">سامانه از هفت بخش هم‌پیوند تشکیل شده که اطلاعات از «اطلاعات پایه» جریان می‌یابد، در «برنامه‌ریزی درسی» غنی می‌شود، با «تعامل دانشجویی» واقعی‌تر می‌گردد و در نهایت به «تولید برنامه هفتگی» می‌رسد.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card reveal" style="--fc:#818cf8">
+        <div class="feat-ic"><svg class="ic ic-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-pie"/></svg></div>
+        <h3>داشبورد مدیریتی</h3>
+        <p>نمای کلان از وضعیت برنامه‌ریزی با شاخص‌های عملکردی و نمودارهای زنده؛ همه‌چیز در یک نگاه.</p>
+        <div class="feat-items"><span>شاخص‌های KPI</span><span>نمودار توزیع دروس</span><span>وضعیت فرایند</span></div>
+      </div>
+      <div class="feat-card reveal" style="--fc:#38bdf8">
+        <div class="feat-ic"><svg class="ic ic-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-book"/></svg></div>
+        <h3>اطلاعات پایه</h3>
+        <p>موتور داده‌ی سامانه؛ هر چه در جدول نهایی می‌بینید، از همین‌جا آغاز می‌شود — با امکان ورود گروهی از اکسل.</p>
+        <div class="feat-items"><span>دروس یکتا</span><span>دروس ارائه</span><span>اساتید</span><span>کلاس‌ها و سالن‌ها</span><span>بارگذاری اکسل</span></div>
+      </div>
+      <div class="feat-card reveal" style="--fc:#a78bfa">
+        <div class="feat-ic"><svg class="ic ic-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-calendar"/></svg></div>
+        <h3>برنامه‌ریزی درسی</h3>
+        <p>لایه‌ی هوشمندی سامانه؛ ترجیحات و محدودیت‌هایی که کیفیت چیدمان نهایی را تعیین می‌کنند.</p>
+        <div class="feat-items"><span>دروس ترمیک</span><span>مطلوبیت تدریس</span><span>مطلوبیت زمانی</span><span>سوابق برنامه‌ریزی</span></div>
+      </div>
+      <div class="feat-card reveal" style="--fc:#f472b6">
+        <div class="feat-ic"><svg class="ic ic-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-thumbs"/></svg></div>
+        <h3>تعامل دانشجویی</h3>
+        <p>صدای دانشجو پیش از چیدمان شنیده می‌شود؛ تقاضای واقعی جای حدس و گمان را می‌گیرد.</p>
+        <div class="feat-items"><span>پیشنهاد دروس</span><span>نظرسنجی دروس</span><span>امتیاز به برنامه</span></div>
+      </div>
+      <div class="feat-card reveal" style="--fc:#fbbf24">
+        <div class="feat-ic"><svg class="ic ic-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-zap"/></svg></div>
+        <h3>تولید برنامه هفتگی</h3>
+        <p>قلب تپنده‌ی سامانه؛ از سبد دروس تا زمان‌بندی استاد، تخصیص کلاس و بهینه‌سازی نهایی.</p>
+        <div class="feat-items"><span>سبد دروس</span><span>زمان‌بندی استاد</span><span>تخصیص کلاس</span><span>بهینه‌سازی برنامه</span></div>
+      </div>
+      <div class="feat-card reveal" style="--fc:#fb7185">
+        <div class="feat-ic"><svg class="ic ic-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-award"/></svg></div>
+        <h3>مدیریت و انتشار</h3>
+        <p>کنترل کامل چرخه نظرسنجی‌ها و انتشار نتایج؛ خروجی نهایی به دو شکل جدولی و تقویم رنگی هفتگی.</p>
+        <div class="feat-items"><span>مدیریت نظرسنجی</span><span>تقویم رنگی</span><span>خروجی برنامه</span></div>
+      </div>
+      <div class="feat-card reveal" style="--fc:#94a3b8">
+        <div class="feat-ic"><svg class="ic ic-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-settings"/></svg></div>
+        <h3>تنظیمات سامانه</h3>
+        <p>شخصی‌سازی رفتار موتور؛ از بازه‌های زمانی مجاز تا انتخاب حالت هدف بهینه‌سازی متناسب با سیاست گروه.</p>
+        <div class="feat-items"><span>بازه‌های زمانی</span><span>پارامترهای موتور</span><span>حالت هدف</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======== Process (فرایند) ======== -->
+<section id="process" style="background:linear-gradient(180deg,transparent,rgba(99,102,241,.045) 30%,rgba(99,102,241,.045) 70%,transparent)">
+  <div class="container">
+    <div class="sec-head reveal">
+      <span class="sec-tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-activity"/></svg> مراحل و فرایند</span>
+      <h2 class="sec-title">از داده خام تا <span class="grad-text">برنامه نهایی</span> در ۶ گام</h2>
+      <p class="sec-desc">هر ترم، یک خط تولید شش‌مرحله‌ای اجرا می‌شود؛ هر مرحله خروجیِ استانداردی به مرحله بعد می‌دهد و در پایان، برنامه‌ای قابل اعتماد و بدون تداخل منتشر می‌گردد.</p>
+    </div>
+    <div class="timeline" id="timeline">
+      <div class="tl-line"></div>
+      <div class="tl-fill" id="tlFill"></div>
+      <div class="tl-step reveal" style="--fc:#818cf8">
+        <div class="tl-dot">۱</div>
+        <div class="tl-card">
+          <h3><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-database"/></svg> ثبت اطلاعات پایه</h3>
+          <p>دروس، اساتید، فضاهای آموزشی و بازه‌های زمانی از طریق فرم‌های کاربرپسند یا بارگذاری مستقیم فایل اکسل وارد سامانه می‌شوند. کیفیت کل چیدمان، از کیفیت همین داده‌ها آغاز می‌شود.</p>
+          <div class="tl-chips"><span>فرم‌های هوشمند</span><span>ورود از اکسل</span><span>اعتبارسنجی داده</span></div>
+        </div>
+      </div>
+      <div class="tl-step reveal" style="--fc:#38bdf8">
+        <div class="tl-dot">۲</div>
+        <div class="tl-card">
+          <h3><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-package"/></svg> تشکیل سبد دروس ترم</h3>
+          <p>دروس ترم شناسایی و «سبد دروس» ساخته می‌شود؛ برآورد ظرفیت هر درس و آمار تقاضای ترم‌های گذشته (میانگین ثبت‌نام مهر و بهمن) برای تصمیم‌گیری بهتر محاسبه می‌گردد.</p>
+          <div class="tl-chips"><span>برآورد ظرفیت</span><span>آمار تقاضا</span><span>دروس مهر و بهمن</span></div>
+        </div>
+      </div>
+      <div class="tl-step reveal" style="--fc:#a78bfa">
+        <div class="tl-dot">۳</div>
+        <div class="tl-card">
+          <h3><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-star"/></svg> امتیازدهی و اولویت‌بندی</h3>
+          <p>به هر درس امتیاز اختصاص می‌یابد؛ دروس گلوگاهی و پیش‌نیازمحور در اولویت قرار می‌گیرند تا در چیدمان نهایی، مسیر فارغ‌التحصیلی دانشجویان بسته نشود.</p>
+          <div class="tl-chips"><span>دروس گلوگاهی</span><span>پیش‌نیازها</span><span>امتیاز هر درس</span></div>
+        </div>
+      </div>
+      <div class="tl-step reveal" style="--fc:#f472b6">
+        <div class="tl-dot">۴</div>
+        <div class="tl-card">
+          <h3><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-users"/></svg> تخصیص استاد به دروس</h3>
+          <p>با توجه به مطلوبیت تدریس هر استاد، سقف واحد مجاز و تخصص او، بهترین استاد به هر درس تخصیص می‌یابد؛ دروس کارآموزی و پروژه به‌صورت مجزا مدیریت می‌شوند.</p>
+          <div class="tl-chips"><span>مطلوبیت تدریس</span><span>سقف واحد</span><span>کارآموزی و پروژه</span></div>
+        </div>
+      </div>
+      <div class="tl-step reveal" style="--fc:#fbbf24">
+        <div class="tl-dot">۵</div>
+        <div class="tl-card">
+          <h3><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-cpu"/></svg> زمان‌بندی هوشمند (CP-SAT)</h3>
+          <p>حل‌گر بهینه‌سازی گوگل برنامه را در چهار دور محاسبه می‌کند: ابتدا سخت‌گیرانه با تمام محدودیت‌ها، سپس با تساهل تدریجی، بعد در روزهای مطلوب و در نهایت پوشش کامل باقیمانده‌ها.</p>
+          <div class="tl-chips"><span>دور سخت‌گیرانه</span><span>تساهل تدریجی</span><span>روزهای مطلوب</span><span>پوشش نهایی</span></div>
+        </div>
+      </div>
+      <div class="tl-step reveal" style="--fc:#34d399">
+        <div class="tl-dot">۶</div>
+        <div class="tl-card">
+          <h3><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-home"/></svg> تخصیص کلاس و انتشار</h3>
+          <p>به هر کلاس، سالنی با ظرفیت نزدیک به تعداد دانشجویان اختصاص می‌یابد؛ پس از بازبینی دستیِ مدیر گروه، تقویم رنگی نهایی آماده انتشار و ارائه به دانشجویان است.</p>
+          <div class="tl-chips"><span>ظرفیت بهینه</span><span>بازبینی دستی</span><span>تقویم رنگی نهایی</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ======== Forms (فرم‌های اطلاعاتی) ======== -->
+<section id="forms" style="background:linear-gradient(180deg,transparent,rgba(139,92,246,.04) 30%,rgba(139,92,246,.04) 70%,transparent)">
+  <div class="container">
+    <div class="sec-head reveal">
+      <span class="sec-tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-edit"/></svg> فرم‌های اطلاعاتی</span>
+      <h2 class="sec-title">ورود داده، <span class="grad-text">ساده و شکیل</span></h2>
+      <p class="sec-desc">هر موجودیت سامانه یک فرم اختصاصی و اعتبارسنجی‌شده دارد. نمونه‌های واقعی فرم‌ها را ببینید — روی هر تب کلیک کنید.</p>
+    </div>
+    <div class="tabs reveal" id="formTabs">
+      <button class="tab active" data-panel="p1"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-book"/></svg> فرم درس</button>
+      <button class="tab" data-panel="p2"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-users"/></svg> فرم استاد</button>
+      <button class="tab" data-panel="p3"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-home"/></svg> فضای آموزشی</button>
+      <button class="tab" data-panel="p4"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-clock"/></svg> بازه زمانی</button>
+      <button class="tab" data-panel="p5"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-upload"/></svg> بارگذاری اکسل</button>
+      <button class="tab" data-panel="p6"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-thumbs"/></svg> پیشنهاد و نظرسنجی</button>
+    </div>
+
+    <div class="form-panel active reveal" id="p1">
+      <div class="mock-form">
+        <div class="mf-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-book"/></svg> ثبت درس جدید</div>
+        <div class="mf-grid">
+          <div class="mf-field"><label>کد درس</label><input class="inp" value="CS-40213" readonly></div>
+          <div class="mf-field"><label>نام درس</label><input class="inp" value="پایگاه داده پیشرفته" readonly></div>
+          <div class="mf-field"><label>واحد نظری</label><input class="inp" value="۳" readonly></div>
+          <div class="mf-field"><label>واحد عملی</label><input class="inp" value="۱" readonly></div>
+          <div class="mf-field"><label>نوع درس</label><select class="inp"><option>اصلی</option><option>تخصصی</option><option>عمومی</option></select></div>
+          <div class="mf-field"><label>ترم پیشنهادی</label><select class="inp"><option>مهر</option><option>بهمن</option></select></div>
+          <button class="mf-submit" onclick="return false"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg> ذخیره درس</button>
+        </div>
+      </div>
+      <div class="form-info">
+        <h3>فرم درس</h3>
+        <p>هویت هر درس با کد یکتا، تعداد واحدهای نظری/عملی و نوع آن تعریف می‌شود؛ این مشخصات مبنای محاسبه حجم تدریس و انتخاب فضای مناسب است.</p>
+        <ul>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg> کد درس یکتا و غیرتکراری — پایه اتصال دروس ارائه و ترمیک</li>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg> تفکیک واحد نظری و عملی برای محاسبه دقیق ساعات کلاس</li>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg> نوع درس (اصلی/تخصصی/عمومی) در اولویت‌بندی چیدمان اثر می‌گذارد</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="form-panel" id="p2">
+      <div class="mock-form">
+        <div class="mf-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-users"/></svg> ثبت استاد جدید</div>
+        <div class="mf-grid">
+          <div class="mf-field"><label>کد استاد</label><input class="inp" value="256" readonly></div>
+          <div class="mf-field"><label>نام و نام خانوادگی</label><input class="inp" value="دکتر مریم صادقی" readonly></div>
+          <div class="mf-field"><label>سقف واحد در هفته</label><input class="inp" value="۱۲ واحد" readonly></div>
+          <div class="mf-field"><label>گروه آموزشی</label><input class="inp" value="مهندسی کامپیوتر" readonly></div>
+          <div class="mf-field full"><label>دروس قابل تدریس</label>
+            <div class="chips-select"><span class="on">هوش مصنوعی</span><span class="on">یادگیری ماشین</span><span>الگوریتم‌ها</span><span class="on">پایگاه داده</span><span>گرافیک</span><span>شبکه</span></div>
+          </div>
+          <button class="mf-submit" onclick="return false"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg> ذخیره استاد</button>
+        </div>
+      </div>
+      <div class="form-info">
+        <h3>فرم استاد</h3>
+        <p>هر استاد با کد یکتا، تخصص‌ها و سقف واحد ثبت می‌شود؛ موتور تخصیص دقیقاً از همین داده‌ها برای نگاشت «استاد به درس» استفاده می‌کند.</p>
+        <ul>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg> فهرست دروس قابل تدریس — تنها دروس تخصصی به استاد واگذار می‌شود</li>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg> سقف واحد هفتگی مانع از بار غیرمنصفانه و کیفیت‌سنجی تدریس</li>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg> مطلوبیت تدریس هر درس و مطلوبیت زمانی در بخش برنامه‌ریزی تکمیل می‌شود</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="form-panel" id="p3">
+      <div class="mock-form">
+        <div class="mf-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-home"/></svg> ثبت فضای آموزشی</div>
+        <div class="mf-grid">
+          <div class="mf-field"><label>نام سالن / کلاس</label><input class="inp" value="کلاس ۲۰۱ — ساختمان مرکزی" readonly></div>
+          <div class="mf-field"><label>ظرفیت</label><input class="inp" value="۴۵ نفر" readonly></div>
+          <div class="mf-field"><label>نوع فضا</label><select class="inp"><option>کلاس نظری</option><option>آزمایشگاه کامپیوتر</option><option>کارگاه</option></select></div>
+          <div class="mf-field"><label>وضعیت</label><select class="inp"><option>فعال</option><option>در حال تعمیر</option></select></div>
+          <button class="mf-submit" onclick="return false"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg> ذخیره فضا</button>
+        </div>
+      </div>
+      <div class="form-info">
+        <h3>فرم فضای آموزشی</h3>
+        <p>کلاس‌ها و سالن‌ها با ظرفیت و نوع فضا ثبت می‌شوند؛ حل‌گر برای هر کلاس، فضایی انتخاب می‌کند که ظرفیتش به تعداد دانشجویان نزدیک باشد تا سالن‌های بزرگ بیهوده اشغال نشوند.</p>
+        <ul>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg> ظرفیت سالن هرگز کمتر از تعداد دانشجویان کلاس نخواهد بود</li>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg> نوع فضا (نظری/کامپیوتر/کارگاه) با نیاز درس تطبیق داده می‌شود</li>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg> بهره‌وری فضاها در بهینه‌سازی نهایی به‌صورت عددی سنجیده می‌شود</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="form-panel" id="p4">
+      <div class="mock-form">
+        <div class="mf-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-clock"/></svg> تعریف بازه زمانی</div>
+        <div class="mf-grid">
+          <div class="mf-field"><label>روز هفته</label><select class="inp"><option>شنبه</option><option>یکشنبه</option><option>دوشنبه</option><option>سه‌شنبه</option><option>چهارشنبه</option><option>پنجشنبه</option></select></div>
+          <div class="mf-field"><label>وضعیت</label><select class="inp"><option>فعال</option><option>غیرفعال</option></select></div>
+          <div class="mf-field"><label>ساعت شروع</label><input class="inp" value="۰۸:۰۰" readonly></div>
+          <div class="mf-field"><label>ساعت پایان</label><input class="inp" value="۱۰:۰۰" readonly></div>
+          <div class="mf-field full"><label>پیش‌نمایش بازه‌های روز شنبه</label>
+            <div class="chips-select"><span class="on">۸–۱۰</span><span class="on">۱۰–۱۲</span><span>۱۲–۱۴</span><span class="on">۱۴–۱۶</span><span>۱۶–۱۸</span></div>
+          </div>
+          <button class="mf-submit" onclick="return false"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg> ذخیره بازه</button>
+        </div>
+      </div>
+      <div class="form-info">
+        <h3>بازه‌های زمانی</h3>
+        <p>تقویم آموزشی هفته به بازه‌های استاندارد دو ساعته تقسیم می‌شود؛ کلاس‌ها فقط و فقط در همین بازه‌های مجاز چیده می‌شوند و بازه‌های غیرفعال کلاً از جستجوی موتور حذف می‌گردند.</p>
+        <ul>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg> بازه‌های غیرفعال عملاً «تعطیلی» آن ساعت در کل دانشگاه است</li>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg> پایه‌ی محاسبه مطلوبیت زمانی اساتید بر همین بازه‌ها بنا می‌شود</li>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg> جستجوی موتور با حذف بازه‌های ممنوع، سریع‌تر و دقیق‌تر می‌شود</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="form-panel" id="p5">
+      <div class="mock-form">
+        <div class="mf-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-upload"/></svg> بارگذاری گروهی داده</div>
+        <div class="mf-grid">
+          <div class="dropzone full" onclick="return false">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><use href="#i-upload"/></svg>
+            <b>فایل اکسل را اینجا رها کنید</b>
+            <small>فرمت‌های xlsx / csv — دروس، اساتید و فضاهای آموزشی به‌صورت گروهی</small>
+          </div>
+          <div class="mf-field"><label>نوع داده</label><select class="inp"><option>دروس یکتا</option><option>اساتید</option><option>فضاهای آموزشی</option></select></div>
+          <div class="mf-field"><label>حالت درج</label><select class="inp"><option>افزودن به موجود</option><option>جایگزینی کامل</option></select></div>
+          <button class="mf-submit" onclick="return false"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg> شروع پردازش فایل</button>
+        </div>
+      </div>
+      <div class="form-info">
+        <h3>بارگذاری از اکسل</h3>
+        <p>برای دانشگاه‌هایی که داده‌هایشان در اکسل نگهداری می‌شود، امکان ورود گروهی فراهم است؛ صدها رکورد در چند ثانیه وارد سامانه می‌شوند و نیازی به ثبت دستی تک‌تک نیست.</p>
+        <ul>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg> پشتیبانی از قالب‌های xlsx و csv برای انواع موجودیت‌ها</li>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg> رکوردهای نامعتبر گزارش می‌شوند؛ بدون خراب کردن داده سالم</li>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg> مناسب برای مهاجرت اولیه از اسناد اکسل اداری به سامانه</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="form-panel" id="p6">
+      <div class="mock-form">
+        <div class="mf-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-thumbs"/></svg> پیشنهاد و نظرسنجی دانشجو</div>
+        <div class="mf-grid">
+          <div class="mf-field full"><label>جستجوی درس برای پیشنهاد</label>
+            <div class="chips-select"><span class="on">پردازش زبان طبیعی</span><span class="on">رایانش ابری</span><span>بازی‌سازی</span><span class="on">امنیت شبکه</span></div>
+          </div>
+          <div class="mf-field"><label>اولویت پیشنهاد</label><select class="inp"><option>فارغ‌التحصیلی نیازمندم</option><option>علاقه شخصی</option></select></div>
+          <div class="mf-field"><label>امتیاز به برنامه فعلی</label><div class="stars">★★★★☆</div></div>
+          <button class="mf-submit" onclick="return false"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg> ثبت پیشنهاد و امتیاز</button>
+        </div>
+      </div>
+      <div class="form-info">
+        <h3>تعامل دانشجویی</h3>
+        <p>پیش از آن که جدول نهایی بسته شود، دانشجویان دروس پیشنهادی خود را ثبت و به دروس موجود رأی می‌دهند؛ مدیر گروه با دیدن تقاضای واقعی، درباره برگزاری یا حذف هر درس تصمیم می‌گیرد.</p>
+        <ul>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg> پیشنهاد دروس جدید با ذکر دلیل و اولویت تحصیلی</li>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg> نظرسنجی و رأی‌گیری روی دروس پیشنهادی برای سنجش تقاضا</li>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg> امتیازدهی به برنامه نهایی برای بهبود مستمر ترم‌های بعد</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======== Logic (منطق برنامه‌ریزی) ======== -->
+<section id="logic">
+  <div class="container">
+    <div class="sec-head reveal">
+      <span class="sec-tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-cpu"/></svg> منطق برنامه‌ریزی درسی</span>
+      <h2 class="sec-title">پشت صحنه‌ی چیدمان: <span class="grad-text">بهینه‌سازی ریاضی</span></h2>
+      <p class="sec-desc">زمان‌بندی دانشگاهی یکی از مسائل NP-Hard است؛ یعنی با بزرگ‌تر شدن دانشگاه، جستجوی معمولی عملاً غیرممکن می‌شود. این سامانه مسئله را به یک مدل بهینه‌سازی سازگار (CP-SAT) تبدیل می‌کند و در فضای هزاران متغیر بولی، بهترین جواب ممکن را اثبات‌شده پیدا می‌کند.</p>
+    </div>
+
+    <div class="formula reveal" dir="ltr">
+      x<span style="color:#94a3b8">[course, day, slot, room]</span> ∈ {0, 1} &nbsp;→&nbsp; <span class="fx">Maximize&nbsp; Σ w<sub>k</sub> · f<sub>k</sub>(x)</span>
+      <span class="cmt">متغیر تصمیم: «آیا کلاسِ x در روز d، بازه t و سالن r برگزار شود؟» — تابع هدف: بیشینه‌سازی مجموع امتیازات موزون محدودیت‌های نرم، در حالی که هیچ‌یک از محدودیت‌های سخت نقض نشود</span>
+    </div>
+
+    <div class="hs-grid">
+      <div class="hs-card hs-hard reveal">
+        <div class="hs-head"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-shield"/></svg> محدودیت‌های سخت <span class="hs-badge">هرگز نقض نمی‌شوند</span></div>
+        <p class="hs-sub">شرط‌هایی که تحقق آن‌ها یعنی «برنامه معتبر»؛ حل‌گر موظف است همه را هم‌زمان برقرار نگه دارد.</p>
+        <ul class="hs-list">
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-x"/></svg><span><b>عدم تداخل استاد</b> — یک استاد در یک بازه فقط یک کلاس<i>حتی دو گروه از یک درس</i></span></li>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-x"/></svg><span><b>عدم تداخل فضای آموزشی</b> — یک سالن در یک بازه فقط یک کلاس<i>حذف کامل تصادم کلاس‌ها</i></span></li>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-x"/></svg><span><b>عدم تداخل گروه دانشجویی</b> — یک گروه در یک بازه یک درس<i>دانشجو انتخاب «کدام کلاس؟» ندارد</i></span></li>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-x"/></svg><span><b>ظرفیت سالن ≥ تعداد دانشجویان</b><i>جای برای همه تضمین می‌شود</i></span></li>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-x"/></svg><span><b>فقط بازه‌های مجاز تقویم</b><i>خارج از ساعات اداری و تعطیلات ممنوع</i></span></li>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-x"/></svg><span><b>سقف واحد استاد و تراکم روزانه</b><i>بار آموزشی در محدوده مجاز</i></span></li>
+        </ul>
+      </div>
+      <div class="hs-card hs-soft reveal">
+        <div class="hs-head"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-target"/></svg> محدودیت‌های نرم <span class="hs-badge">تا حد ممکن بهینه</span></div>
+        <p class="hs-sub">خواسته‌های کیفی که هرچه بیشتر برآورده شوند، امتیاز برنامه بالاتر می‌رود؛ تابع هدف دنبال بیشینه‌سازی همین‌هاست.</p>
+        <ul class="hs-list">
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg><span><b>مطلوبیت زمانی اساتید</b><i>کلاس در بازه‌های ترجیحی استاد</i></span></li>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg><span><b>روزهای مطلوب تدریس</b><i>احترام به روزهای اعلام‌شده استاد</i></span></li>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg><span><b>توزیع یکنواخت کلاس‌ها در هفته</b><i>تراکم یک روز و خالی بودن روز دیگر ممنوع</i></span></li>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg><span><b>تطابق ظرفیت سالن با نیاز واقعی</b><i>کلاس ۳۰ نفره در سالن ۲۰۰ نفره نه</i></span></li>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg><span><b>اولویت دروس فارغ‌التحصیلی</b><i>دروس گلوگاهی زودتر و بهتر چیده می‌شوند</i></span></li>
+          <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg><span><b>کاهش فاصله‌های خالی بین کلاس‌ها</b><i>برنامه منسجم‌تر برای استاد و دانشجو</i></span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="modes">
+      <div class="mode reveal">
+        <div class="mode-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-sliders"/></svg></div>
+        <h4>متعادل</h4>
+        <span class="m-en">balanced</span>
+        <p>حالت پیش‌فرض؛ توازن میان رضایت اساتید، بهره‌وری فضا و انسجام برنامه.</p>
+      </div>
+      <div class="mode reveal">
+        <div class="mode-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-users"/></svg></div>
+        <h4>مطلوبیت اساتید</h4>
+        <span class="m-en">teacher_preferences</span>
+        <p>اولویت با رضایت هیئت علمی؛ کلاس‌ها در بازه‌های ترجیحی اساتید چیده می‌شوند.</p>
+      </div>
+      <div class="mode reveal">
+        <div class="mode-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-award"/></svg></div>
+        <h4>اولویت فارغ‌التحصیلی</h4>
+        <span class="m-en">graduation_priority</span>
+        <p>دروس باقیمانده دانشجویان ترم آخر، تضمین‌شده و بدون مانع برنامه‌ریزی می‌شوند.</p>
+      </div>
+      <div class="mode reveal">
+        <div class="mode-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-layers"/></svg></div>
+        <h4>برنامه فشرده</h4>
+        <span class="m-en">compact_schedule</span>
+        <p>کلاس‌ها متراکم و پیوسته؛ مناسب دانشگاه‌هایی با محدودیت فضای آموزشی.</p>
+      </div>
+    </div>
+
+    <div class="pipe-wrap reveal">
+      <div class="pipe-title">خط لوله بهینه‌سازی — از داده خام تا برنامه اثبات‌شده</div>
+      <div class="pipeline">
+        <div class="pipe-node"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-database"/></svg><b>داده‌های آماده</b><span>دروس، اساتید، فضاها، ترجیحات</span></div>
+        <div class="pipe-arrow"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-arrow"/></svg></div>
+        <div class="pipe-node"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-file"/></svg><b>مدل ریاضی</b><span>متغیرها + محدودیت‌ها + تابع هدف</span></div>
+        <div class="pipe-arrow"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-arrow"/></svg></div>
+        <div class="pipe-node"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-cpu"/></svg><b>حل‌گر CP-SAT</b><span>جستجوی موازی و اثبات بهینگی</span></div>
+        <div class="pipe-arrow"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-arrow"/></svg></div>
+        <div class="pipe-node"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-calendar"/></svg><b>برنامه بهینه</b><span>بدون تداخل، آماده انتشار</span></div>
+      </div>
+      <div class="rounds">
+        <span class="round-chip"><b>۱</b> دور سخت‌گیرانه (Strict)</span>
+        <span class="round-sep">→</span>
+        <span class="round-chip"><b>۲</b> تساهل تدریجی (Tolerance)</span>
+        <span class="round-sep">→</span>
+        <span class="round-chip"><b>۳</b> روزهای مطلوب (Fallback)</span>
+        <span class="round-sep">→</span>
+        <span class="round-chip"><b>۴</b> پوشش کامل باقیمانده</span>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ======== Considerations (ملاحظات) ======== -->
+<section id="considerations" style="background:linear-gradient(180deg,transparent,rgba(34,211,238,.035) 30%,rgba(34,211,238,.035) 70%,transparent)">
+  <div class="container">
+    <div class="sec-head reveal">
+      <span class="sec-tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-sliders"/></svg> ملاحظات برنامه‌ریزی درسی</span>
+      <h2 class="sec-title">موتور به چه چیزهایی <span class="grad-text">فکر می‌کند؟</span></h2>
+      <p class="sec-desc">چیدمان درسی فقط «جای خالی پیدا کردن» نیست؛ موتور سامانه هم‌زمان پنج دسته ملاحظات را با هم سنجیده و بین آن‌ها توازن برقرار می‌کند.</p>
+    </div>
+    <div class="cons-grid">
+      <div class="cons-card reveal" style="--fc:#818cf8">
+        <div class="cons-head"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-book"/></svg> ملاحظات آموزشی</div>
+        <ul class="cons-list">
+          <li>پیش‌نیازها و هم‌نیازهای هر درس</li>
+          <li>دروس گلوگاهی مسیر فارغ‌التحصیلی</li>
+          <li>تعداد گروه‌های هر درس</li>
+          <li>تراکم و توازن دروس بین ترم‌ها</li>
+          <li>بخش نظری و عملی دروس</li>
+        </ul>
+      </div>
+      <div class="cons-card reveal" style="--fc:#38bdf8">
+        <div class="cons-head"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-home"/></svg> ملاحظات منابع</div>
+        <ul class="cons-list">
+          <li>ظرفیت هر سالن و کلاس</li>
+          <li>نوع فضا: نظری، کامپیوتر، کارگاه</li>
+          <li>تجهیزات ویژه هر فضا</li>
+          <li>بهره‌وری و اشغال بهینه فضاها</li>
+          <li>تداخل استفاده از یک فضا</li>
+        </ul>
+      </div>
+      <div class="cons-card reveal" style="--fc:#a78bfa">
+        <div class="cons-head"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-users"/></svg> ملاحظات اساتید</div>
+        <ul class="cons-list">
+          <li>مطلوبیت زمانی هر استاد</li>
+          <li>روزهای غیرمجاز تدریس</li>
+          <li>سقف واحد تدریس در هفته</li>
+          <li>توازن بار آموزشی بین اساتید</li>
+          <li>تخصص و دروس قابل تدریس</li>
+        </ul>
+      </div>
+      <div class="cons-card reveal" style="--fc:#f472b6">
+        <div class="cons-head"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-thumbs"/></svg> ملاحظات دانشجویی</div>
+        <ul class="cons-list">
+          <li>تقاضای واقعی درس از نظرسنجی</li>
+          <li>عدم تداخل برنامه گروه‌ها</li>
+          <li>فاصله منطقی کلاس‌های متوالی</li>
+          <li>اولویت دانشجویان ترم بالاتر</li>
+          <li>برآورد ظرفیت ثبت‌نام هر درس</li>
+        </ul>
+      </div>
+      <div class="cons-card reveal" style="--fc:#fbbf24">
+        <div class="cons-head"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-calendar"/></svg> ملاحظات تقویمی</div>
+        <ul class="cons-list">
+          <li>بازه‌های مجاز هر روز هفته</li>
+          <li>سقف واحد روزانه گروه‌ها</li>
+          <li>تقویم آموزشی مهر و بهمن</li>
+          <li>زمان استراحت و ناهار</li>
+          <li>روزهای تعطیل و مناسبتی</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======== Tech ======== -->
+<section id="tech">
+  <div class="container">
+    <div class="sec-head reveal">
+      <span class="sec-tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-cpu"/></svg> زیر ساخت فناوری</span>
+      <h2 class="sec-title">ساخته‌شده با <span class="grad-text">فناوری‌های روز</span></h2>
+      <p class="sec-desc">معماری مدرن، سبک و قابل حمل — از API پرسرعت تا حل‌گر بهینه‌سازی گوگل و نسخه قابل حمل ویندوز که بدون هیچ نصبی اجرا می‌شود.</p>
+    </div>
+    <div class="tech-grid">
+      <div class="tech reveal">
+        <div class="tech-ic"><svg class="ic ic-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-zap"/></svg></div>
+        <b>FastAPI</b>
+        <span>بک‌اند پرسرعت پایتون با مستندات خودکار</span>
+      </div>
+      <div class="tech reveal">
+        <div class="tech-ic"><svg class="ic ic-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-monitor"/></svg></div>
+        <b>React 18 + Vite</b>
+        <span>رابط کاربری مدرن، فارسی و راست‌به‌چپ</span>
+      </div>
+      <div class="tech reveal">
+        <div class="tech-ic"><svg class="ic ic-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-cpu"/></svg></div>
+        <b>OR-Tools CP-SAT</b>
+        <span>حل‌گر بهینه‌سازی گوگل با جستجوی موازی</span>
+      </div>
+      <div class="tech reveal">
+        <div class="tech-ic"><svg class="ic ic-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-database"/></svg></div>
+        <b>SQLAlchemy + SQLite</b>
+        <span>۲۱ جدول داده؛ بدون نیاز به سرور دیتابیس</span>
+      </div>
+      <div class="tech reveal">
+        <div class="tech-ic"><svg class="ic ic-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-package"/></svg></div>
+        <b>PyInstaller</b>
+        <span>نسخه قابل حمل ویندوز، بدون نصب پایتون</span>
+      </div>
+      <div class="tech reveal">
+        <div class="tech-ic"><svg class="ic ic-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-trending"/></svg></div>
+        <b>Chart & RTL</b>
+        <span>نمودارهای آماری و تایپوگرافی وزیرمتن</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======== Footer ======== -->
+<footer class="footer" id="contact">
+  <div class="container footer-inner">
+    <div class="footer-orb"></div>
+    <div class="footer-mark"><svg class="ic ic-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-grad-cap"/></svg></div>
+    <div class="company">شرکت ماه افزار هوشمند رسا</div>
+    <div class="company-en"><a href="https://mahai.ir" target="_blank" rel="noopener">MahAI.ir</a></div>
+    <p class="footer-tag">توسعه‌دهنده‌ی سامانه‌های هوشمند آموزشی — این سامانه با به‌کارگیری موتور بهینه‌سازی CP-SAT گوگل، برنامه‌ریزی درسی دانشگاه‌ها را از یک فرایند روزها متمرکزِ دستی، به تجربه‌ای چنددقیقه‌ای، دقیق و بدون تداخل تبدیل می‌کند.</p>
+    <div class="footer-links">
+      <a class="f-link" href="https://github.com/hjalilvand2004-coder/university-scheduler" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-github"/></svg> مخزن گیت‌هاب پروژه</a>
+      <a class="f-link" href="https://github.com/hjalilvand2004-coder/university-scheduler/releases" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-download"/></svg> دانلود نسخه قابل حمل ویندوز</a>
+      <a class="f-link" href="https://mahai.ir" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-globe"/></svg> وب‌سایت ماه افزار هوشمند رسا</a>
+    </div>
+    <div class="copy">
+      <span>© ۱۴۰۴ شرکت ماه افزار هوشمند رسا — MahAI.ir — تمامی حقوق محفوظ است.</span>
+      <span>ساخته‌شده با <svg class="ic heart" viewBox="0 0 24 24" fill="currentColor" stroke="none"><use href="#i-heart"/></svg> برای جامعه دانشگاهی ایران</span>
+    </div>
+  </div>
+</footer>
+
+<button class="to-top" id="toTop" aria-label="بازگشت به بالا"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-up"/></svg></button>
+
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const fa=n=>Math.round(n).toLocaleString('fa-IR');
+const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ===== Scroll progress + nav state + to-top ===== */
+const nav=$('#nav'), progress=$('#progress'), toTop=$('#toTop');
+function onScroll(){
+  const st=window.scrollY, h=document.documentElement.scrollHeight-innerHeight;
+  progress.style.width=(h>0?(st/h*100):0)+'%';
+  nav.classList.toggle('scrolled',st>40);
+  toTop.classList.toggle('show',st>700);
+  tlProgress();
+}
+window.addEventListener('scroll',onScroll,{passive:true});
+toTop.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+
+/* ===== Mobile menu ===== */
+const burger=$('#hamburger');
+burger.addEventListener('click',()=>nav.classList.toggle('nav-open'));
+$$('#navLinks a').forEach(a=>a.addEventListener('click',()=>nav.classList.remove('nav-open')));
+
+/* ===== Active nav link ===== */
+const secMap={sections:$('#sections'),process:$('#process'),forms:$('#forms'),logic:$('#logic'),considerations:$('#considerations'),tech:$('#tech')};
+const navAs=$$('#navLinks a');
+const secObs=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting){
+      navAs.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id));
+    }
+  });
+},{rootMargin:'-40% 0px -55% 0px'});
+Object.values(secMap).forEach(s=>s&&secObs.observe(s));
+
+/* ===== Reveal on scroll (with stagger) ===== */
+const revObs=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting){
+      const el=e.target;
+      const sibs=Array.from(el.parentElement.children).filter(c=>c.classList.contains('reveal')||c.classList.contains('reveal-r'));
+      const idx=Math.min(sibs.indexOf(el),6);
+      el.style.transitionDelay=(idx*70)+'ms';
+      el.classList.add('visible');
+      revObs.unobserve(el);
+    }
+  });
+},{threshold:.12,rootMargin:'0px 0px -40px 0px'});
+$$('.reveal,.reveal-r').forEach(el=>revObs.observe(el));
+
+/* ===== Counters (Persian digits) ===== */
+const cntObs=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(!e.isIntersecting)return;
+    const el=e.target, target=+el.dataset.count||0;
+    cntObs.unobserve(el);
+    if(reduced){el.textContent=fa(target);return;}
+    const t0=performance.now(), dur=1600;
+    (function tick(t){
+      const p=Math.min((t-t0)/dur,1), ease=1-Math.pow(1-p,4);
+      el.textContent=fa(target*ease);
+      if(p<1)requestAnimationFrame(tick);else el.textContent=fa(target);
+    })(t0);
+  });
+},{threshold:.6});
+$$('.stat-num[data-count]').forEach(el=>cntObs.observe(el));
+
+/* ===== Forms tabs ===== */
+const tabs=$$('#formTabs .tab');
+tabs.forEach(t=>t.addEventListener('click',()=>{
+  tabs.forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  $$('.form-panel').forEach(p=>p.classList.remove('active'));
+  const panel=document.getElementById(t.dataset.panel);
+  panel.classList.add('active');
+  panel.classList.remove('reveal');
+}));
+
+/* ===== Timeline progress ===== */
+const tl=$('#timeline'), tlFill=$('#tlFill');
+function tlProgress(){
+  if(!tl||!tlFill)return;
+  const r=tl.getBoundingClientRect(), vh=innerHeight;
+  const passed=Math.min(Math.max(vh*0.72-r.top,0),r.height);
+  tlFill.style.height=passed+'px';
+}
+
+/* ===== Hero tilt ===== */
+const wrap=$('#tiltWrap'), card=$('#tiltCard');
+if(wrap&&card&&!reduced&&!matchMedia('(pointer:coarse)').matches){
+  wrap.addEventListener('mousemove',e=>{
+    const r=wrap.getBoundingClientRect();
+    const x=(e.clientX-r.left)/r.width-.5, y=(e.clientY-r.top)/r.height-.5;
+    card.style.transform=`rotateY(${x*9}deg) rotateX(${-y*9}deg)`;
+  });
+  wrap.addEventListener('mouseleave',()=>{card.style.transform='rotateY(0) rotateX(0)';});
+}
+
+/* ===== Hero particles ===== */
+const cv=$('#particles');
+if(cv&&!reduced){
+  const ctx=cv.getContext('2d');
+  let W,H,pts=[],raf;
+  const COLORS=['rgba(139,92,246,','rgba(99,102,241,','rgba(217,70,239,'];
+  function resize(){
+    W=cv.width=cv.offsetWidth*devicePixelRatio;
+    H=cv.height=cv.offsetHeight*devicePixelRatio;
+    const n=Math.min(70,Math.floor(cv.offsetWidth/22));
+    pts=Array.from({length:n},()=>({
+      x:Math.random()*W,y:Math.random()*H,
+      vx:(Math.random()-.5)*.28*devicePixelRatio,
+      vy:(Math.random()-.5)*.28*devicePixelRatio,
+      r:(Math.random()*1.7+.7)*devicePixelRatio,
+      c:COLORS[Math.floor(Math.random()*COLORS.length)],
+      a:Math.random()*.5+.25
+    }));
+  }
+  function step(){
+    ctx.clearRect(0,0,W,H);
+    const linkD=130*devicePixelRatio;
+    for(let i=0;i<pts.length;i++){
+      const p=pts[i];
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0||p.x>W)p.vx*=-1;
+      if(p.y<0||p.y>H)p.vy*=-1;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,7);
+      ctx.fillStyle=p.c+p.a+')';
+      ctx.fill();
+      for(let j=i+1;j<pts.length;j++){
+        const q=pts[j],dx=p.x-q.x,dy=p.y-q.y,d=Math.hypot(dx,dy);
+        if(d<linkD){
+          ctx.beginPath();
+          ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);
+          ctx.strokeStyle='rgba(139,92,246,'+(0.13*(1-d/linkD))+')';
+          ctx.lineWidth=devicePixelRatio*.7;
+          ctx.stroke();
+        }
+      }
+    }
+    raf=requestAnimationFrame(step);
+  }
+  resize();step();
+  window.addEventListener('resize',()=>{cancelAnimationFrame(raf);resize();step();});
+}
+
+onScroll();
+})();
+</script>
+</body>
+</html>
